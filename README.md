@@ -14,6 +14,6 @@ As of the 30th of January only a couple of demos have been implemented.
 
 ## Planned features
 
--GUI  
--Debugging mode  
--Support for at least 10 qubits  
+- GUI  
+- Debugging mode  
+- Support for at least 10 qubits  
