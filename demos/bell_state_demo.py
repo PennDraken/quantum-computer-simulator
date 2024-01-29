@@ -11,7 +11,7 @@ qubit2_state = np.array([1,0], dtype=complex)
 
 # creating the bell state
 qubit1_state = hadamard_gate.dot(qubit1_state)
-two_qubit_state = np.kron(qubit1_state, qubit2_state) # kron() is the tensor product
+two_qubit_state = np.kron(qubit1_state, qubit2_state) # np.kron() is the tensor product
 bell_state = cnot_gate.dot(two_qubit_state)
 
 print(bell_state)
