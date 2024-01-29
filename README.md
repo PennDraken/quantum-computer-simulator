@@ -2,7 +2,7 @@
 
 ## What is this repo?
 
-This repo is for a quantum simulator running on binary hardware.
+This repo is for a quantum simulator running on binary hardware. Made for research purposes.
 
 ## Structure
 
