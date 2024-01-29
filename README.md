@@ -1,4 +1,19 @@
 # quantum-computer-simulator
-For bachelors thesis at Chalmers.
 
-Demos show some basic math examples on simple qubit operations.
+## What is this repo?
+
+This repo is for a quantum simulator running on binary hardware.
+
+## Structure
+
+/demos show some basic implementations of simple qubit operations. 
+
+## Features
+
+As of the 30th of January only a couple of demos have been implemented.
+
+## Planned features
+
+-GUI  
+-Debugging mode  
+-Support for at least 10 qubits  
