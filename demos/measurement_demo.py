@@ -69,17 +69,3 @@ def collapsed_vector(single_qubit_state, qubit_index, qubit_count):
     return vector
 
 print(measure(np.array([1/2,1/2,1/2,1/2]), 1))
-
-# ---------------------------------------------------
-# methods below are used for quick debugging & verification
-def print_collapsed():
-    print(collapsed_vector(np.array([1,0]),0,2))
-    print(collapsed_vector(np.array([1,0]),1,2))
-    print(collapsed_vector(np.array([0,1]),0,2))
-    print(collapsed_vector(np.array([0,1]),1,2))
-    print(collapsed_vector(np.array([1,0]),0,3))
-    print(collapsed_vector(np.array([1,0]),1,3))
-    print(collapsed_vector(np.array([1,0]),2,3))
-    print(collapsed_vector(np.array([0,1]),0,3))
-    print(collapsed_vector(np.array([0,1]),1,3))
-    print(collapsed_vector(np.array([0,1]),2,3))
