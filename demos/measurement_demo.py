@@ -5,7 +5,7 @@ import random
 # Input: matrix containing values of qubits, qubit index is the index of the qubit we want to measure (0-indexed)
 # Returns the collapsed normalised matrix
 # https://quantumcomputing.stackexchange.com/questions/1206/how-does-measurement-of-one-qubit-affect-the-others/4133#4133
-def measure2x2(state_matrix, qubit_index):
+def measure2x2(state_matrix, qubit_index)->np.array:
     if qubit_index==0:
         p0 = np.abs(state_matrix[0])**2+np.abs(state_matrix[1])**2
         p1 = np.abs(state_matrix[2])**2+np.abs(state_matrix[3])**2
@@ -32,7 +32,7 @@ def measure2x2(state_matrix, qubit_index):
     return state_matrix
 
 # Implementation of measurement algorithm for arbitrarily sized state matrix
-def measure(state_matrix, qubit_index):
+def measure(state_matrix, qubit_index)->np.array:
     qubit_count = int(np.log2(len(state_matrix)))
     # Matrices used to remove states from matrix
     m0 = collapsed_vector([1,0], qubit_index, qubit_count)
@@ -55,7 +55,7 @@ def measure(state_matrix, qubit_index):
 
 # We can create a collapsed vector corresponding to the qubit that we collapsed
 # Used to apply measurement to a qubit state matrix by setting collapses states to 0
-def collapsed_vector(single_qubit_state, qubit_index, qubit_count):
+def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
     m = np.array([1,1])
     if qubit_index==0:
         vector = single_qubit_state
