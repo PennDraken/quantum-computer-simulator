@@ -31,7 +31,7 @@ def measure2x2(state_matrix, qubit_index):
     state_matrix = state_matrix/scaler
     return state_matrix
 
-# Generic implementation of measurement algorithm
+# Implementation of measurement algorithm for arbitrarily sized state matrix
 def measure(state_matrix, qubit_index):
     qubit_count = int(np.log2(len(state_matrix)))
     # Matrices used to remove states from matrix
@@ -54,7 +54,7 @@ def measure(state_matrix, qubit_index):
     return measured_state
 
 # We can create a collapsed vector corresponding to the qubit that we collapsed
-# Used to apply measurement to a qubit state matrix
+# Used to apply measurement to a qubit state matrix by setting collapses states to 0
 def collapsed_vector(single_qubit_state, qubit_index, qubit_count):
     m = np.array([1,1])
     if qubit_index==0:
