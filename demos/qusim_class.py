@@ -27,7 +27,7 @@ class Quantum:
         return vector
     
     # Implementation of measurement algorithm for arbitrarily sized state matrix
-    def measure(self, qubit_index)->np.array:
+    def measure(self, qubit_index):
         qubit_count = int(np.log2(len(self.state_matrix)))
         # Matrices used to remove states from matrix
         m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
