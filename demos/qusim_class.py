@@ -80,7 +80,7 @@ class Quantum:
         # Multiply this new gate with the state_matrix
         self.state_matrix = matrix.dot(self.state_matrix)
 
-# Stores the different gates
+# Stores the different gates TODO More gates
 class Gates:
     # Identity
     I = np.array([[1,0],[0,1]], dtype=complex) 
