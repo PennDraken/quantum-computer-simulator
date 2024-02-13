@@ -28,7 +28,8 @@ class Quantum:
         return vector
     
     # Implementation of measurement algorithm for arbitrarily sized state matrix
-    def measure(self, qubit_index):
+    # Returns state as bit (0 or 1). Also collapses the matrix
+    def measure(self, qubit_index)->int:
         # Matrices used to remove states from matrix
         m0 = self.collapsed_vector([1,0], qubit_index, self.qubit_count)
         m1 = self.collapsed_vector([0,1], qubit_index, self.qubit_count)
@@ -47,7 +48,8 @@ class Quantum:
         scaler = np.sqrt(np.sum(np.abs(measured_state)**2)) # Sum of the abs squares of matrix
         measured_state = measured_state/scaler # Divide by scaler so |sum of ^2| == 1
         self.state_matrix = measured_state # Update state_matrix
-    
+        return p # Returns probability of q_n=1 for qubit n
+
     # Applies gate
     # TODO This only handes 2x2 gates at the moment (single qubit)
     def applyGate(self, gate, qubit_index):
@@ -98,10 +100,17 @@ class Quantum:
         # Multiply this new gate with the state_matrix
         self.state_matrix = matrix.dot(self.state_matrix)
 
+    # Helpful functions
+    # ---------------------------------------------
     # Calculates sum(|q_state|^2)==1
     def totalProbability(self):
         return np.sum(np.abs(self.state_matrix)**2)
-
+    
+    # Prints all qubits (useful for debugging)
+    def printQubits(self):
+        for i in range(0,self.qubit_count):
+            print(f"Qubit {i}:{self.getQubit(i)}")
+    
 
 # Bell state demo
 #q = Quantum(2) # Create 2 qubits
