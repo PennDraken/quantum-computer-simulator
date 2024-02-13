@@ -7,13 +7,13 @@ import numpy as np
 q = qusim_class.Quantum(3)
 q.applyGate(Gates.Ry(np.pi/4), 0) # Set value of qubit to be teleported to |alpha|^2=0.146
 
-# Show starting state
-print("---Qubits initialized")
-q.printQubits()
-
 # Constructing bell state on qubits 1 and 2
 q.applyGate(Gates.H, 1)
 q.applyGateQubits(Gates.CNOT, [1,2])
+
+# Show starting state (after Bell state)
+print("---Qubits initialized (q1 and q2 are in a bell state)")
+q.printQubits()
 
 # CNOT -> Hadamard
 q.applyGateQubits(Gates.CNOT, [0,1])
