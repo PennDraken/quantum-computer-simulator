@@ -23,6 +23,7 @@ q.applyGate(Gates.H, 0)
 bit0=q.measure(0)
 bit1=q.measure(1)
 
+# Error correction
 # X
 if bit1==1:
     q.applyGate(Gates.X, 2)
