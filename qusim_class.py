@@ -15,16 +15,10 @@ class Quantum:
     # We can create a collapsed vector corresponding to the qubit that we collapsed
     # Used to apply measurement to a qubit state matrix by setting collapses states to 0
     def collapsed_vector(self, single_qubit_state, qubit_index, qubit_count)->np.array:
-        m = np.array([1,1])
-        if qubit_index==0:
-            vector = single_qubit_state
-        else:
-            vector = m
+        m = np.array([1, 1])
+        vector = single_qubit_state if qubit_index == 0 else m
         for i in range(1, qubit_count):
-            if i == qubit_index:
-                vector = np.kron(vector, single_qubit_state)
-            else:
-                vector = np.kron(vector, m)
+            vector = np.kron(vector, single_qubit_state if i == qubit_index else m)
         return vector
     
     # Implementation of measurement algorithm for arbitrarily sized state matrix
@@ -54,10 +48,7 @@ class Quantum:
     # TODO This only handes 2x2 gates at the moment (single qubit)
     def applyGate(self, gate, qubit_index):
         # Expand gate to fit given qubit using identity matrix
-        if qubit_index==0:
-            matrix = gate
-        else:
-            matrix = Gates.I
+        matrix = gate if qubit_index == 0 else Gates.I # initialize matrix correctly
         for i in range(1, self.qubit_count):
             if i == qubit_index:
                 matrix = np.kron(matrix, gate)
