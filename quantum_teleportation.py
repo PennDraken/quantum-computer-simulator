@@ -8,7 +8,7 @@ q = qusim_class.Quantum(3)
 q.applyGate(Gates.Ry(np.pi/4), 0) # Set value of qubit to be teleported to |alpha|^2=0.146
 
 # Show starting state
-print("Qubits initialized")
+print("---Qubits initialized")
 q.printQubits()
 
 # Constructing bell state on qubits 1 and 2
@@ -32,5 +32,5 @@ if bit0==1:
     q.applyGate(Gates.Z, 2)
 
 # Show final state
-print("Final state of qubits")
+print("---Final state of qubits. (Note that qubit 0 has moved to qubit 2)")
 q.printQubits()
