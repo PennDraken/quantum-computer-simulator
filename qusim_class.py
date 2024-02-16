@@ -105,7 +105,7 @@ class Quantum:
     # Converts alpha*|0>+beta*|1> to P(x, y, z)
     # Used for plotting on Bloch-sphere
     # Math from en.wikipedia.org/wiki/Bloch_sphere
-    # TODO Research in how to plot on Q-sphere
+    # TODO Research in how to plot on Q-sphere instead of Bloch
     def blochVector(self, alpha, beta)->list:
         u = complex(beta) / complex(alpha)
         ux = u.real
