@@ -15,6 +15,7 @@ dt = 0
 x=screen.get_width()/2
 y=screen.get_height()/2
 r=screen.get_width()/2
+last_pos=None
 
 # Rotation angles of sphere
 a = 0.1
@@ -187,10 +188,26 @@ while running:
     elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
         a2 = (a2 + delta_angle) % (2 * np.pi)
 
+    # rotate with mouse
+    if pygame.mouse.get_pressed()[0]:
+        # find difference between old and new
+        curr_pos = pygame.mouse.get_pos()
+        if last_pos != None:
+            delta_pos = np.array(curr_pos) - np.array(last_pos)
+            # moving mouse across half screen should rotate sphere 1/4 turn = 1/2 pi=>1 width = 1pi | screen/f=pi f=screen/pi
+            factor = 2*r/np.pi
+            delta_angle_x = delta_pos[0]/factor
+            delta_angle_y = delta_pos[1]/factor
+            a2 = (a2 + delta_angle_x) % (2 * np.pi)
+            a = (a + delta_angle_y) % (2 * np.pi)
+        last_pos = curr_pos
+    else:
+        last_pos = None
+
     # Automatic rotation
     # a = (a+0.01)%(2*np.pi)
     # a2 = (a2+0.01)%(2*np.pi)
-
+    text(str(int(clock.get_fps())), 10, 10, "white")
     pygame.display.flip() # Draw screen
     dt = clock.tick(60) / 1000
 
