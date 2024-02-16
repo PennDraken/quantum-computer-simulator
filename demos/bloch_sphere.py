@@ -7,21 +7,23 @@ import numpy as np
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((512, 512))
+screen = pygame.display.set_mode((900, 900))
 clock = pygame.time.Clock()
 running = True
 dt = 0
 
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+x=screen.get_width()/2
+y=screen.get_height()/2
+r=screen.get_width()/2
 
 # Rotation angles of sphere
-a = 0
+a = 0.1
 a2 = 0 # horizontal
 
 # Draws the 3D sphere
 def draw_bloch(x, y, r, a):
-    pygame.draw.ellipse(screen, "navy", pygame.Rect(x-r,y-r,2*r,2*r), width=1)
-    n = 10
+    pygame.draw.ellipse(screen, pygame.Color("darkslategrey"), pygame.Rect(x-r,y-r,2*r,2*r), width=5)
+    n = 5
     for i in range(-n,n+1,2):
         s=(i)*(r/n)
         x1=x+np.sqrt(r**2-s**2)
@@ -31,7 +33,7 @@ def draw_bloch(x, y, r, a):
         p1=rotate_point(x,y,x1,y1,a)
         p2=rotate_point(x,y,x2,y2,a)
         dx=np.sqrt(r**2-s**2)
-        oval(x-dx,p1['y'],x+dx,p2['y'],"white")
+        oval(x-dx,p1['y'],x+dx,p2['y'], pygame.Color("darkslategrey"))
         # print(p1['y'])
 
 # Kind of unneccessary, just that the old code was implemented using oval(x1,y1,x2,y2) (not available in Pygame) instead of ellipse
@@ -41,7 +43,56 @@ def oval(x1, y1, x2, y2, color):
     height = abs(y2 - y1)
     left = min(x1, x2)
     top = min(y1, y2)
-    pygame.draw.ellipse(screen, color, (left, top, width, height), width=1)
+    pygame.draw.ellipse(screen, color, (left, top, width, height), width=5)
+
+# Plots a point at x,y,z
+def plot_point(x,y,r,px,py,pz):
+    np=ry(px,py,pz,a2)
+    px=np['x']
+    py=np['y']
+    pz=np['z']
+    p=rotate_point(x,y,x+pz,y+py,a)
+    # Pointing outwards
+    # if pz<0:
+        # drawX(x+px, p['y'], 10, pygame.Color("coral4"))
+    # Pointing towards
+    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+        r2=10
+        pygame.draw.circle(screen, pygame.Color("gold3"), [x+px, p['y']], r2, width=5)
+
+def plot_point_line(x,y,r,px,py,pz):
+    np=ry(px,py,pz,a2)
+    px=np['x']
+    py=np['y']
+    pz=np['z']
+    p=rotate_point(x,y,x+pz,y+py,a)
+    # Pointing outwards
+    if pz<0:
+        pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=1)
+    # Pointing towards
+    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+        pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=5)
+
+def plot_point_text(x,y,r,px,py,pz):
+    np=ry(px,py,pz,a2)
+    px=np['x']
+    py=np['y']
+    pz=np['z']
+    p=rotate_point(x,y,x+pz,y+py,a)    
+    # Pointing towards
+    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+        # Draw alpha beta values of point
+        # We need to unrotate point to get its real values
+        p_original = ry(px,py,pz, -a2)
+        state = pointToAlphaBeta(p_original['x']/r, p_original['y']/r, p_original['z']/r) # scaling to unit sphere
+        alpha = state[0]
+        beta = state[1]
+        text(f"{alpha:.2}*|0>+{beta:.2}*|1>", x+px, p['y']-20, "white")
+
+# Draws a cross shape
+def drawX(x,y, length, color):
+    pygame.draw.lines(screen, color, True, [(x-length,y-length),(x+length,y+length)], 5)
+    pygame.draw.lines(screen, color, True, [(x-length,y+length),(x+length,y-length)], 5)
 
 # Rotate point around center coords
 # Input: Center point=cx,cy point=x,y
@@ -49,6 +100,56 @@ def rotate_point(cx, cy, x, y, a):
     nx=cx+(x-cx)*np.cos(a)-(y-cy)*np.sin(a)
     ny=cy+(x-cx)*np.sin(a)+(y-cy)*np.cos(a)
     return {'x' : nx, 'y' : ny}
+
+# Rotates around the y axis a degrees
+def ry(x,y,z,a):
+    xp=x*np.cos(a)+z*np.sin(a)
+    yp=y
+    zp=-x*np.sin(a)+z*np.cos(a)
+    return {'x' : xp, 'y' : yp, 'z' : zp}
+
+# Converts alpha beta values to a blochvector
+def blochVector(alpha, beta)->list:
+    u = complex(beta) / complex(alpha)
+    ux = u.real
+    uy = u.imag
+    # Coordinates of point on unit sphere
+    px = (2*ux)/(1+ux**2+uy**2)
+    py = (2*uy)/(1+ux**2+uy**2)
+    pz = (1-ux**2-uy**2)/(1+ux**2+uy**2)
+    return np.array([px,py,pz])
+
+def pointToAlphaBeta(px, py, pz):
+    # Solve equations to find alpha and beta
+    uy = (2 * py) / (1 - pz)
+    ux = (2 * px) / (1 - pz)
+    beta = uy + 1j * ux
+    alpha = 1 / np.sqrt(1 + np.abs(beta) ** 2)
+    return np.array([alpha, beta])
+
+# Used to generate some random points
+def random_point_on_unit_sphere():
+    theta = np.random.uniform(0, 2*np.pi)
+    phi = np.random.uniform(0, np.pi)
+    x = np.sin(phi) * np.cos(theta)
+    y = np.sin(phi) * np.sin(theta)
+    z = np.cos(phi)
+    return np.array([x, y, z])
+
+def text(string, x, y, color):
+    font = pygame.font.Font(None, 24)
+    text_color = pygame.Color(color)
+    text_surface = font.render(string, True, text_color)
+    text_rect = text_surface.get_rect()
+    text_rect.center = (x, y)
+    screen.blit(text_surface, text_rect)
+
+# generate some random points on sphere
+points = []
+for i in range(0,10):
+    p = random_point_on_unit_sphere()
+    p = p*r
+    points.append(p)
 
 # Game loop
 while running:
@@ -58,23 +159,37 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
-    draw_bloch(256,256,128,a)
-    
-    # Input
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        player_pos.y -= 300 * dt
-    if keys[pygame.K_s]:
-        player_pos.y += 300 * dt
-    if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
-    if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
 
-    a = (a+0.01)%(2*np.pi)
-    a2 = (a2+0.01)%(2*np.pi)
+    # draw sphere
+    draw_bloch(x,y,r,a)
+
+    # draw points (theyre seperated to layers so points are always drawon over lines)
+    for p in points:
+        plot_point_line(x,y,r,p[0],p[1],p[2])
+
+    for p in points:
+        plot_point(x,y,r,p[0],p[1],p[2])
+
+    for p in points:
+        plot_point_text(x,y,r,p[0],p[1],p[2])
+
+
+    # Input WASD to rotate sphere
+    delta_angle = 0.015 # Velocity of angle change
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w] or keys[pygame.K_UP]:
+        a = (a + delta_angle) % (2 * np.pi)
+    elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+        a = (a - delta_angle) % (2 * np.pi)
+    elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        a2 = (a2 - delta_angle) % (2 * np.pi)
+    elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+        a2 = (a2 + delta_angle) % (2 * np.pi)
+
+    # Automatic rotation
+    # a = (a+0.01)%(2*np.pi)
+    # a2 = (a2+0.01)%(2*np.pi)
 
     pygame.display.flip() # Draw screen
     dt = clock.tick(60) / 1000
