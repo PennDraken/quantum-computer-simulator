@@ -15,8 +15,8 @@ dt = 0
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
 # Rotation angles of sphere
-a = np.pi/3
-a2 = 0
+a = 0
+a2 = 0 # horizontal
 
 # Draws the 3D sphere
 def draw_bloch(x, y, r, a):
@@ -34,14 +34,13 @@ def draw_bloch(x, y, r, a):
         oval(x-dx,p1['y'],x+dx,p2['y'],"white")
         # print(p1['y'])
 
+# Kind of unneccessary, just that the old code was implemented using oval(x1,y1,x2,y2) (not available in Pygame) instead of ellipse
+# Draws an oval at rectangle of points P(x1,y1) to P(x2,y2)
 def oval(x1, y1, x2, y2, color):
-    # Calculate width and height
     width = abs(x2 - x1)
     height = abs(y2 - y1)
-    # Determine the top-left coordinates for the ellipse
     left = min(x1, x2)
     top = min(y1, y2)
-    # Call the ellipse function
     pygame.draw.ellipse(screen, color, (left, top, width, height), width=1)
 
 # Rotate point around center coords
@@ -75,6 +74,8 @@ while running:
         player_pos.x += 300 * dt
 
     a = (a+0.01)%(2*np.pi)
+    a2 = (a2+0.01)%(2*np.pi)
+
     pygame.display.flip() # Draw screen
     dt = clock.tick(60) / 1000
 
