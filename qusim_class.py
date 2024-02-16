@@ -101,15 +101,20 @@ class Quantum:
     def printQubits(self):
         for i in range(0,self.qubit_count):
             print(f"Qubit {i}:{self.getQubit(i)}")
-    
 
-# Bell state demo
-#q = Quantum(2) # Create 2 qubits
-#q.applyGate(Gates.H, 0) # Apply Hadamard to qubit 0
-#print(f"Hadamard applied to first qubit \n {q.state_matrix}")
+    # Converts alpha*|0>+beta*|1> to P(x, y, z)
+    # Used for plotting on Bloch-sphere
+    # Math from en.wikipedia.org/wiki/Bloch_sphere
+    # TODO Research in how to plot on Q-sphere
+    def blochVector(self, alpha, beta)->list:
+        u = complex(beta) / complex(alpha)
+        ux = u.real
+        uy = u.imag
+        # Coordinates of point on Q-sphere
+        px = (2*ux)/(1+ux**2+uy**2)
+        py = (2*uy)/(1+ux**2+uy**2)
+        pz = (1-ux**2-uy**2)/(1+ux**2+uy**2)
+        return [px,py,pz]
 
-#q.applyGateQubits(Gates.CNOT, [0,1]) # Apply CNOT to qubit 0 and 1
-##print(f"CNOT applied to both qubits \n {q.state_matrix}")
-
-#q.measure(0) # Measure qubit 0
-#print(f"Qubit 0 measured \n {q.state_matrix}")
+q = Quantum(2)
+print(q.blochVector(0.5, 0.5))
