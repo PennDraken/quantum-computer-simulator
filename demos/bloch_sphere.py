@@ -12,10 +12,10 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-x=screen.get_width()/2
-y=screen.get_height()/2
-r=screen.get_width()/2
-last_pos=None
+center_x=screen.get_width()/2
+center_y=screen.get_height()/2
+sphere_r=screen.get_width()/2
+mouse_last_pos=None # Used for m
 
 # Rotation angles of sphere
 a = 0.1
@@ -23,7 +23,7 @@ a2 = 0 # horizontal
 
 # Draws the 3D sphere
 def draw_bloch(x, y, r, a):
-    pygame.draw.ellipse(screen, pygame.Color("darkslategrey"), pygame.Rect(x-r,y-r,2*r,2*r), width=5)
+    pygame.draw.ellipse(screen, pygame.Color("darkslategrey"), pygame.Rect(x-r,y-r,2*r,2*r), width=5) # could be cirlce instead
     n = 5
     for i in range(-n,n+1,2):
         s=(i)*(r/n)
@@ -137,6 +137,7 @@ def random_point_on_unit_sphere():
     z = np.cos(phi)
     return np.array([x, y, z])
 
+# Useful method to quickly draw text on screen
 def text(string, x, y, color):
     font = pygame.font.Font(None, 24)
     text_color = pygame.Color(color)
@@ -145,11 +146,11 @@ def text(string, x, y, color):
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
 
-# generate some random points on sphere
+# Generates some random points on sphere
 points = []
-for i in range(0,10):
+for i in range(0,5):
     p = random_point_on_unit_sphere()
-    p = p*r
+    p = p*sphere_r
     points.append(p)
 
 # Game loop
@@ -163,17 +164,17 @@ while running:
     screen.fill("black")
 
     # draw sphere
-    draw_bloch(x,y,r,a)
+    draw_bloch(center_x,center_y,sphere_r,a)
 
-    # draw points (theyre seperated to layers so points are always drawon over lines)
+    # draw points (theyre seperated to layers so points are always drawn over lines, (depth))
     for p in points:
-        plot_point_line(x,y,r,p[0],p[1],p[2])
-
-    for p in points:
-        plot_point(x,y,r,p[0],p[1],p[2])
+        plot_point_line(center_x,center_y,sphere_r,p[0],p[1],p[2])
 
     for p in points:
-        plot_point_text(x,y,r,p[0],p[1],p[2])
+        plot_point(center_x,center_y,sphere_r,p[0],p[1],p[2])
+
+    for p in points:
+        plot_point_text(center_x,center_y,sphere_r,p[0],p[1],p[2])
 
 
     # Input WASD to rotate sphere
@@ -192,17 +193,17 @@ while running:
     if pygame.mouse.get_pressed()[0]:
         # find difference between old and new
         curr_pos = pygame.mouse.get_pos()
-        if last_pos != None:
-            delta_pos = np.array(curr_pos) - np.array(last_pos)
+        if mouse_last_pos != None:
+            delta_pos = np.array(curr_pos) - np.array(mouse_last_pos)
             # moving mouse across half screen should rotate sphere 1/4 turn = 1/2 pi=>1 width = 1pi | screen/f=pi f=screen/pi
-            factor = 2*r/np.pi
+            factor = 2*sphere_r/np.pi
             delta_angle_x = delta_pos[0]/factor
             delta_angle_y = delta_pos[1]/factor
             a2 = (a2 + delta_angle_x) % (2 * np.pi)
             a = (a + delta_angle_y) % (2 * np.pi)
-        last_pos = curr_pos
+        mouse_last_pos = curr_pos
     else:
-        last_pos = None
+        mouse_last_pos = None
 
     # Automatic rotation
     # a = (a+0.01)%(2*np.pi)
