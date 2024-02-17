@@ -4,6 +4,8 @@ import Gates
 
 # Our quantum circuit manager
 class Quantum:
+    qubit_names = [] # Stores the names of the qubits (index is qubit index)
+
     def __init__(self, qubit_count):
         self.qubit_count = qubit_count
         # self.state_matrix = np.zeros(2**qubit_count, dtype=complex) # vector representing the probability state of the systems qubits
@@ -69,6 +71,10 @@ class Quantum:
         p1 = np.sum(np.abs(m1*self.state_matrix)**2)
         return p1
 
+    # Sets the name of qubit to string
+    def nameQubit(self, index, str):
+        self.qubit_names[index] = str
+    
     # Sets a given qubits probability vector
     # Input: vector = [alpha, beta]
     # Description: Applying a Pauli-X gate sets the qubit. We use tesnor product to select which qubit.
