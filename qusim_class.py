@@ -6,11 +6,10 @@ import Gates
 class Quantum:
     def __init__(self, qubit_count):
         self.qubit_count = qubit_count
-        # self.state_matrix = np.zeros(2**qubit_count, dtype=complex) # vector representing the probability state of the systems qubits
-        state_matrix = np.array([1,0],dtype=complex)
+        state_vector = np.array([1,0],dtype=complex)
         for i in range(0,qubit_count-1):
-            state_matrix = np.kron(state_matrix, np.array([1,0],dtype=complex))
-        self.state_matrix = state_matrix
+            state_vector = np.kron(state_vector, np.array([1,0],dtype=complex))
+        self.state_vector = state_vector
 
     # We can create a collapsed vector corresponding to the qubit that we collapsed
     # Used to apply measurement to a qubit state matrix by setting collapses states to 0
@@ -28,20 +27,20 @@ class Quantum:
         m0 = self.collapsed_vector([1,0], qubit_index, self.qubit_count)
         m1 = self.collapsed_vector([0,1], qubit_index, self.qubit_count)
         # Probabilites for given qubit to be 0 or 1
-        p0 = np.sum(np.abs(m0*self.state_matrix)**2)
-        p1 = np.sum(np.abs(m1*self.state_matrix)**2)
+        p0 = np.sum(np.abs(m0*self.state_vector)**2)
+        p1 = np.sum(np.abs(m1*self.state_vector)**2)
         # Collapsing qubit based on probabilites p0 or p1
         p = np.random.choice([0,1], p=[p0,p1])
         # Set probability to 0 for all states where qubit is equal to 0
         measured_state = None
         if p==0:
-            measured_state=m0*self.state_matrix
+            measured_state=m0*self.state_vector
         else:
-            measured_state=m1*self.state_matrix
+            measured_state=m1*self.state_vector
         # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
         scaler = np.sqrt(np.sum(np.abs(measured_state)**2)) # Sum of the abs squares of matrix
         measured_state = measured_state/scaler # Divide by scaler so |sum of ^2| == 1
-        self.state_matrix = measured_state # Update state_matrix
+        self.state_vector = measured_state # Update state_vector
         return p # Returns probability of q_n=1 for qubit n
 
     # Applies gate
@@ -54,26 +53,8 @@ class Quantum:
                 matrix = np.kron(matrix, gate)
             else:
                 matrix = np.kron(matrix, Gates.I)
-        # Multiply this new gate with the state_matrix
-        self.state_matrix = matrix.dot(self.state_matrix)
-
-    # Gets a given qubits probability of being equal to 1
-    # Returns a float
-    def getQubit(self, qubit_index)->float:
-        qubit_count = int(np.log2(len(self.state_matrix)))
-        # Matrices used to remove states from matrix
-        m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
-        m1 = self.collapsed_vector([0,1], qubit_index, qubit_count)
-        # Probabilites for given qubit to be 0 or 1
-        p0 = np.sum(np.abs(m0*self.state_matrix)**2)
-        p1 = np.sum(np.abs(m1*self.state_matrix)**2)
-        return p1
-
-    # Sets a given qubits probability vector
-    # Input: vector = [alpha, beta]
-    # Description: Applying a Pauli-X gate sets the qubit. We use tesnor product to select which qubit.
-    def setQubit(self, qubit_index, vector):
-        self.applyGate(Gates.X, qubit_index)
+        # Multiply this new gate with the state_vector
+        self.state_vector = matrix.dot(self.state_vector)
 
     # Applies gate to multiple qubits
     # TODO Probably somewhat buggy with different matrix sizes
@@ -88,14 +69,38 @@ class Quantum:
                 matrix = np.kron(matrix, gate)
             else:
                 matrix = np.kron(matrix, Gates.I)
-        # Multiply this new gate with the state_matrix
-        self.state_matrix = matrix.dot(self.state_matrix)
+        # Multiply this new gate with the state_vector
+        self.state_vector = matrix.dot(self.state_vector)
+
+    # Gets alpha|0> beta|1> of a qubit
+    # Returns a complex vector
+    def getQubit(self, qubit_index)->np.array:
+        qubit_count = int(np.log2(len(self.state_vector)))
+        # Matrices used to remove states from matrix
+        m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
+        m1 = self.collapsed_vector([0,1], qubit_index, qubit_count)
+        # Probabilites for given qubit to be 0 or 1
+        alpha = np.sum(m0*self.state_vector)
+        beta = np.sum(m1*self.state_vector)
+        return np.array([alpha, beta])
+
+    # Sets a given qubits probability vector
+    # Input: vector = [alpha, beta]
+    # Description: Applying a Pauli-X gate sets the qubit. We use tesnor product to select which qubit.
+    def setQubit(self, qubit_index, vector):
+        self.applyGate(Gates.X, qubit_index)
+
+    # Sets the qubit state to a state vector (useful for debugging/ shortcuts)
+    def setState(self, state_vector):
+        self.qubit_count = int(np.log2(len(state_vector)))
+        self.state_vector = state_vector
+
 
     # Helpful functions
     # ---------------------------------------------
     # Calculates sum(|q_state|^2)==1
     def totalProbability(self):
-        return np.sum(np.abs(self.state_matrix)**2)
+        return np.sum(np.abs(self.state_vector)**2)
     
     # Prints all qubits (useful for debugging)
     def printQubits(self):
@@ -116,5 +121,8 @@ class Quantum:
         pz = (1-ux**2-uy**2)/(1+ux**2+uy**2)
         return [px,py,pz]
 
-q = Quantum(2)
-print(q.blochVector(0.5, 0.5))
+# q = Quantum(2)
+# q.applyGate(Gates.H, 0)
+# q.applyGateQubits(Gates.CNOT, {0,1})
+# print(q.measure(0))
+# print(q.blochVector(0.5, 0.5))
