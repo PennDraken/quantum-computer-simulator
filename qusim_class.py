@@ -3,6 +3,14 @@ import random
 import Gates
 
 # Our quantum circuit manager
+"""
+To use this library, first create a quantum circuit.
+    q=qusim_class.Quantum(n) # n is the amount of qubits you want to use
+    
+
+"""
+
+#------------------------------------------------------------------------------------------------------
 class Quantum:
     def __init__(self, qubit_count):
         self.qubit_count = qubit_count
