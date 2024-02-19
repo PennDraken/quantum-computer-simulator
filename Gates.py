@@ -15,7 +15,8 @@ SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]], dtype=complex)
 
 def Rx(theta):
     return np.array([[np.cos(theta/2), -1j*np.sin(theta/2)],
-                     [1j*np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+                     [-1j*np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+
 
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
