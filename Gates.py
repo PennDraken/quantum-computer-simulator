@@ -12,6 +12,8 @@ CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]], dtype=complex)
 H = (1/np.sqrt(2))*np.array([[1,1],[1,-1]], dtype=complex)
 # Swap gate
 SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]], dtype=complex)
+zero_state = np.array([[1],[0]])
+one_state = np.array([[0],[1]])
 
 def Rx(theta):
     return np.array([[np.cos(theta/2), -1j*np.sin(theta/2)],
