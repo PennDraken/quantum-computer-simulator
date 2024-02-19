@@ -80,9 +80,39 @@ class Quantum:
         # Multiply this new gate with the state_vector
         self.state_vector = matrix.dot(self.state_vector)
 
+    def applyGateQubits2(self, gate, qubit_index_arr):
+        qubit_index_a = qubit_index_arr[0]
+        qubit_index_b = qubit_index_arr[1]
+        # We create a temporary new state vector that only contains the two qubits we want to apply our gate to
+        q_a = self.getQubit(qubit_index_a)
+        q_b = self.getQubit(qubit_index_b)
+        state_vector_2x2 = np.kron(q_a,q_b)
+        new_state_2x2 = np.dot(gate, state_vector_2x2)
+        q=Quantum(2)
+        q.setState(new_state_2x2)
+        q_a = q.getQubit(0)
+        q_b = q.getQubit(1)
+        # Now we recalulate the complete qubit state
+        # Recalculate complete state vector
+        if qubit_index_a==0:
+            final_state_vector=q_a
+        elif qubit_index_b==0:
+            final_state_vector=q_b
+        else:
+            final_state_vector=self.getQubit(0)
+        for i in range(1, self.qubit_count):
+            if i==qubit_index_a:
+                final_state_vector = np.kron(final_state_vector, q_a)
+            elif i==qubit_index_b:
+                final_state_vector = np.kron(final_state_vector, q_b)
+            else:
+                final_state_vector = np.kron(final_state_vector, self.getQubit(i))
+        self.state_vector = final_state_vector
+        return final_state_vector
+
     # Gets alpha|0> beta|1> of a qubit
     # Returns a complex vector
-    def getQubit(self, qubit_index)->np.array:
+    def getQubit(self, qubit_index: int)->np.array:
         qubit_count = int(np.log2(len(self.state_vector)))
         # Matrices used to remove states from matrix
         m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
@@ -90,7 +120,9 @@ class Quantum:
         # Probabilites for given qubit to be 0 or 1
         alpha = np.sum(m0*self.state_vector)
         beta = np.sum(m1*self.state_vector)
-        return np.array([alpha, beta])
+        state = np.array([alpha, beta], dtype=complex)
+        scaler = np.sqrt(np.sum(np.abs(state)**2)) # For normalise
+        return state/scaler
 
     # Sets a given qubits probability vector
     # Input: vector = [alpha, beta]
@@ -128,9 +160,13 @@ class Quantum:
         py = (2*uy)/(1+ux**2+uy**2)
         pz = (1-ux**2-uy**2)/(1+ux**2+uy**2)
         return [px,py,pz]
+    
 
 # q = Quantum(2)
 # q.applyGate(Gates.H, 0)
 # q.applyGateQubits(Gates.CNOT, {0,1})
 # print(q.measure(0))
 # print(q.blochVector(0.5, 0.5))
+# q = Quantum(14)
+# q.applyGate(Gates.H, 3)
+# print(q.measure(3))

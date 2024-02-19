@@ -14,6 +14,8 @@ q.applyGateQubits(Gates.CNOT, [1,2])
 # Show starting state (after Bell state)
 print("---Qubits initialized (q1 and q2 are in a bell state)")
 q.printQubits()
+# q0=q.getQubit(0)
+# print(np.abs(q0[0])**2)
 
 # CNOT -> Hadamard
 q.applyGateQubits(Gates.CNOT, [0,1])
@@ -32,5 +34,6 @@ if bit0==1:
     q.applyGate(Gates.Z, 2)
 
 # Show final state
-print("---Final state of qubits. (Note that qubit 0 has moved to qubit 2)")
+print("---Final state of qubits. (Note that qubit 0 should have moved to qubit 2)")
+# q2=q.getQubit(2)
 q.printQubits()
