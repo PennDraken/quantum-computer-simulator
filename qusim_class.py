@@ -1,193 +1,60 @@
+# Revised version of qusim class
+# Supports smaller vector sizes
+# ----------------------------------------------------------------------------------------------------
+# IMPORTS
 import numpy as np
-import random 
 import Gates
+# ----------------------------------------------------------------------------------------------------
+# CLASSES
+# A single qubit
+class Qubit():
+    def __init__(self, name):
+        self.name=name
 
-# Our quantum circuit manager
-"""
-To use this library, first create a quantum circuit.
-    q=qusim_class.Quantum(n) # n is the amount of qubits you want to use
-    
+# System of a single/ multiple qubits
+class Register():
+    def __init__(self, qubits,  vector : np.array):
+        self.qubits=qubits
+        self.vector=vector
 
-"""
+# System of all registers of qubits
+class System():
+    def __init__(self):
+        # self.qubits=[]
+        self.registers=[]
 
-#------------------------------------------------------------------------------------------------------
-class Quantum:
-    def __init__(self, qubit_count):
-        self.qubit_count = qubit_count
-        state_vector = np.array([1,0],dtype=complex)
-        for i in range(0,qubit_count-1):
-            state_vector = np.kron(state_vector, np.array([1,0],dtype=complex))
-        self.state_vector = state_vector
+    def add_qubit(self, qubit : Qubit, vector : np.array):
+        # self.qubits.append(qubit)
+        self.registers.append(Register([qubit]), vector)
 
-    # We can create a collapsed vector corresponding to the qubit that we collapsed
-    # Used to apply measurement to a qubit state matrix by setting collapses states to 0
-    def collapsed_vector(self, single_qubit_state, qubit_index, qubit_count)->np.array:
-        m = np.array([1, 1])
-        vector = single_qubit_state if qubit_index == 0 else m
-        for i in range(1, qubit_count):
-            vector = np.kron(vector, single_qubit_state if i == qubit_index else m)
-        return vector
-    
-    # Implementation of measurement algorithm for arbitrarily sized state matrix
-    # Returns state as bit (0 or 1). Also collapses the matrix
-    def measure(self, qubit_index)->int:
-        # Matrices used to remove states from matrix
-        m0 = self.collapsed_vector([1,0], qubit_index, self.qubit_count)
-        m1 = self.collapsed_vector([0,1], qubit_index, self.qubit_count)
-        # Probabilites for given qubit to be 0 or 1
-        p0 = np.sum(np.abs(m0*self.state_vector)**2)
-        p1 = np.sum(np.abs(m1*self.state_vector)**2)
-        # Collapsing qubit based on probabilites p0 or p1
-        p = np.random.choice([0,1], p=[p0,p1])
-        # Set probability to 0 for all states where qubit is equal to 0
-        measured_state = None
-        if p==0:
-            measured_state=m0*self.state_vector
+
+# ----------------------------------------------------------------------------------------------------
+# METHODS
+# Find a register where qubit is stored
+def find_register(system : System, qubit : Qubit):
+    for register in System:
+        if qubit in register.qubits:
+            return qubit
+    return "Qubit not found"
+
+# Applies gate to a single qubit
+def apply_gate(system : System, qubit : Qubit, gate : np.array):
+    # Find which register the qubit is linked to
+    register : Register = find_register(system, qubit)
+    # Expand gate based on index of qubit
+    qubit_index = register.qubits.index(qubit)
+    expanded_gate = gate if qubit_index == 0 else Gates.I # initialize matrix correctly
+    for i in range(1, len(register.qubits)):
+        if i == qubit_index:
+            expanded_gate = np.kron(expanded_gate, gate)
         else:
-            measured_state=m1*self.state_vector
-        # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
-        scaler = np.sqrt(np.sum(np.abs(measured_state)**2)) # Sum of the abs squares of matrix
-        measured_state = measured_state/scaler # Divide by scaler so |sum of ^2| == 1
-        self.state_vector = measured_state # Update state_vector
-        return p # Returns probability of q_n=1 for qubit n
+            expanded_gate = np.kron(expanded_gate, Gates.I)
+    # Multiply this new gate with the state_vector
+    return expanded_gate.dot(register.vector)
 
-    # Applies gate
-    # TODO This only handes 2x2 gates at the moment (single qubit)
-    def applyGate(self, gate, qubit_index):
-        # Expand gate to fit given qubit using identity matrix
-        matrix = gate if qubit_index == 0 else Gates.I # initialize matrix correctly
-        for i in range(1, self.qubit_count):
-            if i == qubit_index:
-                matrix = np.kron(matrix, gate)
-            else:
-                matrix = np.kron(matrix, Gates.I)
-        # Multiply this new gate with the state_vector
-        self.state_vector = matrix.dot(self.state_vector)
-
-    # Applies gate to multiple qubits
-    # TODO Probably somewhat buggy with different matrix sizes
-    # TODO Overload other apply gate to handle list of indices + single indices
-    def applyGateQubits(self, gate, qubit_index_arr):
-        if 0 in qubit_index_arr:
-            matrix = gate
-        else:
-            matrix = Gates.I
-        for i in range(int(np.log2(len(gate))), self.qubit_count):
-            if i in qubit_index_arr:
-                matrix = np.kron(matrix, gate)
-            else:
-                matrix = np.kron(matrix, Gates.I)
-        # Multiply this new gate with the state_vector
-        self.state_vector = matrix.dot(self.state_vector)
-
-    def applyGateQubits2(self, gate, qubit_index_arr):
-        qubit_index_a = qubit_index_arr[0]
-        qubit_index_b = qubit_index_arr[1]
-        # We create a temporary new state vector that only contains the two qubits we want to apply our gate to
-        q_a = self.getQubit(qubit_index_a)
-        q_b = self.getQubit(qubit_index_b)
-        state_vector_2x2 = np.kron(q_a,q_b)
-        new_state_2x2 = np.dot(gate, state_vector_2x2)
-        q=Quantum(2)
-        q.setState(new_state_2x2)
-        q_a = q.getQubit(0)
-        q_b = q.getQubit(1)
-        # Now we recalulate the complete qubit state
-        # Recalculate complete state vector
-        if qubit_index_a==0:
-            final_state_vector=q_a
-        elif qubit_index_b==0:
-            final_state_vector=q_b
-        else:
-            final_state_vector=self.getQubit(0)
-        for i in range(1, self.qubit_count):
-            if i==qubit_index_a:
-                final_state_vector = np.kron(final_state_vector, q_a)
-            elif i==qubit_index_b:
-                final_state_vector = np.kron(final_state_vector, q_b)
-            else:
-                final_state_vector = np.kron(final_state_vector, self.getQubit(i))
-        self.state_vector = final_state_vector
-        return final_state_vector
-
-    # TODO This does not work and can't be implemented
-    # Gets alpha|0> beta|1> of a qubit
-    # Returns a complex vector
-    def getQubit(self, qubit_index: int)->np.array:
-        qubit_count = int(np.log2(len(self.state_vector)))
-        # Matrices used to remove states from matrix
-        # print(self.state_vector)
-        m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
-        m1 = self.collapsed_vector([0,1], qubit_index, qubit_count)
-        # Probabilites for given qubit to be 0 or 1
-        alpha = np.sum(m0*self.state_vector)
-        beta = np.sum(m1*self.state_vector)
-        state = np.array([alpha, beta], dtype=complex)
-        scaler = np.sqrt(np.sum(np.abs(state)**2)) # For normalise
-        state = state/scaler
-        assert state.shape==(2,), f"Wrong shape in getQubit() {state.shape}"
-        return state
-
-    # Returns a list of the individual qubit states
-    def getQubitList(self):
-        list = []
-        for i in range(0,self.qubit_count):
-            list.append(self.getQubit(i))
-        return list
-
-    # Transforms the state_vector to that corresponding to qubit_list
-    def setQubitList(self, qubit_list):
-        new_state_vector=qubit_list[0]
-        for i in range(1,len(qubit_list)):
-            new_state_vector = np.kron(new_state_vector, qubit_list[i])
-            # print(f"Curr state:{new_state_vector}")
-        self.state_vector=new_state_vector
-        self.qubit_count=len(qubit_list)
-        return new_state_vector
-
-    # Sets a given qubits probability vector
-    # Input: vector = [alpha, beta]
-    # Description: Applying a Pauli-X gate sets the qubit. We use tesnor product to select which qubit.
-    def setQubit(self, qubit_index, vector):
-        self.applyGate(Gates.X, qubit_index)
-
-    # Sets the qubit state to a state vector (useful for debugging/ shortcuts)
-    def setState(self, state_vector):
-        self.qubit_count = int(np.log2(len(state_vector)))
-        self.state_vector = state_vector
-
-
-    # Helpful functions
-    # ---------------------------------------------
-    # Calculates sum(|q_state|^2)==1
-    def totalProbability(self):
-        return np.sum(np.abs(self.state_vector)**2)
-    
-    # Prints all qubits (useful for debugging)
-    def printQubits(self):
-        for i in range(0,self.qubit_count):
-            print(f"Qubit {i}:{self.getQubit(i)}")
-
-    # Converts alpha*|0>+beta*|1> to P(x, y, z)
-    # Used for plotting on Bloch-sphere
-    # Math from en.wikipedia.org/wiki/Bloch_sphere
-    # TODO Research in how to plot on Q-sphere instead of Bloch
-    def blochVector(self, alpha, beta)->list:
-        u = complex(beta) / complex(alpha)
-        ux = u.real
-        uy = u.imag
-        # Coordinates of point on Q-sphere
-        px = (2*ux)/(1+ux**2+uy**2)
-        py = (2*uy)/(1+ux**2+uy**2)
-        pz = (1-ux**2-uy**2)/(1+ux**2+uy**2)
-        return [px,py,pz]
-    
-
-# q = Quantum(2)
-# q.applyGate(Gates.H, 0)
-# q.applyGateQubits(Gates.CNOT, {0,1})
-# print(q.measure(0))
-# print(q.blochVector(0.5, 0.5))
-# q = Quantum(14)
-# q.applyGate(Gates.H, 3)
-# print(q.measure(3))
+# ----------------------------------------------------------------------------------------------------
+# DEMO
+# Bell state
+q = System()
+q.add_qubit(Qubit("A"), np.array([1,0]))
+q.add_qubit(Qubit("B"), np.array([1,0]))
