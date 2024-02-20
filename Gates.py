@@ -1,17 +1,17 @@
 import numpy as np
 # Stores the different gates TODO More gates
 # Identity
-I = np.array([[1,0],[0,1]], dtype=complex) 
+I = np.array([[1,0],[0,1]]) 
 # Pauli gates
 X = np.array([[0,1],[1,0]], dtype=complex)
 Y = np.array([[0,-1j],[1j,0]], dtype=complex) 
 Z = np.array([[1,0],[0,-1]], dtype=complex) 
 # Controlled gates
-CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]], dtype=complex)
+CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
 # Hadamard gate
 H = (1/np.sqrt(2))*np.array([[1,1],[1,-1]], dtype=complex)
 # Swap gate
-SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]], dtype=complex)
+SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])
 zero_state = np.array([[1],[0]])
 one_state = np.array([[0],[1]])
 
