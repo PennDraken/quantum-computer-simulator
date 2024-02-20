@@ -110,11 +110,13 @@ class Quantum:
         self.state_vector = final_state_vector
         return final_state_vector
 
+    # TODO This does not work and can't be implemented
     # Gets alpha|0> beta|1> of a qubit
     # Returns a complex vector
     def getQubit(self, qubit_index: int)->np.array:
         qubit_count = int(np.log2(len(self.state_vector)))
         # Matrices used to remove states from matrix
+        # print(self.state_vector)
         m0 = self.collapsed_vector([1,0], qubit_index, qubit_count)
         m1 = self.collapsed_vector([0,1], qubit_index, qubit_count)
         # Probabilites for given qubit to be 0 or 1
@@ -122,7 +124,26 @@ class Quantum:
         beta = np.sum(m1*self.state_vector)
         state = np.array([alpha, beta], dtype=complex)
         scaler = np.sqrt(np.sum(np.abs(state)**2)) # For normalise
-        return state/scaler
+        state = state/scaler
+        assert state.shape==(2,), f"Wrong shape in getQubit() {state.shape}"
+        return state
+
+    # Returns a list of the individual qubit states
+    def getQubitList(self):
+        list = []
+        for i in range(0,self.qubit_count):
+            list.append(self.getQubit(i))
+        return list
+
+    # Transforms the state_vector to that corresponding to qubit_list
+    def setQubitList(self, qubit_list):
+        new_state_vector=qubit_list[0]
+        for i in range(1,len(qubit_list)):
+            new_state_vector = np.kron(new_state_vector, qubit_list[i])
+            # print(f"Curr state:{new_state_vector}")
+        self.state_vector=new_state_vector
+        self.qubit_count=len(qubit_list)
+        return new_state_vector
 
     # Sets a given qubits probability vector
     # Input: vector = [alpha, beta]
