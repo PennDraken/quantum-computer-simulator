@@ -3,81 +3,106 @@ import qusim_class
 import Gates
 import random
 
-def test_gateApply():
-    vector1 = np.array([1,0,0,0])
-    vector1 = Gates.CNOT.dot(vector1)
-    q=qusim_class.System()
-    q.add_qubit("A", [1,0])
-    q.add_qubit("B", [1,0])
-    q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    vector2 = q.as_register().vector
-    assert np.allclose(vector1, vector2), f"Gate application not succesfull."
 
-    vector1 = np.array([0,0,1,0])
-    vector1 = Gates.CNOT.dot(vector1)
-    q=qusim_class.System()
-    q.add_qubit("A", [0,1])
-    q.add_qubit("B", [1,0])
+def test_gateApply():
+    target = np.array([1, 0, 0, 0])
+    target = Gates.CNOT.dot(target)
+    q = qusim_class.System()
+    q.add_qubit("A", [1, 0])
+    q.add_qubit("B", [1, 0])
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    vector2 = q.as_register().vector
-    assert np.allclose(vector1, vector2), f"Gate application not succesfull."
+    result = q.as_register().vector
+    test(target, result, "Testing gate application")
+
+    target = np.array([0, 0, 1, 0])
+    target = Gates.CNOT.dot(target)
+    q = qusim_class.System()
+    q.add_qubit("A", [0, 1])
+    q.add_qubit("B", [1, 0])
+    q.apply_gate_multiple(Gates.CNOT, "A", "B")
+    result = q.as_register().vector
+    test(target, result, "Testing gate application")
+
 
     q = qusim_class.System()
-    q.add_qubit("A", np.array([1,0]))
-    q.add_qubit("B", np.array([1,0]))
+    q.add_qubit("A", np.array([1, 0]))
+    q.add_qubit("B", np.array([1, 0]))
     q.apply_gate(Gates.H, "A")
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    assert np.allclose(q.as_register().vector, 1/np.sqrt(2)*np.array([1,0,0,1])), f"Gate application not succesfull."
+    result=q.as_register().vector
+    target =1/np.sqrt(2) * np.array([1, 0, 0, 1])
+    test(target, result, "Testing gate application")
 
-    q0 = 1/np.sqrt(2)*np.array([1,1])
-    q1 = np.array([0,1])
-    q2 = np.array([0,1])
+
+    # define qubits
+    q0 = 1/np.sqrt(2)*np.array([1, 1])
+    q1 = np.array([0, 1])
+    q2 = np.array([0, 1])
 
     # New case
-    vector1 = kron_list([q0,q1,q2])
-    vector1 = vector1.dot(np.kron(Gates.CNOT, Gates.I))
-    q=qusim_class.System()
+    target = kron_list([q0, q1, q2])
+    target = target.dot(np.kron(Gates.CNOT, Gates.I))
+    q = qusim_class.System()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
 
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    vector2 = q.as_register().vector
-    assert np.allclose(vector1, vector2), f"Gate application not succesfull."
+    result = q.as_register().vector
+    test(target, result, "Testing gate application")
 
     # New case
-    vector1 = kron_list([q0,q1,q2])
-    vector1 = vector1.dot(np.kron(Gates.I, Gates.CNOT))
-    q=qusim_class.System()
+    target = kron_list([q0, q1, q2])
+    target = target.dot(np.kron(Gates.I, Gates.CNOT))
+    q = qusim_class.System()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
 
     q.apply_gate_multiple(Gates.CNOT, "B", "C")
-    vector2 = q.as_register().vector
-    assert np.allclose(vector1, vector2), f"Gate application not succesfull."
+    result = q.as_register().vector
+    test(target, result, "Testing gate application")
 
     # Non adjacent qubits
-    vector1 = kron_list([q0,q1,q2])
-    vector1 = vector1.dot(np.kron(Gates.I, Gates.SWAP)) # Swap q2 q1
-    vector1 = vector1.dot(np.kron(Gates.CNOT, Gates.I)) # Apply CNOT
-    vector1 = vector1.dot(np.kron(Gates.I, Gates.SWAP)) # Swap back
+    target = kron_list([q0, q1, q2])
+    target = target.dot(np.kron(Gates.I, Gates.SWAP))  # Swap q2 q1
+    target = target.dot(np.kron(Gates.CNOT, Gates.I))  # Apply CNOT
+    target = target.dot(np.kron(Gates.I, Gates.SWAP))  # Swap back
 
-    q=qusim_class.System()
+    q = qusim_class.System()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
     q.register_combined()
     q.apply_gate_multiple(Gates.CNOT, "A", "C")
-    vector2 = q.as_register().vector
-    assert np.allclose(vector1, vector2), f"Gate application not succesfull."
+    result = q.as_register().vector
+    test(target, result, "Testing gate application")
+
+def test_swap():
+    register = qusim_class.Register(["A","B"], np.array([0,1,2,3]))
+    register2 = qusim_class.swap(register, "A", "B")
+    vector=register2.vector
+    target = np.array([0,2,1,3])
+    test(target, vector, "Testing swap")
+
+    register = qusim_class.Register(["A","B","C"], np.array([0,1,2,3,4,5,6,7]))
+    register2 = qusim_class.swap(register, "A", "C")
+    target = np.array([0,4,2,6,1,5,3,7])
+    vector=register2.vector
+    test(target, vector, "Testing swap")
+
+# Used for feedback in terminal
+def test(target, result, test_text : str):
+    assert np.allclose(result, target),str+f"\nTest failed! Exptected:\n{target}\nReceived:\n{result}\n"
 
 # Apply kron to a whole list
 def kron_list(list):
     vector = list[0]
-    for i in range(1,len(list)):
+    for i in range(1, len(list)):
         vector = np.kron(vector, list[i])
     return vector
 
+print("Starting tests!")
+test_swap()
 test_gateApply()
 print("All tests passed!")
