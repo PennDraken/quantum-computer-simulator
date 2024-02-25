@@ -1,9 +1,13 @@
+# Revised version of qusim class
+# Supports smaller vector sizes
+# ----------------------------------------------------------------------------------------------------
+# IMPORTS
+import numpy as np
+import Gates
 import numpy as np
 import qusim_class
-import Gates
-import random
-
-
+# ----------------------------------------------------------------------------------------------------
+# TESTS
 def test_gateApply():
     target = np.array([1, 0, 0, 0])
     target = Gates.CNOT.dot(target)
@@ -91,6 +95,8 @@ def test_swap():
     vector=register2.vector
     test(target, vector, "Testing swap")
 
+# ----------------------------------------------------------------------------------------------------
+# UTIL
 # Used for feedback in terminal
 def test(target, result, test_text : str):
     assert np.allclose(result, target),str+f"\nTest failed! Exptected:\n{target}\nReceived:\n{result}\n"
@@ -102,6 +108,8 @@ def kron_list(list):
         vector = np.kron(vector, list[i])
     return vector
 
+# ----------------------------------------------------------------------------------------------------
+# TESTS TO RUN
 print("Starting tests!")
 test_swap()
 test_gateApply()
