@@ -15,7 +15,7 @@ def test_gateApply():
     q.add_qubit("A", [1, 0])
     q.add_qubit("B", [1, 0])
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    result = q.as_register().vector
+    result = q.get_as_register().vector
     test(target, result, "Testing gate application")
 
     target = np.array([0, 0, 1, 0])
@@ -24,7 +24,7 @@ def test_gateApply():
     q.add_qubit("A", [0, 1])
     q.add_qubit("B", [1, 0])
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    result = q.as_register().vector
+    result = q.get_as_register().vector
     test(target, result, "Testing gate application")
 
 
@@ -33,7 +33,7 @@ def test_gateApply():
     q.add_qubit("B", np.array([1, 0]))
     q.apply_gate(Gates.H, "A")
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    result=q.as_register().vector
+    result=q.get_as_register().vector
     target =1/np.sqrt(2) * np.array([1, 0, 0, 1])
     test(target, result, "Testing gate application")
 
@@ -52,7 +52,7 @@ def test_gateApply():
     q.add_qubit("C", q2)
 
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
-    result = q.as_register().vector
+    result = q.get_as_register().vector
     test(target, result, "Testing gate application")
 
     # New case
@@ -64,7 +64,7 @@ def test_gateApply():
     q.add_qubit("C", q2)
 
     q.apply_gate_multiple(Gates.CNOT, "B", "C")
-    result = q.as_register().vector
+    result = q.get_as_register().vector
     test(target, result, "Testing gate application")
 
     # Non adjacent qubits
@@ -79,7 +79,7 @@ def test_gateApply():
     q.add_qubit("C", q2)
     q.register_combined()
     q.apply_gate_multiple(Gates.CNOT, "A", "C")
-    result = q.as_register().vector
+    result = q.get_as_register().vector
     test(target, result, "Testing gate application")
 
 def test_swap():
@@ -95,11 +95,48 @@ def test_swap():
     vector=register2.vector
     test(target, vector, "Testing swap")
 
+def test_sort():
+    # define qubits
+    q0 = 1/np.sqrt(2)*np.array([1, 1])
+    q1 = np.array([0, 1])
+    q2 = np.array([0, 1])
+    q3 = 1/np.sqrt(2)*np.array([1, 1])
+
+    # sorted same as unsorted test
+    q = qusim_class.System()
+    q.add_qubit("A", q0)
+    q.add_qubit("B", q1)
+    q.add_qubit("C", q2)
+    q.add_qubit("D", q3)
+    q.register_combined()
+    q.apply_gate_multiple(Gates.CNOT, "A", "C")
+    result = q.register_combined().vector
+    result2 = q.sort_register(q.registers[0], q.qubits).vector
+    test(result, result2, "Tested sorting already sorted state")
+
+    # sort unsorted test
+    q = qusim_class.System()
+    q.add_qubit("A", q0)
+    q.add_qubit("B", q1)
+    q.add_qubit("C", q2)
+    q.add_qubit("D", q3)
+    q.apply_gate_multiple(Gates.CNOT, "A", "D")
+    q.apply_gate_multiple(Gates.CNOT, "B", "D")
+    q.register_combined()
+    qubit_result = q.sort_register(q.registers[0], q.qubits).qubits
+    test(["A","B","C","D"], qubit_result, "Tested sorting already sorted state")
+
+    # bell state test
+    # q = qusim_class.System()
+    # q.add_qubit("A", q0)
+    # q.add_qubit("B", q1)
+    # q.add_qubit("C", q2)
+
 # ----------------------------------------------------------------------------------------------------
 # UTIL
 # Used for feedback in terminal
 def test(target, result, test_text : str):
-    assert np.allclose(result, target),str+f"\nTest failed! Exptected:\n{target}\nReceived:\n{result}\n"
+    assert np.allclose(result, target),test_text+f"\nTest failed! Exptected:\n{target}\nReceived:\n{result}\n"
 
 # Apply kron to a whole list
 def kron_list(list):
@@ -113,4 +150,5 @@ def kron_list(list):
 print("Starting tests!")
 test_swap()
 test_gateApply()
+test_sort()
 print("All tests passed!")

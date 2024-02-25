@@ -12,13 +12,21 @@ CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
 H = (1/np.sqrt(2))*np.array([[1,1],[1,-1]], dtype=complex)
 # Swap gate
 SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])
-zero_state = np.array([[1],[0]])
-one_state = np.array([[0],[1]])
+zero_state = np.array([1,0])
+one_state = np.array([0,1])
+
+# TODO Name to something more intuitive
+# Vector that coreresponds to the states that are searched for
+def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
+    m = np.array([1, 1])
+    vector = single_qubit_state if qubit_index == 0 else m
+    for i in range(1, qubit_count):
+        vector = np.kron(vector, single_qubit_state if i == qubit_index else m)
+    return vector
 
 def Rx(theta):
     return np.array([[np.cos(theta/2), -1j*np.sin(theta/2)],
                      [-1j*np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
-
 
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
