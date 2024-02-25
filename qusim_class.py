@@ -130,15 +130,15 @@ class System():
         else:
             measured_state=m1*register.vector
         # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
-        norm_register = self.normalize(register)
-        self.registers[register_index] = norm_register # Should update self as well
+        norm_vector = self.normalize(measured_state)
+        self.registers[register_index] = Register(register.qubits, norm_vector) # Should update self as well
         return p # Returns probability of q_n=1 for qubit n
     
-    # Normalises probabilities of register to 1 and returns resulting register
-    def normalize(self, register : Register)->Register:
-        scaler = np.sqrt(np.sum(np.abs(register.vector)**2))
-        new_vector = register.vector/scaler
-        return Register(register.qubits, new_vector)
+    # Normalises probabilities of vector and returns it
+    def normalize(self, vector : np.array)->Register:
+        scaler = np.sqrt(np.sum(np.abs(vector)**2))
+        new_vector = vector/scaler
+        return new_vector
 
     """def print_qubits(self):
         register = self.get_as_register()
@@ -156,7 +156,6 @@ class System():
             print(f"State:\n {register.vector}\n")
         print("-----------------------------------------------------------------")        
 
-    # This has side effects
     def print_registers(self):
         print("-------State of registers:---------------------------------------")
         register = self.get_as_register()
