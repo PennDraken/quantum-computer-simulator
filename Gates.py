@@ -31,3 +31,16 @@ def Rx(theta):
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
                      [np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+
+# gets corresponding gate from a gate_str
+def string_to_gate(gate_str : str):
+    # TODO More programmatic approach, perhaps dictionaries?
+    match gate_str:
+        case "H":
+            return H
+        case "I":
+            return I
+        case "CNOT":
+            return CNOT
+        case _ :
+            return None # TODO Error
