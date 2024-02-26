@@ -140,12 +140,6 @@ class System():
         new_vector = vector/scaler
         return new_vector
 
-    """def print_qubits(self):
-        register = self.get_as_register()
-        sorted_register = self.sort_register(register, self.qubits)
-        for qubit in self.qubits:
-            print(f"Qubit {qubit}:{self.getQubit(qubit)}")"""
-
     # Prints all registers
     def print_registers2(self):
         print("-------State of registers:---------------------------------------")
