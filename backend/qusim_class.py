@@ -193,10 +193,10 @@ class Circuit():
         self.position+=1
         operation = self.description[self.position].split(' ')
         gate_str : str = operation[0]
+        gate = Gates.string_to_gate(gate_str)
         qubits_indices = []
         for i in range(1, len(operation)):
-            qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for both
-        gate = Gates.string_to_gate(gate_str)
+            qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for bot
         # Duplicate system
         new_system : System = copy.deepcopy(self.systems[self.position-1])
         # Apply gate
@@ -207,6 +207,7 @@ class Circuit():
         # Add to our history TODO Support history mode
         self.systems.append(new_system)
         if self.show_output:
+            print(f"Stepped forward {operation}")
             self.systems[self.position].print_registers()
 
     # Steps backwards in circuit

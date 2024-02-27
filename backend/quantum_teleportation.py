@@ -40,7 +40,7 @@ print("---Measurement B")
 q.print_registers()
 
 # Everything looks correct so far
-# Error correction
+# TODO Error correction not working
 # X
 if bit1==1:
     q.apply_gate(Gates.X, "C")

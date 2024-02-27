@@ -42,5 +42,7 @@ def string_to_gate(gate_str : str):
             return I
         case "CNOT":
             return CNOT
+        case "Ry(np.pi/4)": # TODO parse actual value
+            return Ry(np.pi/4)
         case _ :
             return None # TODO Error
