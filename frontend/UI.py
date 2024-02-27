@@ -1,6 +1,6 @@
 import pygame
-import mouse
-import Colors
+import Utilities.mouse as mouse
+import Utilities.Colors as Colors
 
 # A single button on screen
 class Button():
