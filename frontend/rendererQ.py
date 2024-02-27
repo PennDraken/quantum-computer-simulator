@@ -17,20 +17,7 @@ import array
 import Colors
 import bloch_sphere
 
-class MenuButton:
-    def __init__(self, name : str , width : int , height : int):
-        self.width = width
-        self.height = height
-        self.gate = name
-        self.selected = False
-        self.gatefield = pygame.Rect(150, 150, 175, 175) 
-        
-    def update(self, x : int, y : int):
-        self.gatefield = gateRenderer.renderGateCustom(self.gate, x, y, self.width, self.height)
-        
-    def checkClicked(self):
-        if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[2]):
-            self.selected = True
+
 
 
 class gateRenderer:
@@ -149,7 +136,7 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
 
 #def panScreen(directions):
 pygame.init()
-screen = pygame.display.set_mode((800,1000),pygame.RESIZABLE)
+screen = pygame.display.set_mode((800,700),pygame.RESIZABLE)
 pygame.display.set_caption("circuitQ")
 
 # Colors constants
@@ -166,7 +153,7 @@ calculations = ["calculation_placeholder"]
 framerate = pygame.time.Clock()
 
 # sampleString = "H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0"
-# TODO: zoom out and pan
+# TODO: zoom out
 offset = (75,75)
 
 # access screen
@@ -184,7 +171,7 @@ drag_bar_y = screen.get_height() - 100
 drag_bar_color = colorWhite
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
 
-tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Vector view","Bloch sphere"])
+tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
 
 bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 bloch_sphere.add_random_point_on_unit_sphere()
@@ -342,6 +329,8 @@ while True:
         renderButtons([gateButtons], drag_bar_y + 20)
     elif option == "Math view":
         pass # Implement math view renderer here
+    elif option == "Text view":
+        pass # TODO implement text view here
     elif option == "Bloch sphere":
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
