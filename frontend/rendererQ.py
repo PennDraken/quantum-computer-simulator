@@ -138,7 +138,7 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
 pygame.init()
 screen = pygame.display.set_mode((800,700),pygame.RESIZABLE)
 pygame.display.set_caption("circuitQ")
-
+image = pygame.image.load('background2.jpg')
 # Colors constants
 colorWhite = (250,250,250)
 colorSelected = (255, 200, 100) # Yellow
@@ -308,6 +308,7 @@ class gate:
 
 while True:
     screen.fill((0,0,0))
+    screen.blit(image, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
