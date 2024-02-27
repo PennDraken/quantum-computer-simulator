@@ -29,10 +29,6 @@ def showCalculation(position : tuple, calculations : [str]): # not settled on ca
                 screen.blit(pygame.font.SysFont(calculation, 45).render(calculation, True, (170, 170, 200)), (position[0]+1, position[1]-2))
 
 
-#def panScreen(directions):
-renderQlines(amount, 0, 0, pygame.display.Info().current_w) # draw a line for each qubit
-
-# below is for testing
 handler = gateHandler()
 calculations = ["calculation_placeholder"]
 
@@ -219,7 +215,7 @@ while True:
     for button in gateButtons:
         if button.selected and (mouse.r_held or mouse.r_click):
             print ("Clicked gate" + button.gate)
-            gatesList.gateRenderer.renderGate(button.gate, mouse.x,  mouse.y, 40, 40)
+            Gate.renderGate(button.gate, mouse.x,  mouse.y, 40, 40)
     
         elif button.selected and (not mouse.r_held):
             print ("release " + button.gate)
