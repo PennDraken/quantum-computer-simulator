@@ -15,14 +15,6 @@ screen = screenHandler.screen
 
 amount = 5 # stand in for number of qubits
 
-def renderQlines(qubits : int, dy : int, dx : int, width : int):
-    if(dx < 0):
-        dx = 0
-    y = 50 + dy
-    for i in range(qubits):
-        y += 50
-        screenHandler.drawQline((0 - dx, y), (width + (dx * 2), y))
-
 def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
             pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
             for calculation in calculations:
@@ -232,8 +224,10 @@ while True:
         if not button.selected:
             button.checkClicked(mouse)
 
-    # Draw circuit
-    renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    
+    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+
+    # Draw example circuit
     for i in range(0,len(gateList)):
         temp = gateList[i]      
         handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
