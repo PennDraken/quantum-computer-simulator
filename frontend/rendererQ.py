@@ -132,7 +132,13 @@ while True:
             pygame.quit()
             exit()
             
-        
+    # Draw circuit view
+    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    # Draw example circuit
+    for i in range(0,len(gateList)):
+        temp = gateList[i]      
+        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
+
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
@@ -141,6 +147,8 @@ while True:
     tab_panel.y = drag_bar_y + drag_bar_height
     tab_panel.draw()
     bloch_sphere.y = tab_panel.y + tab_panel.height
+    # Draws bg of panel window (hides circuit)
+    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
 
     # Draw selected screen
     option = tab_panel.get_selected()
@@ -225,12 +233,6 @@ while True:
             button.checkClicked(mouse)
 
     
-    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
-
-    # Draw example circuit
-    for i in range(0,len(gateList)):
-        temp = gateList[i]      
-        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
 
     pygame.display.update()
     framerate.tick(30)
