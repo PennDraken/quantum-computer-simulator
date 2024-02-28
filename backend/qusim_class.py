@@ -20,7 +20,7 @@ class Register():
 
 # System of all registers of qubits
 class System():
-    history : bool = False # If previous states should be stored
+
     def __init__(self):
         self.qubits=[] # Used to keep track of qubits
         self.registers=[]
@@ -103,7 +103,7 @@ class System():
             sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
         # Finished
         return sorted_register
-    
+
     # Measures a qubit
     # returns status of qubit after measurement as 0 or 1
     def measure(self, qubit):
@@ -142,7 +142,7 @@ class System():
         return new_vector
 
     # Prints all registers
-    def print_registers2(self):
+    def print_registers(self):
         print("-------State of registers:---------------------------------------")
         for register in self.registers:
             print(f"Qubits:")
@@ -151,7 +151,23 @@ class System():
             print(f"State:\n {register.vector}\n")
         print("-----------------------------------------------------------------")        
 
-    def print_registers(self):
+    def print_merged_register(self):
+        print("-------State of registers:---------------------------------------")
+        register = self.get_as_register()
+        print(f"Qubits:")
+        for qubit in register.qubits:
+            print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+        # Print the vector matrix
+        print("\nState:")
+        print(f"|{''.join(register.qubits)}>")
+        for i in range(0, len(register.vector)):
+            state_val = register.vector[i]
+            binary_str = bin(i)[2:].zfill(len(register.qubits))
+            print(f"|{binary_str}> = {state_val}")
+        print("-----------------------------------------------------------------")        
+
+    # Prints the register in the style of QC
+    def print_merged_register_QC(self):
         print("-------State of registers:---------------------------------------")
         register = self.get_as_register()
         print(f"Qubits:")
@@ -165,7 +181,7 @@ class System():
         qubit_index = register.qubits.index(qubit)
         m1 = Gates.collapsed_vector([0,1], qubit_index, len(register.qubits))
         p1 = np.sum(np.abs(m1*register.vector)**2)
-        return p1
+        return float(p1)
 
 # Stores a quantum circuit
 class Circuit():
@@ -208,7 +224,7 @@ class Circuit():
         self.systems.append(new_system)
         if self.show_output:
             print(f"Stepped forward {operation}")
-            self.systems[self.position].print_registers()
+            self.systems[self.position].print_merged_register()
 
     # Steps backwards in circuit
     # Removes state at current position
