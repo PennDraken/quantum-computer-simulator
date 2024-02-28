@@ -79,30 +79,7 @@ class System():
             qubits += register.qubits
         return Register(vector=vector, qubits=qubits)
 
-    # Sorts a register based on a qubit list to move qubit states to order given in qubits
-    # Useful as final state may be shown in wrong order otherwise
-    def sort_register(self, register : Register, sorted_qubits)->Register:
-        # find bits to shift
-        unsorted_qubits = register.qubits
-        unsorted_vector = register.vector
-        sorted_vector = []
-        sorted_register = register
-        # find all bits that should be swapped
-        bits_to_swap = []
-        for i in range(len(unsorted_qubits)):
-            q = unsorted_qubits[i]
-            # find where this q should be moved to in sorted_qubits
-            target_i = sorted_qubits.index(q)
-            # check if swap is not already in bits_to_swap (no duplicate swaps)
-            if not (target_i, i) in bits_to_swap:
-                bits_to_swap.append((i, target_i))
-        # swap state vector
-        for swap_pair in bits_to_swap:
-            i_a = swap_pair[0]
-            i_b = swap_pair[1]
-            sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
-        # Finished
-        return sorted_register
+   
 
     # Measures a qubit
     # returns status of qubit after measurement as 0 or 1
@@ -173,7 +150,16 @@ class System():
         print(f"Qubits:")
         for qubit in register.qubits:
             print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
-        print(f"State:\n {register.vector}\n")
+        # Print the vector matrix
+        print("\nState:")
+        reversed_qubit_list = register.qubits[::-1]
+        print(f"|{''.join(reversed_qubit_list)}>")
+        # Resort state vector based on new qubit list
+        register_reversed = sort_register(register, reversed_qubit_list)
+        for i in range(0, len(register.vector)):
+            state_val = register_reversed.vector[i]
+            binary_str = bin(i)[2:].zfill(len(register.qubits))
+            print(f"|{binary_str}> = {state_val}")
         print("-----------------------------------------------------------------")        
 
 
@@ -224,7 +210,8 @@ class Circuit():
         self.systems.append(new_system)
         if self.show_output:
             print(f"Stepped forward {operation}")
-            self.systems[self.position].print_merged_register()
+            # self.systems[self.position].print_merged_register()
+            self.systems[self.position].print_merged_register_QC()
 
     # Steps backwards in circuit
     # Removes state at current position
@@ -252,6 +239,28 @@ def find_register(system, qubit):
             return register
     return "Qubit not found"
 
+ # Sorts a register based on a qubit list to move qubit states to order given in qubits
+# Useful as final state may be shown in wrong order otherwise
+def sort_register(register: Register, sorted_qubits)->Register:
+    # find bits to shift
+    unsorted_qubits = register.qubits
+    sorted_register = register
+    # find all bits that should be swapped
+    bits_to_swap = []
+    for i in range(len(unsorted_qubits)):
+        q = unsorted_qubits[i]
+        # find where this q should be moved to in sorted_qubits
+        target_i = sorted_qubits.index(q)
+        # check if swap is not already in bits_to_swap (no duplicate swaps)
+        if not (target_i, i) in bits_to_swap:
+            bits_to_swap.append((i, target_i))
+    # swap state vector
+    for swap_pair in bits_to_swap:
+        i_a = swap_pair[0]
+        i_b = swap_pair[1]
+        sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
+    # Finished
+    return sorted_register
 
 def combine_registers(register_a, register_b):
     vector = np.kron(register_a.vector, register_b.vector)
