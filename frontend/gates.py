@@ -1,8 +1,7 @@
 import pygame
-import numpy as np
 from enum import Enum
 import Utilities.Colors as Colors
-import Utilities.screenHandler as screenHandler
+import screenHandler
 
 Loc = screenHandler.Loc
 screen = screenHandler.screen
@@ -47,18 +46,12 @@ class gateHandler:
 
 
     def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, collumn): # integrating evenhandler for this method
-        #pygame.draw.rect(screen, colorWhite, (self.xStart, self.yStart, self.gateWidth, self.gateHeight), 0)
 
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
 
-        #self.addGateCount(qubits[0])
-        #self.step += 1
         pygame.font.init()
-        
-        #dy = relative_position[1] - 75
-
         if nrQubits > 1:
             for i in range(1, nrQubits):
                 x = relative_position[0] + 50 * collumn + 20
@@ -72,8 +65,5 @@ class gateHandler:
 
         x = relative_position[0] + 50 * collumn
         y = relative_position[1] + (qubits[0] * 50)
-        gate = Gate(gate, x, y, self.gateWidth, self.gateHeight)
-        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight)
-        wasClicked = pygame.mouse.get_pressed()[0]
-        # below is an alternative way of handeling calculations
-      
+        gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
+        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight) # Render gate 

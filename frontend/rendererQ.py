@@ -5,9 +5,17 @@ import UI
 import pygame
 import Utilities.Colors as Colors
 import bloch_sphere
+import Fields.MenuButton as MenuButton
 
 from gates import Gate, gateHandler
-import Utilities.screenHandler as screenHandler
+from Utilities.mouse import Mouse
+import screenHandler
+
+import sys
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
+sys.path.insert(0, parent_dir_path)
 
 screen = screenHandler.screen
 # this is mainly for testing, expect significant changes
@@ -56,8 +64,6 @@ displayCalc = False
 dragging = False
 
 # Mouse status
-mouse = mouse.Mouse()
-
 # drag/drop development below, unfinished
 # name of selected gate
 #selected = ""
@@ -74,41 +80,7 @@ xtest = 0
 ytest = 0
 # just for testing 
 color = (250,250,250)
-
-class MenuButton:
-    def __init__(self, name : str , width : int , height : int):
-        self.gate = name
-        self.width = width
-        self.height = height
-        self.selected = False
-        self.gatefield = pygame.Rect(150, 150, 175, 175) 
         
-    def update(self, gate, x : int, y : int):
-        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height)
-        
-
-    def checkClicked(self, mouse):
-        if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and (mouse.r_click or mouse.r_held)):
-            self.selected = True
-
-
-def createGateButtons(names : [str], width : int, height : int):
-    temp = []
-    for gate in names:
-        temp.append(MenuButton(gate, width, height))
-    return temp
-
-gatesList = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
-gateButtons = createGateButtons(gatesList, 40, 40)
-        
-def renderButtons(buttonRows : [[MenuButton]], canvasYT : int ):
-    xOffset = 75
-    yOffset = 75
-    for bRow in range (0, len(buttonRows)):
-        for b in range (0, len(buttonRows[bRow])):
-            button = buttonRows[bRow][b] # Is a MenuButton
-            button.update(buttonRows[bRow][b].gate, 15 + xOffset * b, canvasYT + 50 + (bRow * yOffset))
-
 #buttons for the gate tab
 
 #related to merge
@@ -116,14 +88,8 @@ gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3]
 x = 75
 y = 75
 
-def checkLines( x : int , y : int, xl, xr):
-  
-    withinLx = xl < x
-    withinRx = x < xr
-    withinX = withinLx and withinRx
-    
-    return withinX
-
+gatesList = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
+gateButtons = MenuButton.createGateButtons(gatesList, 40, 40)
 
 while True:
     screen.fill((0,0,0))
@@ -150,10 +116,11 @@ while True:
     # Draws bg of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
 
+
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
-        renderButtons([gateButtons], drag_bar_y + 20)
+        MenuButton.renderButton([gateButtons], drag_bar_y + 20)
     elif option == "Math view":
         pass # Implement math view renderer here
     elif option == "Text view":
@@ -163,77 +130,56 @@ while True:
         pass # Implement Bloch sphere render here
     # ---------------------------------------------------------------
     # Mouse input
-    mouse.update()
+    Mouse.update(Mouse)
     # Update cursor + temporary colors
-    if mouse.status == None and mouse.y > drag_bar_y and mouse.y < drag_bar_y + drag_bar_height:
+    if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
         drag_bar_color = Colors.yellow
-    elif mouse.status == "Panning": # TODO Now it changes when cursor isnt moving, should use a time held timer instead probably. This is to preventing cursor changing when clicking
+    elif Mouse.status == "Panning": # TODO Now it changes when cursor isnt moving, should use a time held timer instead probably. This is to preventing cursor changing when clicking
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
     else:
         pygame.mouse.set_cursor(*pygame.cursors.arrow) # Reset mouse image
         drag_bar_color = Colors.white
 
     # Left click
-    if mouse.l_click:
+    if Mouse.l_click:
         # Check for tabs here
-        tab_panel.click(mouse.x, mouse.y)
-        if mouse.y > drag_bar_y and mouse.y < drag_bar_y + drag_bar_height:
-            mouse.status = "Resizing bottom panel"
-        elif mouse.y < drag_bar_y:
-            mouse.status = "Panning"
-        elif mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
+        tab_panel.click(Mouse.x, Mouse.y)
+        if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
+            Mouse.status = "Resizing bottom panel"
+        elif Mouse.y < drag_bar_y:
+            Mouse.status = "Panning"
+        elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector
             # Bloch sphere
             if tab_panel.get_selected()=="Bloch sphere":
                 mouse.status = "Panning sphere"
     # Left mouse is being held down
-    elif mouse.l_held:
+    elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom
-        if mouse.status == "Resizing bottom panel":
-            drag_bar_y = mouse.y # Move UI
+        if Mouse.status == "Resizing bottom panel":
+            drag_bar_y = Mouse.y # Move UI
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
             drag_bar_color = Colors.yellow
         # Drag circuit
-        elif mouse.status == "Panning":
-            circuit_dx += mouse.dx
-            circuit_dy += mouse.dy
+        elif Mouse.status == "Panning":
+            circuit_dx += Mouse.dx
+            circuit_dy += Mouse.dy
         # Rotate Bloch sphere
-        elif mouse.status == "Panning sphere":
-            bloch_sphere.pan(mouse)
+        elif Mouse.status == "Panning sphere":
+            bloch_sphere.pan(Mouse)
     # ---------------------------------------------------------------
 
-    screenInfo = pygame.display.Info()
-    screenWidth = screenInfo.current_w
-    screenHeight = screenInfo.current_h
+    #screenInfo = pygame.display.Info()
+    #screenWidth = screenInfo.current_w
+    #screenHeight = screenInfo.current_h
 
-    # allt nedan ska paketeras i lämpliga metoder
-    # use for test
     if displayCalc:
         showCalculation((100,200), calculations)
-       
-    for button in gateButtons:
-        if button.selected and (mouse.r_held or mouse.r_click):
-            print ("Clicked gate" + button.gate)
-            Gate.renderGate(button.gate, mouse.x,  mouse.y, 40, 40)
-    
-        elif button.selected and (not mouse.r_held):
-            print ("release " + button.gate)
-            print (mouse.dy)
-            print (floor((mouse.y - mouse.dy) / 50))
-            check = False
-            for i in range(0,len(gateList)):
-                if checkLines(mouse.x, mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20):
-                    gateList.insert(i -1, (button.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-                    check = True
-            if not check:
-                gateList.append((button.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-            button.selected = False  
-        if not button.selected:
-            button.checkClicked(mouse)
 
-    
+    MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)
 
     pygame.display.update()
     framerate.tick(30)
+    
     
