@@ -16,7 +16,7 @@ import pygame
 import array 
 import Colors
 import bloch_sphere
-
+import os
 
 
 
@@ -133,10 +133,11 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
     modCases(mod1, start, end)
     modCases(mod2, start, end)
 
-
 #def panScreen(directions):
 pygame.init()
-screen = pygame.display.set_mode((800,700),pygame.RESIZABLE)
+cmd = 'wmic desktopmonitor get screenheight, screenwidth'
+(x,y) = tuple(map(int, os.popen(cmd).read().split()[-2::]))
+screen = pygame.display.set_mode((3*x/4,y/3),pygame.RESIZABLE) # i assumed that this would make a good resultion to start with
 pygame.display.set_caption("circuitQ")
 image = pygame.image.load('background2.jpg')
 # Colors constants
@@ -331,7 +332,8 @@ while True:
     elif option == "Math view":
         pass # Implement math view renderer here
     elif option == "Text view":
-        pass # TODO implement text view here
+        renderButtons([gateButtons], drag_bar_y + 20)
+        #pass # TODO implement text view here
     elif option == "Bloch sphere":
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
