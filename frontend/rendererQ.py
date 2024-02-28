@@ -70,12 +70,9 @@ dragging = False
 dragging2 = False
 coordinates = []
 
-
-
 gateBoxHit = False
 gateButton = False
          
-
 xtest = 0
 ytest = 0
 # just for testing 
@@ -129,6 +126,7 @@ while True:
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
     # ---------------------------------------------------------------
+
     # Mouse input
     Mouse.update(Mouse)
     # Update cursor + temporary colors
@@ -154,6 +152,7 @@ while True:
             # Bloch sphere
             if tab_panel.get_selected()=="Bloch sphere":
                 mouse.status = "Panning sphere"
+    
     # Left mouse is being held down
     elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom

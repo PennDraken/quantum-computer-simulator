@@ -16,6 +16,7 @@ class Mouse():
 
 
     # Updates the mouse
+    @staticmethod
     def update(self):
         # Update position
         self.x = pygame.mouse.get_pos()[0]
@@ -45,9 +46,6 @@ class Mouse():
         else: # Mouse right released
             self.r_held = False
             self.r_click = False
-
-
-
         # Update old position
         self.last_x = self.x
         self.last_y = self.y

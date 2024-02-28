@@ -54,11 +54,11 @@ def checkLines( x : int , y : int, xl, xr):
 def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
-            print ("Clicked gate" + button.gate)
+            print ("Clicked gate " + button.gate)
             Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40)
     
         elif button.selected and (not Mouse.r_held):
-            print ("release " + button.gate)
+            print ("Release " + button.gate)
             print (Mouse.dy)
             print (floor((Mouse.y - Mouse.dy) / 50))
             check = False
