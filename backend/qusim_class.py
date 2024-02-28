@@ -193,21 +193,38 @@ class Circuit():
         if self.position>=len(self.description):
             return # We're out out bounds
         self.position+=1
+        # Start interpreting operation type
         operation = self.description[self.position].split(' ')
-        gate_str : str = operation[0]
-        gate = Gates.string_to_gate(gate_str)
-        qubits_indices = []
-        for i in range(1, len(operation)):
-            qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for bot
-        # Duplicate system
-        new_system : System = copy.deepcopy(self.systems[self.position-1])
-        # Apply gate
-        if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
-            new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
-        elif len(qubits_indices)==2:
-            new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
-        # Add to our history TODO Support history mode
+        op_type : str = operation[0]
+
+        if op_type=="measure":
+            # We measure qubit
+            qubits_indices = []
+            for i in range(1, len(operation)):
+                qubits_indices.append(int(operation[i]))
+            # Duplicate system
+            new_system : System = copy.deepcopy(self.systems[self.position-1])
+            # Apply measure
+            qubit = new_system.qubits[qubits_indices[0]]
+            p = new_system.measure(qubit)
+            print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
+        else:
+            # It is gate
+            gate = Gates.string_to_gate(op_type)
+            qubits_indices = []
+            for i in range(1, len(operation)):
+                qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for bot
+            # Duplicate system
+            new_system : System = copy.deepcopy(self.systems[self.position-1])
+            # Apply gate
+            if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
+                new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+            elif len(qubits_indices)==2:
+                new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
+        
+        # Add to our history
         self.systems.append(new_system)
+        # Print output
         if self.show_output:
             print(f"Stepped forward {operation}")
             # self.systems[self.position].print_merged_register()
@@ -222,7 +239,8 @@ class Circuit():
         del self.systems[self.position]
         self.position-=1 # Go left in system
         if self.show_output:
-            self.systems[self.position].print_registers()
+            # self.systems[self.position].print_merged_register()
+            self.systems[self.position].print_merged_register_QC()
 
 
     # Runts through the cicuit as fast as possible
