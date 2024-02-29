@@ -241,7 +241,7 @@ COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
 FONT = pygame.font.Font(None, 45)
 input_boxes = InputBox(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
-done = False
+
 
 displayCalc = False
 dragging = False
@@ -396,20 +396,12 @@ while True:
     elif option == "Math view":
         pass # Implement math view renderer here
     elif option == "Text view":
-        clock = pygame.time.Clock()
 
-        done = False
+        for event in pygame.event.get():
+            input_boxes.handle_event(event)
+            input_boxes.update()
+            input_boxes.draw()
 
-        while not done:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True
-                input_boxes.handle_event(event)
-                input_boxes.update()
-                input_boxes.draw()
-
-            pygame.display.flip()
-            clock.tick(30)
         #pass # TODO implement text view here
     elif option == "Bloch sphere":
         bloch_sphere.draw()
