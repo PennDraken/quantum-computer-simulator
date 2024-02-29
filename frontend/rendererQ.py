@@ -1,6 +1,5 @@
 from pickletools import pyfloat
 from math import floor
-import Utilities.mouse as mouse
 import UI
 import pygame
 import Utilities.Colors as Colors
@@ -151,7 +150,7 @@ while True:
             # Below panel selector
             # Bloch sphere
             if tab_panel.get_selected()=="Bloch sphere":
-                mouse.status = "Panning sphere"
+                Mouse.status = "Panning sphere"
     
     # Left mouse is being held down
     elif Mouse.l_held:

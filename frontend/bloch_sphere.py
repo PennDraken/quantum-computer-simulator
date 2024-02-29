@@ -3,7 +3,6 @@
 # Example file showing a circle moving on screen
 import pygame
 import numpy as np
-from Utilities.mouse import Mouse
 
 # Draws the 3D sphere
 def draw_bloch(screen, x, y, r, a, a2):
@@ -182,7 +181,6 @@ class Bloch_Sphere():
 
     def pan(self, mouse):
         if mouse.l_held:
-            print("debug")
             # moving mouse across half screen should rotate sphere 1/4 turn = 1/2 pi=>1 width = 1pi | screen/f=pi f=screen/pi
             factor = 2*self.sphere_r/np.pi
             delta_angle_x = mouse.dx/factor
