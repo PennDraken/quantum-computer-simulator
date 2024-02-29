@@ -162,6 +162,7 @@ class InputBox:
         self.height = new_height
         self.txt_surface = FONT.render(self.text, True, self.color)
         self.txt_surface = pygame.transform.scale(self.txt_surface, (int(new_width), int(new_height)))
+        self.rect = pygame.Rect(new_x, new_y, new_width, new_height)
 
     def draw(self):
         # Blit the text.
@@ -396,10 +397,11 @@ while True:
     elif option == "Math view":
         pass # Implement math view renderer here
     elif option == "Text view":
-
+        #maybe use mouse.l_click and so on
         for event in pygame.event.get():
-            input_boxes.handle_event(event)
-            input_boxes.update()
+            if event.type == pygame.QUIT:
+                running = False
+                input_boxes.handle_event(event)
             input_boxes.draw()
 
         #pass # TODO implement text view here
