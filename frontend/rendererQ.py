@@ -359,7 +359,7 @@ selectedGate = None
 index = 0
 
 gateHeld = False
-#_____________________________________________________________________________________________________________________________________________________________________________________________________________
+
 
 while True:
     screen.fill((0,0,0))
@@ -475,7 +475,7 @@ while True:
                 selectedGate = gate
                 del gateList[index -1]
                 del placedGates[index -1]
-                gateHeld = True # remember to change this
+                gateHeld = True 
 
             if(selectedGate != None):        
                 gateRenderer.renderGate(selectedGate.gate, mouse.x,  mouse.y)
@@ -500,10 +500,10 @@ while True:
     renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     #placedGates = [] this by extension empties the gatelist
     for i in range(0,len(gateList)):
-        temp = gateList[i]      # modify 
+        temp = gateList[i]     
         if startChange:
           print ("here")
-          placedGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)) # modify should not add multiple times
+          placedGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1))
         else:
            handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
     startChange = False
