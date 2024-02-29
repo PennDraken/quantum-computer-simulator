@@ -16,8 +16,7 @@ import pygame
 import array 
 import Colors
 import bloch_sphere
-import os
-import pygame_gui
+
 
 
 
@@ -88,7 +87,7 @@ class gateHandler:
 
 # this is mainly for testing, expect significant changes
 # screen.blit(pygame.font.SysFont('Times New Roman', 45).render('I', True, (170, 200, 200)) ,((x + (n * 50) + 3,y+ (n * 50) - 5))) 
-
+    
 def renderQlines(qubits : int, dy : int, dx : int, width : int):
     if(dx < 0):
         dx = 0
@@ -112,64 +111,7 @@ class Loc(Enum):
 # draws a line between 2 points on the canvas         
 def drawQline(start : tuple, end : tuple):
     pygame.draw.line(screen,(255, 0, 0),start,end,1)
-
-
-class InputBox:
-
-    def __init__(self, screen,x, y, w, h, text=''):
-        self.screen = screen
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.color = COLOR_INACTIVE
-        self.text = text
-        self.txt_surface = FONT.render(text, True, self.color)
-        self.active = False
-        self.rect = pygame.Rect(x, y, w, h)
-
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            # If the user clicked on the input_box rect.
-            if self.rect.collidepoint(event.pos):
-                # Toggle the active variable.
-                self.active = not self.active
-            else:
-                self.active = False
-            # Change the current color of the input box.
-            self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
-        if event.type == pygame.KEYDOWN:
-            if self.active:
-                if event.key == pygame.K_RETURN:
-                    print(self.text)
-                    self.text = ''
-                elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
-                else:
-                    self.text += event.unicode
-                # Re-render the text.
-                self.txt_surface = FONT.render(self.text, True, self.color)
-
-    def update(self):
-        margin = 20  # Assuming some margin from the edge of the screen
-        new_width = self.screen.get_width() / 2 - 2 * margin  # For example, half the screen width minus some margin
-        new_height = 30
-        new_x = margin
-        new_y = self.screen.get_width() - new_height - margin
-        self.x = new_x
-        self.y = new_y
-        self.width = new_width
-        self.height = new_height
-        self.txt_surface = FONT.render(self.text, True, self.color)
-        self.txt_surface = pygame.transform.scale(self.txt_surface, (int(new_width), int(new_height)))
-        self.rect = pygame.Rect(new_x, new_y, new_width, new_height)
-
-    def draw(self):
-        # Blit the text.
-        self.screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
-        # Blit the rect.
-        pygame.draw.rect(self.screen, self.color, self.rect, 2)
-
+    
 
 def modCases(mod : Loc, start : tuple, end : tuple):
     match mod:
@@ -191,18 +133,15 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
     modCases(mod1, start, end)
     modCases(mod2, start, end)
 
+
 #def panScreen(directions):
 pygame.init()
-cmd = 'wmic desktopmonitor get screenheight, screenwidth'
-(x,y) = tuple(map(int, os.popen(cmd).read().split()[-2::]))
-screen = pygame.display.set_mode((3*x/4,y/3),pygame.RESIZABLE) # i assumed that this would make a good resultion to start with
+screen = pygame.display.set_mode((800,700),pygame.RESIZABLE)
 pygame.display.set_caption("circuitQ")
-image = pygame.image.load('background2.jpg')
+
 # Colors constants
 colorWhite = (250,250,250)
 colorSelected = (255, 200, 100) # Yellow
-
-
 
 amount = 5 # stand in for number of qubits
 renderQlines(amount, 0, 0, pygame.display.Info().current_w) # draw a line for each qubit
@@ -237,11 +176,6 @@ tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates",
 bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
-
-COLOR_INACTIVE = pygame.Color('lightskyblue3')
-COLOR_ACTIVE = pygame.Color('dodgerblue2')
-FONT = pygame.font.Font(None, 45)
-input_boxes = InputBox(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 
 
 displayCalc = False
@@ -374,7 +308,6 @@ class gate:
 
 while True:
     screen.fill((0,0,0))
-    screen.blit(image, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -397,14 +330,7 @@ while True:
     elif option == "Math view":
         pass # Implement math view renderer here
     elif option == "Text view":
-        #maybe use mouse.l_click and so on
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                input_boxes.handle_event(event)
-            input_boxes.draw()
-
-        #pass # TODO implement text view here
+        pass # TODO implement text view here
     elif option == "Bloch sphere":
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
