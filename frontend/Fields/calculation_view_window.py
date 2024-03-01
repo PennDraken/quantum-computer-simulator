@@ -14,6 +14,8 @@ class Calculation_Viewer_Window:
         self.str_registers = []
         self.grid_size = 90  # Width and height of the underlying grid
         self.precompute_register_info()
+        self.title_font = pygame.font.Font(None, 24)
+        self.state_font = pygame.font.Font(None, 20)
 
     def precompute_register_info(self):
         for system in self.systems:
@@ -28,8 +30,7 @@ class Calculation_Viewer_Window:
         half_grid_size = self.grid_size / 2
         label_height = 30
         text_height = 20
-        title_font = pygame.font.Font(None, 24)
-        state_font = pygame.font.Font(None, 20)
+        
 
         for col, system in enumerate(self.systems):
             grid_row = 0
@@ -42,11 +43,11 @@ class Calculation_Viewer_Window:
                 
                 # Draw the label showing the qubits of the register
                 pygame.draw.rect(self.screen, Colors.white, (x, y, self.grid_size, label_height), width=1)  # Box around text
-                text(self.screen, label, x + half_grid_size, y, Colors.white, title_font)
+                text(self.screen, label, x + half_grid_size, y, Colors.white, self.title_font)
 
                 # Draws the vector state of the register
                 for row, line in enumerate(lines):  # Iterate over precomputed lines
-                    text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, Colors.white, state_font)
+                    text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, Colors.white, self.state_font)
                 
                 # Draw the grid rectangle showing end of qubit
                 pygame.draw.rect(self.screen, Colors.white, (x, y, self.grid_size, len(system.registers[register_index].qubits) * self.grid_size), width=2)
