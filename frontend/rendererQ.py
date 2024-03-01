@@ -105,7 +105,7 @@ gateButtons = MenuButton.createGateButtons(gatesList, 40, 40)
 
 
 # keep track of shifting
-shifting = False
+moving_gate = False
 
 # the gate being shifted
 selectedGate = None
@@ -198,7 +198,7 @@ while True:
             for i in range (0, len(activeGates)):
                 gate = activeGates[i]
                 if gate.gCollider().collidepoint(Mouse.x, Mouse.y):
-                    shifting = True
+                    moving_gate = True
                     selectedGate = gate 
                     del gateList[i]#gateList.remove()
         #Mouse.status = "Shifting"            
@@ -218,25 +218,25 @@ while True:
         print (selectedGate.gate)
         print (selectedGate.width)
         print (selectedGate.height)
-        print (shifting)
+        print (moving_gate)
         #print (Mouse.status + "")
            
 
     if Mouse.r_held:
-        if shifting and selectedGate != None:
+        if moving_gate and selectedGate != None:
             Gate.renderGate(selectedGate.gate, Mouse.x, Mouse.y, selectedGate.width, selectedGate.height) # Render gate 
     
-    if shifting and Mouse.l_click:
+    if moving_gate and not (Mouse.r_click or Mouse.r_held):
         check = False
         for i in range(0,len(gateList)):
             test = MenuButton.checkLines(Mouse.x, Mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20) 
             print(test)
             if test:
-                    gateList.insert(i -1, (selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
-                    check = True
+                gateList.insert(i -1, (selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
+                check = True
         if not check:
             gateList.append((selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1])) 
-        shifting = False
+        moving_gate = False
         selectedGate = None
         Mouse.status = None
 
@@ -263,8 +263,8 @@ while True:
     if displayCalc:
         showCalculation((100,200), calculations)
 
-    if not shifting:
-     MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)  # gate placement
+    if not moving_gate:
+        MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)  # gate placement
 
     pygame.display.update()
     framerate.tick(30)
