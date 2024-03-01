@@ -5,6 +5,8 @@ import pygame
 import Utilities.Colors as Colors
 import bloch_sphere
 import Fields.MenuButton as MenuButton
+import Fields.calculation_view_window as calculation_view_window
+import backend.qusim_class as qusim_class
 
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
@@ -58,6 +60,16 @@ bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_
 bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
 
+# Calculation window (generate example circuit)
+circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1"])
+circuit.step_fwd()
+circuit.step_fwd()
+circuit.step_fwd()
+circuit.step_fwd()
+circuit.step_fwd()
+circuit.step_fwd()
+circuit.step_fwd()
+calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
 displayCalc = False
 dragging = False
@@ -105,20 +117,22 @@ while True:
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
     pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height))
-    # Draw options panel + update positions
+    # Draw options panel
+    # Update positions
     tab_panel.y = drag_bar_y + drag_bar_height
     tab_panel.draw()
     bloch_sphere.y = tab_panel.y + tab_panel.height
     # Draws bg of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
-
+    calculation_window.y = tab_panel.y + tab_panel.height
 
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
         MenuButton.renderButton([gateButtons], drag_bar_y + 20)
     elif option == "Math view":
-        pass # Implement math view renderer here
+        # Implement math view renderer here
+        calculation_window.draw()
     elif option == "Text view":
         pass # TODO implement text view here
     elif option == "Bloch sphere":
@@ -152,6 +166,16 @@ while True:
             if tab_panel.get_selected()=="Bloch sphere":
                 Mouse.status = "Panning sphere"
     
+    if Mouse.r_click:
+        pass
+        #for i in range(0,len(gateList)):
+        #    gate = gateList[i]
+        #    sx = (x + circuit_dx) + 50 * i+1
+        #    sy = (y + circuit_dy) + gate[1][0] * 50
+        #    if Mouse.x>sx and Mouse.x<sx + 40 and Mouse.y>sy and Mouse.y<sy + 40:
+        #        print("Clicked gate")
+            
+
     # Left mouse is being held down
     elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom

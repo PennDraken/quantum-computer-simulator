@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------------------------------
 # IMPORTS
 import numpy as np
-import Gates
+import backend.Gates as Gates
 import copy
 # ----------------------------------------------------------------------------------------------------
 # CLASSES
@@ -17,6 +17,10 @@ class Register():
     def __init__(self, qubits,  vector: np.array):
         self.qubits = qubits
         self.vector = vector
+
+    def get_label(self)->str:
+        reversed_qubit_list = self.qubits[::-1]
+        return f"|{''.join(reversed_qubit_list)}>"
 
 # System of all registers of qubits
 class System():
@@ -171,9 +175,9 @@ class System():
 
 # Stores a quantum circuit
 class Circuit():
-    history : bool = False # If previous states should be stored
+    history : bool = False  # If previous states should be stored
     def __init__(self, description):
-        self.systems = [] # Index corresponds to state in circuit
+        self.systems = []  # Index corresponds to state in circuit
         self.history : bool = True
         self.show_output : bool = True
         # First element is qubit list, rest are gate operations
