@@ -231,7 +231,7 @@ while True:
 
     if Mouse.r_held:
         if moving_gate and selectedGate != None:
-            Gate.renderGate(selectedGate.gate, Mouse.x, Mouse.y, selectedGate.width, selectedGate.height) # Render gate 
+            Gate.renderGate(selectedGate.gate, Mouse.x, Mouse.y, selectedGate.width, selectedGate.height, Colors.white) # Render gate 
     
     if moving_gate and not (Mouse.r_click or Mouse.r_held):
         check = False
