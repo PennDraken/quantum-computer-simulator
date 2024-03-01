@@ -5,6 +5,7 @@
 import numpy as np
 import backend.Gates as Gates
 import copy
+import re
 # ----------------------------------------------------------------------------------------------------
 # CLASSES
 # A single qubit (currently unused)
@@ -267,6 +268,16 @@ class Circuit():
     def run(self):
         pass
 
+    # Used for frontend
+    def as_frontend_gate_list(self):
+        description = self.description
+        converted_list = []
+        for item in description[1:]:
+            parts = re.split(r'\s+', item.strip())
+            gate = parts[0]
+            qubits = [int(qubit) for qubit in re.findall(r'\d+', ' '.join(parts[1:]))]
+            converted_list.append((gate, qubits))
+        return converted_list
 
 # ----------------------------------------------------------------------------------------------------
 # METHODS

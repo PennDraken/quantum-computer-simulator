@@ -27,9 +27,9 @@ screen = screenHandler.screen
 amount = 5 # stand in for number of qubits
 
 def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
-            pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
-            for calculation in calculations:
-                screen.blit(pygame.font.SysFont(calculation, 45).render(calculation, True, (170, 170, 200)), (position[0]+1, position[1]-2))
+    pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
+    for calculation in calculations:
+        screen.blit(pygame.font.SysFont(calculation, 45).render(calculation, True, (170, 170, 200)), (position[0]+1, position[1]-2))
 
 
 handler = gateHandler()
@@ -96,7 +96,8 @@ color = (250,250,250)
 #buttons for the gate tab
 
 #related to merge
-gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
+# gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
+gateList = circuit.as_frontend_gate_list()
 x = 75
 y = 75
 
@@ -127,8 +128,15 @@ while True:
     screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
+
         temp = gateList[i]      
         activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1)) # <---------- made active gates change
+        if i==circuit.position-1:
+            color = Colors.yellow
+        else:
+            color = Colors.white
+        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)
+
 
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
@@ -260,8 +268,8 @@ while True:
     #screenWidth = screenInfo.current_w
     #screenHeight = screenInfo.current_h
 
-    if displayCalc:
-        showCalculation((100,200), calculations)
+    # if displayCalc:
+        # showCalculation((100,200), calculations)
 
     if not moving_gate:
         MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)  # gate placement
