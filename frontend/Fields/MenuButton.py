@@ -1,5 +1,6 @@
 import pygame
 import sys, os
+import Utilities.Colors as Colors
 
 # Add frontend to path
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -20,7 +21,7 @@ class MenuButton:
         self.gatefield = pygame.Rect(150, 150, 175, 175) 
 
     def update(self, gate, x : int, y : int):
-        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height)
+        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height, Colors.white)
         
     def checkClicked(self, mouse):
         if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and (Mouse.r_click or Mouse.r_held)):
@@ -55,7 +56,7 @@ def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : i
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
             print ("Clicked gate " + button.gate)
-            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40)
+            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40, Colors.white)
     
         elif button.selected and (not Mouse.r_held):
             print ("Release " + button.gate)

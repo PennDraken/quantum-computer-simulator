@@ -128,14 +128,13 @@ while True:
     screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
-
         temp = gateList[i]      
-        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1)) # <---------- made active gates change
         if i==circuit.position-1:
             color = Colors.yellow
         else:
             color = Colors.white
-        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)
+        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)) # <---------- made active gates change
+        # handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)
 
 
     # Draw drag bar

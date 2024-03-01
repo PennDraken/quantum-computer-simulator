@@ -74,6 +74,8 @@ class gateHandler:
         y = relative_position[1] + (qubits[0] * grid_size)
         gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
         Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight, color) # Render gate
+        return gate # for gate shifting
+
 
 # Draws centered text on screen
 def text(string, x, y, color, font):
@@ -82,5 +84,4 @@ def text(string, x, y, color, font):
     text_rect = text_surface.get_rect()
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
-        return gate # for gate shifting
        
