@@ -2,6 +2,7 @@
 import pygame
 import Utilities.Colors as Colors
 import time
+import UI
 
 class Calculation_Viewer_Window:
     def __init__(self, screen, x: int, y: int, width: int, height: int, systems: []):
@@ -13,7 +14,7 @@ class Calculation_Viewer_Window:
         self.height = height
         self.systems = systems
         self.str_registers = []
-        self.grid_size = 90  # Width and height of the underlying grid
+        self.grid_size = UI.grid_size  # Width and height of the underlying grid
         self.precompute_register_info()
         self.title_font = pygame.font.Font(None, 24)
         self.state_font = pygame.font.Font(None, 20)

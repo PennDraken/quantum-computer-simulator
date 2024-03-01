@@ -2,6 +2,8 @@ import pygame
 import Utilities.mouse as mouse
 import Utilities.Colors as Colors
 
+grid_size = 90
+
 # A single button on screen
 class Button():
     def __init__(self, screen, rect : pygame.Rect, text, color_base, color_hover, color_selected):

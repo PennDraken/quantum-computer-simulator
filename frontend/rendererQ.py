@@ -92,7 +92,8 @@ color = (250,250,250)
 #buttons for the gate tab
 
 #related to merge
-gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
+# gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
+gateList = [("", [0]),("Ry", [0]),("H", [1]),("CNT", [1, 2]),("CNT", [0,1]),("H", [0])]
 x = 75
 y = 75
 
@@ -105,13 +106,37 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-            
-    # Draw circuit view
-    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
-    # Draw example circuit
-    for i in range(0,len(gateList)):
-        temp = gateList[i]      
-        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1)
+    
+    # Draw horisontal lines
+    for i in range(0,10):
+        y = i * UI.grid_size - UI.grid_size/2 + circuit_dy
+        pygame.draw.line(screen, Colors.white, (0, y), (screen.get_width(), y))
+
+    # Draw circuit
+    for col in range(0, len(gateList)):
+        operation = gateList[col]
+        gate_type = operation[0]
+        qubit_indices = operation[1]
+        x = col * UI.grid_size + circuit_dx
+        y = qubit_indices[0] * UI.grid_size + circuit_dy
+        # Draw lines to connecting qubits
+        if len(qubit_indices)>1:
+            for i in range(1, len(qubit_indices)):
+                qubit_y = qubit_indices[i] * UI.grid_size + circuit_dy + UI.grid_size/2
+                pygame.draw.line(screen, Colors.white, (x + UI.grid_size/2, y), (x + UI.grid_size/2, qubit_y))
+                pygame.draw.circle(screen, Colors.white, (x + UI.grid_size/2, qubit_y), radius=5)
+
+        # Draw box gate
+        pygame.draw.rect(screen, Colors.black, (x, y, UI.grid_size, UI.grid_size))
+        pygame.draw.rect(screen, Colors.white, (x, y, UI.grid_size, UI.grid_size), width = 2)
+        # Render the text
+        text_surface = pygame.font.SysFont('Times New Roman', 45).render(gate_type, True, (170, 200, 200))
+        # Calculate the position to draw the text centered at (x + UI.grid_size/2, y + UI.grid_size/2)
+        text_width, text_height = text_surface.get_size()
+        text_x = x + (UI.grid_size - text_width) / 2
+        text_y = y + (UI.grid_size - text_height) / 2
+        # Blit the text onto the screen
+        screen.blit(text_surface, (text_x, text_y))
 
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
