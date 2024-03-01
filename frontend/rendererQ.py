@@ -111,7 +111,7 @@ while True:
     # Draw example circuit
     for i in range(0,len(gateList)):
         temp = gateList[i]      
-        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
+        handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1)
 
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
