@@ -19,6 +19,12 @@ class Gate:
         pygame.draw.rect(screen,Colors.white,rect,0)
         screen.blit(pygame.font.SysFont('Times New Roman', 45).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
         return rect
+    
+
+    
+    def gCollider(self):
+        rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        return rect
         
 class gateHandler:
     xStart = 75
@@ -67,3 +73,5 @@ class gateHandler:
         y = relative_position[1] + (qubits[0] * grid_size)
         gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
         Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight) # Render gate 
+        return gate # for gate shifting
+       
