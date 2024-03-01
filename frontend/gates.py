@@ -46,6 +46,7 @@ class gateHandler:
 
 
     def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, column): # integrating evenhandler for this method
+        grid_size = 50
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
@@ -53,16 +54,16 @@ class gateHandler:
         pygame.font.init()
         if nrQubits > 1:
             for i in range(1, nrQubits):
-                x = relative_position[0] + 50 * column + 20
-                y = relative_position[1] + (qubits[i] * 50) + 25
-                screenHandler.drawQline((x, (relative_position[1] + (qubits[0] * 50)) + 20), (x, y))
+                x = relative_position[0] + grid_size * column + 20
+                y = relative_position[1] + (qubits[i] * grid_size) + 25
+                screenHandler.drawQline((x, (relative_position[1] + (qubits[0] * grid_size)) + 20), (x, y))
             for i in range(1, nrQubits):
-                x = relative_position[0] + 50 * column + 20
-                y = relative_position[1] + (qubits[i] * 50) + 25
+                x = relative_position[0] + grid_size * column + 20
+                y = relative_position[1] + (qubits[i] * grid_size) + 25
                 # need to change this
                 screenHandler.drawQlineMod((x, y), (x, y), Loc.NONE, Loc.END_FILLED)
 
-        x = relative_position[0] + 50 * column
-        y = relative_position[1] + (qubits[0] * 50)
+        x = relative_position[0] + grid_size * column
+        y = relative_position[1] + (qubits[0] * grid_size)
         gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
         Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight) # Render gate 
