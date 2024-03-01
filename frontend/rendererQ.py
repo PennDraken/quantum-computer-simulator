@@ -1,176 +1,37 @@
-from ast import List, Return
-from asyncio.windows_events import NULL
-from enum import Enum
-from os import system
-from pickle import TRUE
 from pickletools import pyfloat
 from math import floor
-import select
-import string
-from tkinter import END, Button
-from turtle import Screen, circle, width
-import mouse
+from tkinter import ACTIVE, Menubutton
 import UI
-import numpy
 import pygame
-import array 
-import Colors
+import Utilities.Colors as Colors
 import bloch_sphere
+import Fields.MenuButton as MenuButton
+import Fields.calculation_view_window as calculation_view_window
+import backend.qusim_class as qusim_class
+from Fields.circuit_navigation_window import Circuit_Navigation_Window
 
+from gates import Gate, gateHandler
+from Utilities.mouse import Mouse
+import screenHandler
 
+import sys
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
+sys.path.insert(0, parent_dir_path)
 
-
-class gateRenderer:
-    def renderGate(gate : str, xpos: int, ypos: int):
-        pygame.draw.rect(screen,colorWhite,(xpos, ypos, 40, 40),0)
-        screen.blit(pygame.font.SysFont('Times New Roman', 45).render(gate, True, (170, 200, 200)), (xpos+1, ypos-2)) 
-        
-    def renderGateCustom(gate : str, xpos: int, ypos: int, width : int , height : int):
-        rect = pygame.Rect(xpos, ypos, width, height)
-        pygame.draw.rect(screen,colorWhite,rect,0)
-        screen.blit(pygame.font.SysFont('Times New Roman', 45).render(gate, True, (170, 200, 200)), (xpos+1, ypos-2))
-        return rect
-        
-class gateHandler:
-    xStart = 75
-    yStart = 75
-    gateWidth = 40
-    gateHeight = 40
-    step = 0
-    gateRenderer = gateRenderer()
-    
-    def __init__(self):
-        self.gateMap = {}
-    
-    def addGateCount(self, qubitIndex : int):
-        if qubitIndex not in self.gateMap:
-            self.gateMap[qubitIndex] = 1
-        else:
-            self.gateMap[qubitIndex] += 1  
-            
-    
-    def setGateCount(self, qubitIndex : int, value : int):
-        self.gateMap[qubitIndex] = value
-       
-                
-    def getGateCount(self, key: int):
-        return self.gateMap[key]
-
-    def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, collumn): # integrating evenhandler for this method
-        #pygame.draw.rect(screen, colorWhite, (self.xStart, self.yStart, self.gateWidth, self.gateHeight), 0)
-
-        nrQubits = len(qubits)
-        if nrQubits < 1: # should be at least one qubit
-            raise ValueError
-
-        #self.addGateCount(qubits[0])
-        #self.step += 1
-        pygame.font.init()
-        width = 0
-        height = 0
-        
-        # TODO: make addGate return list off gates these will be used for interaction
-        if gate != "Switch" and gate != "CNOT":
-         if nrQubits > 1:
-            for i in range(1, nrQubits):
-                x = relative_position[0] + 50 * collumn + 20
-                y = relative_position[1] + (qubits[i] * 50) + 25
-                drawQline((x, (relative_position[1] + (qubits[0] * 50)) + 20), (x, y))
-            for i in range(1, nrQubits):
-                x = relative_position[0] + 50 * collumn + 20
-                y = relative_position[1] + (qubits[i] * 50) + 25
-                # need to change this
-                drawQlineMod((x, y), (x, y), Loc.NONE, Loc.END_FILLED)
-
-         gateRenderer.renderGate(gate, relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50))
-         wasClicked = pygame.mouse.get_pressed()[0]
-         width = 40
-         height = 40
-        else: # edit gates
-            if gate == "CNOT":
-                 #drawQlineMod((relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50)), (relative_position[0] + 50 * collumn, relative_position[1] + ((qubits[0] + 1) * 50)), Loc.NONE, Loc.END_FILLED)
-                 # Under construction
-                 gateRenderer.renderGate(gate, relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50))
-                 #Gate
-            if gate == "Switch":
-                gateRenderer.renderGate(gate, relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50))
-            width = 130
-            height = 40
-                 
-            #drawQlineMod((x, y), (x, y), Loc.NONE, Loc.END_FILLED)
-
-            #gateRenderer.renderGate(gate, relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50))
-        return Gate(gate, relative_position[0] + 50 * collumn, relative_position[1] + (qubits[0] * 50), width, height)
-        
-            
-            #wasClicked = pygame.mouse.get_pressed()[0]
-                
-        
-        # below is an alternative way of handeling calculations
-      
-
+screen = screenHandler.screen
 # this is mainly for testing, expect significant changes
 # screen.blit(pygame.font.SysFont('Times New Roman', 45).render('I', True, (170, 200, 200)) ,((x + (n * 50) + 3,y+ (n * 50) - 5))) 
-    
-def renderQlines(qubits : int, dy : int, dx : int, width : int):
-    if(dx < 0):
-        dx = 0
-    y = 50 + dy
-    for i in range(qubits):
-        y += 50
-        drawQline((0 - dx, y),(width + (dx * 2),y))
+
+amount = 5 # stand in for number of qubits
 
 def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
-            pygame.draw.rect(screen,colorWhite,(position[0], position[1], 100, 100),0)
+            pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
             for calculation in calculations:
                 screen.blit(pygame.font.SysFont(calculation, 45).render(calculation, True, (170, 170, 200)), (position[0]+1, position[1]-2))
 
-class Loc(Enum):
-    NONE = 0;
-    START_FILLED = 1; 
-    END_FILLED = 2
-    START_CROSS = 3; 
-    END_CROSS = 4;
 
-# draws a line between 2 points on the canvas         
-def drawQline(start : tuple, end : tuple):
-    pygame.draw.line(screen,(255, 0, 0),start,end,1)
-    
-
-def modCases(mod : Loc, start : tuple, end : tuple): # edit this to handle cross
-    match mod:
-        case Loc.START_FILLED:
-            pygame.draw.circle(screen, (255, 255, 255),start,4)
-        case Loc.END_FILLED:
-            pygame.draw.circle(screen, (255, 255, 255),end, 4) 
-        case Loc.START_CROSS: 
-            pygame.draw.circle(screen, (255, 255, 255),start,15, 2) #change 
-        case Loc.END_CROSS:
-            pygame.draw.circle(screen, (255, 255, 255),end, 15, 2) #change
-        case Loc.NONE:
-            pass
-
-def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
-    
-    drawQline(start,end)
-    
-    modCases(mod1, start, end)
-    modCases(mod2, start, end)
-
-
-#def panScreen(directions):
-pygame.init()
-screen = pygame.display.set_mode((800,700),pygame.RESIZABLE)
-pygame.display.set_caption("circuitQ")
-
-# Colors constants
-colorWhite = (250,250,250)
-colorSelected = (255, 200, 100) # Yellow
-
-amount = 5 # stand in for number of qubits
-renderQlines(amount, 0, 0, pygame.display.Info().current_w) # draw a line for each qubit
-
-# below is for testing
 handler = gateHandler()
 calculations = ["calculation_placeholder"]
 
@@ -192,7 +53,7 @@ circuit_dy = 0;
 # textCanvasY =  pygame.display.Info().current_h - 100 #920
 
 drag_bar_y = screen.get_height() - 100
-drag_bar_color = colorWhite
+drag_bar_color = Colors.white
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
 
 tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
@@ -201,165 +62,56 @@ bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_
 bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
 
+# Calculation window (generate example circuit)
+circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1"])
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
+
+circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
 displayCalc = False
 dragging = False
 
 # Mouse status
-mouse = mouse.Mouse()
-
 # drag/drop development below, unfinished
 # name of selected gate
 #selected = ""
 dragging2 = False
 coordinates = []
 
-
-#skeleton for multi-check if above any hitbox.
-def checkHitboxes(menuItems : int, boxCoordinates : [(int,int)], mouseX : int , mouseY : int ):
-    print ("here")
-    withinAnyHitBox = False  
-    
-    for i in range (0, menuItems):
-        print (i)
-        if within(40,40,boxCoordinates[i][0],boxCoordinates[i][1], mouseX, mouseY):
-            withinAnyHitBox = True
-            print ("here")
-            print(f"withinAnyHitBox value for iteration {i}: {withinAnyHitBox}")
-    return withinAnyHitBox
-   
-
-def within(width : int, height : int, xPos : int, yPos, mouseX : int, mouseY : int):
-    selectReduction = 0
-    print ("mouse coords")
-    print (mouseX)
-    print (mouseY)
-    print ("gate coords")
-    print (xPos)
-    print (yPos)
-    withinLy = (yPos + (height) - selectReduction) > mouseY
-    withinHy = mouseY > yPos - (height) + selectReduction
-    withinY = withinLy and withinHy
-
-    withinLx = ( xPos - (width) + selectReduction) < mouseX
-    withinRx = mouseX < xPos + (width) - selectReduction
-    withinX = withinLx and withinRx
-    return withinX and withinY
-    
 gateBoxHit = False
 gateButton = False
          
-
 xtest = 0
 ytest = 0
 # just for testing 
 color = (250,250,250)
-
-
-class MenuButton:
-    def __init__(self, name : str , width : int , height : int):
-        self.width = width
-        self.height = height
-        self.gate = name
-        self.selected = False
-        self.gatefield = pygame.Rect(150, 150, 175, 175) 
         
-    def update(self, x : int, y : int):
-        self.gatefield = gateRenderer.renderGateCustom(self.gate, x, y, self.width, self.height)
-        
-
-    def checkClicked(self, mouse):
-        if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and mouse.r_click): #(self.gatefield.collidepoint(pygame.mouse.get_pos()) and (mouse.r_click or mouse.r_held)):
-            self.selected = True
-
-class Gate:
-    def __init__(self, name : str , x : int , y : int , width : int , height : int):
-        self.width = width
-        self.height = height
-        self.gate = name
-        self.x = x
-        self.y = y
-        self.hitbox = pygame.Rect(x, y, width, height)
-        self.held = False
-        
-    def gateClick(self, mouse):
-        if (self.hitbox.collidepoint(pygame.mouse.get_pos()) and mouse.r_click): #(self.gatefield.collidepoint(pygame.mouse.get_pos()) and (mouse.r_click or mouse.r_held)):
-            self.held = True
-
-    def gateAdded(self):
-        gateRenderer.renderGateCustom(self.gate, self.x, self.y, self.width, self.height)
-
-gates = ["X","Y","Z","H","S","T"] #work here
-gates2 = ["Switch","CNOT"] 
-
-def createGateButtons(names : [str], width : int, height : int):
-    temp = []
-    for gate in names:
-        temp.append(MenuButton(gate, width, height))
-    return temp
-        
-
-def renderButtons(buttonRows : [[MenuButton]], canvasYT : int ): # [[]] : for several rows #work here
-    xOffset = 75
-    yOffset = 75
-    
-    for bRow in range (0, len(buttonRows)):
-        for b in range (0, len(buttonRows[bRow])):
-            button = buttonRows[bRow][b]
-            if button.width == 40:
-               button.update(15 + xOffset * b, canvasYT + 50 + (bRow * yOffset))
-            else:
-               button.update(15 + xOffset * 2 * b, canvasYT + 50 + (bRow * yOffset))
-                
-
 #buttons for the gate tab
-gateButtons = createGateButtons(gates, 40, 40) #work here
-gateButtons2 = createGateButtons(gates2, 130, 40)
 
 #related to merge
 gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
 x = 75
 y = 75
 
-def checkLines( x : int , y : int, xl, xr):
-  
-    withinLx = xl < x
-    withinRx = x < xr
-    withinX = withinLx and withinRx
-    
-    return withinX
+gatesList = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
+gateButtons = MenuButton.createGateButtons(gatesList, 40, 40)
 
-"""
-class gate:
-    def __init__(self, name : str , x : int , y : int , width : int , height : int):
-        self.width = width
-        self.height = height
-        self.gate = name
-        self.x = x
-        self.y = y
-        #TODO 
-        
 
-    def gateAdded(self):
-        gateRenderer.renderGateCustom(self.gate, self.x, self.y, self.width, self.height)
-"""
-        
-placedGates = [] # [Gate]
+# keep track of shifting
+shifting = False
 
-gateHeld = False # Checks so only 1 gate is removed when 
-
-operationsLock = True # controls gate moves, change to false when testing both
-
-gatelistChange = False
-
-startChange = True
-
+# the gate being shifted
 selectedGate = None
 
-index = 0
-
-gateHeld = False
-
+# check if gate was shifting
+#wasShifting = False
 
 while True:
     screen.fill((0,0,0))
@@ -368,145 +120,153 @@ while True:
             pygame.quit()
             exit()
             
-        
+    
+    # Gates placed on the circuit
+    activeGates = []
+    # Draw circuit view
+    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    # Draw example circuit
+    for i in range(0,len(gateList)):
+        temp = gateList[i]      
+        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1)) # <---------- made active gates change
+
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
     pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height))
-    # Draw options panel + update positions
+    # Draw options panel
+    # Update positions
     tab_panel.y = drag_bar_y + drag_bar_height
     tab_panel.draw()
     bloch_sphere.y = tab_panel.y + tab_panel.height
+    # Draws background of panel window (hides circuit)
+    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
+    calculation_window.y = tab_panel.y + tab_panel.height
+    calculation_window.circuit_dx = circuit_dx
+    calculation_window.systems = circuit.systems # update states
+
+    # Draw navigation window with run and step buttons
+    circuit_navigation_window.draw()
 
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
-        renderButtons([gateButtons, gateButtons2], drag_bar_y + 20) #add next rows of buttons
+        MenuButton.renderButton([gateButtons], drag_bar_y + 20)
     elif option == "Math view":
-        pass # Implement math view renderer here
+        # Implement math view renderer here
+        calculation_window.draw()
     elif option == "Text view":
         pass # TODO implement text view here
     elif option == "Bloch sphere":
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
     # ---------------------------------------------------------------
+
     # Mouse input
-    mouse.update()
+    Mouse.update(Mouse)
     # Update cursor + temporary colors
-    if mouse.status == None and mouse.y > drag_bar_y and mouse.y < drag_bar_y + drag_bar_height:
+    if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
-        drag_bar_color = colorSelected
-    elif mouse.status == "Panning": # TODO Now it changes when cursor isnt moving, should use a time held timer instead probably. This is to preventing cursor changing when clicking
+        drag_bar_color = Colors.yellow
+    elif Mouse.status == "Panning":
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
     else:
         pygame.mouse.set_cursor(*pygame.cursors.arrow) # Reset mouse image
         drag_bar_color = Colors.white
 
     # Left click
-    if mouse.l_click:
+    if Mouse.l_click:
         # Check for tabs here
-        tab_panel.click(mouse.x, mouse.y)
-        if mouse.y > drag_bar_y and mouse.y < drag_bar_y + drag_bar_height:
-            mouse.status = "Resizing bottom panel"
-        elif mouse.y < drag_bar_y:
-            mouse.status = "Panning"
-        elif mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
+        tab_panel.click(Mouse.x, Mouse.y)
+        if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
+            Mouse.status = "Resizing bottom panel"
+        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
+            circuit_navigation_window.click(Mouse.x, Mouse.y)
+        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y: # <------ use this check
+            Mouse.status = "Panning"
+        elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector
             # Bloch sphere
             if tab_panel.get_selected()=="Bloch sphere":
-                mouse.status = "Panning sphere"
+                Mouse.status = "Panning sphere"
+                
+    
+    if Mouse.r_click:
+        if Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
+            print ("shift")
+            print (Mouse.x, Mouse.y)
+            for i in range (0, len(activeGates)):
+                gate = activeGates[i]
+                if gate.gCollider().collidepoint(Mouse.x, Mouse.y):
+                    shifting = True
+                    selectedGate = gate 
+                    del gateList[i]#gateList.remove()
+        #Mouse.status = "Shifting"            
+                
+        # try check here
+        #pass
+        #for i in range(0,len(gateList)):
+        #    gate = gateList[i]
+        #    sx = (x + circuit_dx) + 50 * i+1
+        #    sy = (y + circuit_dy) + gate[1][0] * 50
+        #    if Mouse.x>sx and Mouse.x<sx + 40 and Mouse.y>sy and Mouse.y<sy + 40:
+        #        print("Clicked gate")
+
+
+    if selectedGate != None:
+        print ("gate selected")
+        print (selectedGate.gate)
+        print (selectedGate.width)
+        print (selectedGate.height)
+        print (shifting)
+        #print (Mouse.status + "")
+           
+
+    if Mouse.r_held:
+        if shifting and selectedGate != None:
+            Gate.renderGate(selectedGate.gate, Mouse.x, Mouse.y, selectedGate.width, selectedGate.height) # Render gate 
+    
+    if shifting and Mouse.l_click:
+        check = False
+        for i in range(0,len(gateList)):
+            test = MenuButton.checkLines(Mouse.x, Mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20) 
+            print(test)
+            if test:
+                    gateList.insert(i -1, (selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
+                    check = True
+        if not check:
+            gateList.append((selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1])) 
+        shifting = False
+        selectedGate = None
+        Mouse.status = None
+
     # Left mouse is being held down
-    elif mouse.l_held:
+    elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom
-        if mouse.status == "Resizing bottom panel":
-            drag_bar_y = mouse.y # Move UI
+        if Mouse.status == "Resizing bottom panel":
+            drag_bar_y = Mouse.y # Move UI
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
-            drag_bar_color = colorSelected
+            drag_bar_color = Colors.yellow
         # Drag circuit
-        elif mouse.status == "Panning":
-            circuit_dx += mouse.dx
-            circuit_dy += mouse.dy
+        elif Mouse.status == "Panning":
+            circuit_dx += Mouse.dx
+            circuit_dy += Mouse.dy
         # Rotate Bloch sphere
-        elif mouse.status == "Panning sphere":
-            bloch_sphere.pan(mouse)
+        elif Mouse.status == "Panning sphere":
+            bloch_sphere.pan(Mouse)
     # ---------------------------------------------------------------
 
-    screenInfo = pygame.display.Info()
-    screenWidth = screenInfo.current_w
-    screenHeight = screenInfo.current_h
+    #screenInfo = pygame.display.Info()
+    #screenWidth = screenInfo.current_w
+    #screenHeight = screenInfo.current_h
 
-    # allt nedan ska paketeras i lämpliga metoder
-    # use for test
     if displayCalc:
         showCalculation((100,200), calculations)
-       
-    #----------------------------------------------------------------------------------------------------------------- menu moves
-    if (not operationsLock):
-      for button in gateButtons + gateButtons2:
-          if button.selected and (mouse.r_held or mouse.r_click):
-              print ("Clicked gate" + button.gate)
-              gateRenderer.renderGate(button.gate, mouse.x,  mouse.y)
-    
-          elif button.selected and (not mouse.r_held):
-              print ("release " + button.gate)
-              print (mouse.dy)
-              print (floor((mouse.y - mouse.dy) / 50))
-              check = False
-              for i in range(0,len(gateList)):
-                  if checkLines(mouse.x, mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20):
-                      gateList.insert(i -1, (button.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-                      check = True
-              if not check:
-                  gateList.append((button.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-              button.selected = False  
-          if not button.selected:
-              print ("operation lock failure")
-              button.checkClicked(mouse)
-            
-     #----------------------------------------------------------------------------------------------------------------- placed moves
-    
-     
- 
-    for gate in placedGates:
-        index += 1
-        if (gate.held and (mouse.r_held or mouse.r_click)) or (gateHeld and (mouse.r_held or mouse.r_click)): 
-            #print ("check")
-            if selectedGate == None:
-                selectedGate = gate
-                del gateList[index -1]
-                del placedGates[index -1]
-                gateHeld = True 
 
-            if(selectedGate != None):        
-                gateRenderer.renderGate(selectedGate.gate, mouse.x,  mouse.y)
-                
-        elif gateHeld and (not mouse.r_held):
-            check2 =  False
-            for i in range(0,len(gateList)):
-                  if checkLines(mouse.x, mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20):
-                      gateList.insert(i -1, (selectedGate.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-                      selectedGate = None
-                      check2 = True
-            if not check2:
-                  gateList.append((selectedGate.gate, [floor((mouse.y - circuit_dy) / 50) - 1]))
-                  selectedGate = None
-            gateHeld = False  
-        if not gateHeld:
-            gate.gateClick(mouse)
-    index = 0
-   
+    if not shifting:
+     MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)  # gate placement
 
-    # Draw circuit
-    renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
-    #placedGates = [] this by extension empties the gatelist
-    for i in range(0,len(gateList)):
-        temp = gateList[i]     
-        if startChange:
-          print ("here")
-          placedGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1))
-        else:
-           handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy),i+1)
-    startChange = False
-    gatelistChange = False
     pygame.display.update()
     framerate.tick(30)
+    
+    
