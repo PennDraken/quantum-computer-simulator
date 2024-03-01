@@ -19,12 +19,26 @@ class Register():
         self.vector = vector
 
     def get_label(self)->str:
-        reversed_qubit_list = self.qubits[::-1]
+        qubit_copy = copy.deepcopy(self.qubits)
+        reversed_qubit_list = qubit_copy[::-1]
         return f"|{''.join(reversed_qubit_list)}>"
+    
+    def get_state_str(self)->str:
+        qubit_copy = copy.deepcopy(self.qubits)
+        reversed_qubit_list = qubit_copy[::-1]
+        register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
+        output_str = ""
+        for i in range(0, len(self.vector)):
+            state_val = register_reversed.vector[i]
+            # binary_str = bin(i)[2:].zfill(len(self.qubits))
+            # state_str = f"|{binary_str}> = {state_val}\n"
+            state_str = f"{np.round(state_val, decimals=2)}\n"
+            output_str += state_str
+        return output_str
+    
 
 # System of all registers of qubits
 class System():
-
     def __init__(self):
         self.qubits=[] # Used to keep track of qubits
         self.registers=[]
@@ -266,7 +280,7 @@ def find_register(system, qubit):
 def sort_register(register: Register, sorted_qubits)->Register:
     # find bits to shift
     unsorted_qubits = register.qubits
-    sorted_register = register
+    sorted_register = copy.deepcopy(register)
     # find all bits that should be swapped
     bits_to_swap = []
     for i in range(len(unsorted_qubits)):
