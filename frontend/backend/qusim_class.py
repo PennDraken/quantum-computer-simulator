@@ -21,29 +21,24 @@ class Register():
         self.state_str = None
 
     def get_label(self)->str:
-        if self.label == None:
-            qubit_copy = copy.deepcopy(self.qubits)
-            reversed_qubit_list = qubit_copy[::-1]
-            label = f"|{''.join(reversed_qubit_list)}>"
-            return label
-        return self.label
+        qubit_copy = copy.deepcopy(self.qubits)
+        reversed_qubit_list = qubit_copy[::-1]
+        label = f"|{''.join(reversed_qubit_list)}>"
+        return label
     
     def get_state_str(self)->str:
-        if self.state_str == None:
-            qubit_copy = copy.deepcopy(self.qubits)
-            reversed_qubit_list = qubit_copy[::-1]
-            register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
-            output_str = ""
-            for i in range(0, len(self.vector)):
-                state_val = register_reversed.vector[i]
-                # binary_str = bin(i)[2:].zfill(len(self.qubits))
-                # state_str = f"|{binary_str}> = {state_val}\n"
-                state_str = f"{np.round(state_val, decimals=2)}\n"
-                output_str += state_str
-            self.state_str = output_str
-            return output_str
-        else:
-            return self.state_str
+        qubit_copy = copy.deepcopy(self.qubits)
+        reversed_qubit_list = qubit_copy[::-1]
+        register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
+        output_str = ""
+        for i in range(0, len(self.vector)):
+            state_val = register_reversed.vector[i]
+            # binary_str = bin(i)[2:].zfill(len(self.qubits))
+            # state_str = f"|{binary_str}> = {state_val}\n"
+            state_str = f"{np.round(state_val, decimals=2)}\n"
+            output_str += state_str
+        self.state_str = output_str
+        return output_str
 
 # System of all registers of qubits
 class System():
@@ -105,10 +100,9 @@ class System():
             qubits += register.qubits
         return Register(vector=vector, qubits=qubits)
 
-   
-
     # Measures a qubit
     # returns status of qubit after measurement as 0 or 1
+    # TODO Also seperates the measured qubit into a seperate register
     def measure(self, qubit):
         # Find register
         register = None
@@ -216,7 +210,7 @@ class Circuit():
     # Steps forward in circuit
     # Adds a new system to our systems
     def step_fwd(self):
-        if self.position>=len(self.description):
+        if self.position+1>=len(self.description):
             return # We're out out bounds
         self.position+=1
         # Start interpreting operation type

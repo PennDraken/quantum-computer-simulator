@@ -7,6 +7,7 @@ import bloch_sphere
 import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import backend.qusim_class as qusim_class
+from Fields.circuit_navigation_window import Circuit_Navigation_Window
 
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
@@ -62,14 +63,16 @@ bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1"])
-circuit.step_fwd()
-circuit.step_fwd()
-circuit.step_fwd()
-circuit.step_fwd()
-circuit.step_fwd()
-circuit.step_fwd()
-circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
+# circuit.step_fwd()
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
+
+circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
 displayCalc = False
 dragging = False
@@ -126,6 +129,10 @@ while True:
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
     calculation_window.y = tab_panel.y + tab_panel.height
     calculation_window.circuit_dx = circuit_dx
+    calculation_window.systems = circuit.systems # update states
+
+    # Draw navigation window with run and step buttons
+    circuit_navigation_window.draw()
 
     # Draw selected screen
     option = tab_panel.get_selected()
@@ -147,7 +154,7 @@ while True:
     if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
         drag_bar_color = Colors.yellow
-    elif Mouse.status == "Panning": # TODO Now it changes when cursor isnt moving, should use a time held timer instead probably. This is to preventing cursor changing when clicking
+    elif Mouse.status == "Panning":
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
     else:
         pygame.mouse.set_cursor(*pygame.cursors.arrow) # Reset mouse image
@@ -159,7 +166,9 @@ while True:
         tab_panel.click(Mouse.x, Mouse.y)
         if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
             Mouse.status = "Resizing bottom panel"
-        elif Mouse.y < drag_bar_y:
+        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
+            circuit_navigation_window.click(Mouse.x, Mouse.y)
+        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
             Mouse.status = "Panning"
         elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector

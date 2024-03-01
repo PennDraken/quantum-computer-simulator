@@ -1,7 +1,6 @@
 # This is a class that shows the states at various points of the calculation on window
 import pygame
 import Utilities.Colors as Colors
-import time
 
 class Calculation_Viewer_Window:
     def __init__(self, screen, x: int, y: int, width: int, height: int, systems: []):
