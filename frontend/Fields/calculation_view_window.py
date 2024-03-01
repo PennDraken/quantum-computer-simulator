@@ -8,6 +8,7 @@ class Calculation_Viewer_Window:
         self.screen: pygame.screen = screen
         self.x = x
         self.y = y
+        self.circuit_dx = 0
         self.width = width
         self.height = height
         self.systems = systems
@@ -35,7 +36,7 @@ class Calculation_Viewer_Window:
         for col, system in enumerate(self.systems):
             grid_row = 0
             for register_index, register in enumerate(system.registers):
-                x = self.x + col * self.grid_size
+                x = self.x + col * self.grid_size + self.circuit_dx
                 y = self.y + grid_row * self.grid_size
                 
                 # TODO precalculate these somehow

@@ -122,9 +122,10 @@ while True:
     tab_panel.y = drag_bar_y + drag_bar_height
     tab_panel.draw()
     bloch_sphere.y = tab_panel.y + tab_panel.height
-    # Draws bg of panel window (hides circuit)
+    # Draws background of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
     calculation_window.y = tab_panel.y + tab_panel.height
+    calculation_window.circuit_dx = circuit_dx
 
     # Draw selected screen
     option = tab_panel.get_selected()
