@@ -1,54 +1,63 @@
 # This is a class that shows the states at various points of the calculation on window
 import pygame
 import Utilities.Colors as Colors
+import time
 
 class Calculation_Viewer_Window:
-    def __init__(self, screen, x : int , y : int , width : int , height : int, systems : []):
-        self.screen : pygame.screen = screen
+    def __init__(self, screen, x: int, y: int, width: int, height: int, systems: []):
+        self.screen: pygame.screen = screen
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.systems = systems
-        self.grid_size = 90 # Width and height of the underlying grid
+        self.str_registers = []
+        self.grid_size = 90  # Width and height of the underlying grid
+        self.precompute_register_info()
+
+    def precompute_register_info(self):
+        for system in self.systems:
+            for register in system.registers:
+                label = register.get_label()
+                state_str = register.get_state_str()
+                lines = state_str.splitlines()  # Precompute here
+                self.str_registers.append((label, lines))  # Store lines instead of state_str
 
     def draw(self):
-        # draw grid in panel
-        self.height = self.screen.get_height() - self.y
-        grid_columns = int(self.screen.get_width() / self.grid_size) + 1
-        grid_rows = int(self.height / self.grid_size) + 1
+        # Precompute values
+        half_grid_size = self.grid_size / 2
+        label_height = 30
+        text_height = 20
+        title_font = pygame.font.Font(None, 24)
+        state_font = pygame.font.Font(None, 20)
 
-
-        # Draw registers
-        for col in range(0, len(self.systems)):
-            system = self.systems[col]
+        for col, system in enumerate(self.systems):
             grid_row = 0
-            for register_index in range(0, len(system.registers)):
-                register = system.registers[register_index]
-                x = col * self.grid_size # Leftmost pos 
+            num_registers = len(system.registers)
+            str_registers = self.str_registers[col * num_registers: (col + 1) * num_registers]
+            col_grid_size = self.x + col * self.grid_size
+            for register_index, (label, lines) in enumerate(str_registers):  # Retrieve lines instead of state_str
+                x = col_grid_size
                 y = grid_row * self.grid_size + self.y
-                label = register.get_label()
+                
                 # Draw the label showing the qubits of the register
-                label_height = 30
-                pygame.draw.rect(self.screen, Colors.white, (self.x + col * self.grid_size, self.y + grid_row * self.grid_size, self.grid_size, label_height), width=1) # Box around text
-                text(self.screen, label, x + self.grid_size/2, y, Colors.white)
+                pygame.draw.rect(self.screen, Colors.white, (x, y, self.grid_size, label_height), width=1)  # Box around text
+                text(self.screen, label, x + half_grid_size, y, Colors.white, title_font)
+
                 # Draws the vector state of the register
-                state_str : str = register.get_state_str()
-                lines = state_str.splitlines()
-                for row in range(0, len(lines)):
-                    line = lines[row]
-                    text_height = 20
-                    text(self.screen, line, x + self.grid_size/2, y + label_height + row * text_height, Colors.white, font_size=20)
-                # Draw the grid rectangle showing end of qubti
-                pygame.draw.rect(self.screen,Colors.white, (self.x + col * self.grid_size, self.y + grid_row * self.grid_size, self.grid_size, len(register.qubits) * self.grid_size), width=2)
+                for row, line in enumerate(lines):  # Iterate over precomputed lines
+                    text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, Colors.white, state_font)
+                
+                # Draw the grid rectangle showing end of qubit
+                pygame.draw.rect(self.screen, Colors.white, (x, y, self.grid_size, len(system.registers[register_index].qubits) * self.grid_size), width=2)
+                
                 # Increment grid row based on how many qubits were in register
-                grid_row += len(register.qubits)
+                grid_row += len(system.registers[register_index].qubits)
 
 
-def text(screen, string, x, y, color, font_size = 24):
-    font = pygame.font.Font(None, font_size)
+def text(screen, string, x, y, color, font):
     text_color = pygame.Color(color)
     text_surface = font.render(string, True, text_color)
     text_rect = text_surface.get_rect()
-    text_rect.center = (x, y + font_size/2)
+    text_rect.center = (x, y + text_surface.get_height()/2)
     screen.blit(text_surface, text_rect)
