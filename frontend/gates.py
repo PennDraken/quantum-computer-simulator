@@ -14,10 +14,11 @@ class Gate:
         self.x = x
         self.y = y
     
-    def renderGate(gate : str, xpos: int, ypos: int, width : int, height : int):
+    def renderGate(gate_text : str, xpos: int, ypos: int, width : int, height : int, color):
         rect = pygame.Rect(xpos, ypos, width, height)
-        pygame.draw.rect(screen,Colors.white,rect,0)
-        screen.blit(pygame.font.SysFont('Times New Roman', 45).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
+        pygame.draw.rect(screen, color,rect,0)
+        # screen.blit(pygame.font.SysFont('Times New Roman', 10).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
+        text(gate_text, xpos+width/2, ypos+height/2, Colors.black, pygame.font.Font(None, 20))
         return rect
         
 class gateHandler:
@@ -45,7 +46,7 @@ class gateHandler:
         return self.gateMap[key]
 
 
-    def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, column): # integrating evenhandler for this method
+    def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, column, color): # integrating evenhandler for this method
         grid_size = 50
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
@@ -66,4 +67,12 @@ class gateHandler:
         x = relative_position[0] + grid_size * column
         y = relative_position[1] + (qubits[0] * grid_size)
         gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
-        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight) # Render gate 
+        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight, color) # Render gate
+
+# Draws centered text on screen
+def text(string, x, y, color, font):
+    text_color = pygame.Color(color)
+    text_surface = font.render(string, True, text_color)
+    text_rect = text_surface.get_rect()
+    text_rect.center = (x, y)
+    screen.blit(text_surface, text_rect)
