@@ -17,25 +17,33 @@ class Register():
     def __init__(self, qubits,  vector: np.array):
         self.qubits = qubits
         self.vector = vector
+        self.label = None # TODO init this to a value
+        self.state_str = None
 
     def get_label(self)->str:
-        qubit_copy = copy.deepcopy(self.qubits)
-        reversed_qubit_list = qubit_copy[::-1]
-        return f"|{''.join(reversed_qubit_list)}>"
+        if self.label == None:
+            qubit_copy = copy.deepcopy(self.qubits)
+            reversed_qubit_list = qubit_copy[::-1]
+            label = f"|{''.join(reversed_qubit_list)}>"
+            return label
+        return self.label
     
     def get_state_str(self)->str:
-        qubit_copy = copy.deepcopy(self.qubits)
-        reversed_qubit_list = qubit_copy[::-1]
-        register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
-        output_str = ""
-        for i in range(0, len(self.vector)):
-            state_val = register_reversed.vector[i]
-            # binary_str = bin(i)[2:].zfill(len(self.qubits))
-            # state_str = f"|{binary_str}> = {state_val}\n"
-            state_str = f"{np.round(state_val, decimals=2)}\n"
-            output_str += state_str
-        return output_str
-    
+        if self.state_str == None:
+            qubit_copy = copy.deepcopy(self.qubits)
+            reversed_qubit_list = qubit_copy[::-1]
+            register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
+            output_str = ""
+            for i in range(0, len(self.vector)):
+                state_val = register_reversed.vector[i]
+                # binary_str = bin(i)[2:].zfill(len(self.qubits))
+                # state_str = f"|{binary_str}> = {state_val}\n"
+                state_str = f"{np.round(state_val, decimals=2)}\n"
+                output_str += state_str
+            self.state_str = output_str
+            return output_str
+        else:
+            return self.state_str
 
 # System of all registers of qubits
 class System():
