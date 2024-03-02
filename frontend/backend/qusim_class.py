@@ -130,7 +130,19 @@ class System():
             measured_state=m1*register.vector
         # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
         norm_vector = self.normalize(measured_state)
-        self.registers[register_index] = Register(register.qubits, norm_vector) # Should update self as well
+        # Seperate out the measured qubit and remaining qubits into different registers
+        new_vector = np.zeros(2**(len(register.qubits) - 1))
+        for index in range(0, len(new_vector)):
+            # calculate the indices of the elements that should be put at index in new_vector
+            index_a = insert_bit(index, 0, len(register.qubits) - qubit_index - 1)
+            index_b = insert_bit(index, 1, len(register.qubits) - qubit_index - 1)
+            # add the two elements that should be put into new indices
+            new_vector[index] = norm_vector[index_a] + norm_vector[index_b]
+        # Add the two new registers to system self
+        measured_register = Register([qubit], np.array([1 if p == 0 else 0, p])) # Create vector [1,0] or [0,1] based on p (result of measurement)
+        register.qubits.remove(qubit) # Our other register should no longer contain measured qubit
+        self.registers[register_index] = Register(register.qubits, new_vector) # We update self to contain this register
+        self.registers.append(measured_register)
         return p # Returns probability of q_n=1 for qubit n
     
     # Normalises probabilities of vector and returns it
@@ -240,6 +252,17 @@ class Circuit():
             # Apply gate
             if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
                 new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+            elif len(gate)==2:
+                # this is an if based single qubit gate
+                # find vale of "qubit" (a bit in this case). If bit==1 we will apply gate
+                for register in new_system.registers:
+                    if register.qubits==[new_system.qubits[qubits_indices[1]]]:
+                        if np.array_equal(register.vector, np.array([0, 1])):
+                            print("equal to 1")
+                            # bit was 1 so we apply gate
+                            new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+                            break
+            # Multi qubit gate
             elif len(qubits_indices)==2:
                 new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
         
@@ -366,6 +389,17 @@ def swap_bits(num: int, i: int, j: int, n: int):
     # Use XOR to flip the bits at positions i and j
     num ^= (xor_result << (n - 1 - i)) | (xor_result << (n - 1 - j))
     return num
+
+# Inserts a bit into a binary number at location n
+# Example: 0b00 Insert bit at n=1 => 0b010
+def insert_bit(binary_num, bit, n):
+    # Shift the number to the right by n bits
+    mask = 1 << n
+    # Create a mask to clear the bit at position n
+    cleared_bit = binary_num & ~mask
+    # Set the bit at position n to the desired value
+    result = cleared_bit | ((bit & 1) << n)
+    return result
 
 def check_adjacent(register, qubit_a, qubit_b):
     index_a = register.qubits.index(qubit_a)

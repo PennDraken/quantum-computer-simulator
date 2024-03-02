@@ -34,7 +34,7 @@ def Ry(theta):
 
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
-    # TODO More programmatic approach, perhaps dictionaries?
+    # TODO More programmatic approach, perhaps dictionaries or eval()
     match gate_str:
         case "H":
             return H
@@ -42,6 +42,10 @@ def string_to_gate(gate_str : str):
             return I
         case "CNOT":
             return CNOT
+        case "X":
+            return X
+        case "Z":
+            return Z
         case "Ry(np.pi/4)": # TODO parse actual value
             return Ry(np.pi/4)
         case _ :

@@ -63,7 +63,7 @@ bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
-circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1"])
+circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit.step_fwd()
 # circuit.step_fwd()
 # circuit.step_fwd()
