@@ -1,6 +1,8 @@
 import pygame
 import sys, os
 import Utilities.Colors as Colors
+import UI
+import screenHandler
 
 # Add frontend to path
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -52,23 +54,39 @@ def checkLines( x : int , y : int, xl, xr):
     
     return withinX
 
-def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
+# Cheks if user has clicked gate. Start moving gate.
+def check_moving_gate(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
+    # Calculate how much the cicuit view has shifted
+    offset_x = x + circuit_dx
+    offset_y = y + circuit_dy
+
+    # Preview drop place
+    grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
+    grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
+
+    # Iterate through buttons
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
+            # Move gate
             print ("Clicked gate " + button.gate)
-            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40, Colors.white)
-    
+            pygame.draw.rect(screenHandler.screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
+            # Show gate moving
+            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
         elif button.selected and (not Mouse.r_held):
+            # Drop gate on circuit view
             print ("Release " + button.gate)
             print (Mouse.dy)
             print (floor((Mouse.y - Mouse.dy) / 50))
-            check = False
-            for i in range(0,len(gateList)):
-                if checkLines(Mouse.x, Mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20):
-                    gateList.insert(i -1, (button.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
-                    check = True
-            if not check:
-                gateList.append((button.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
+            # convert grid_x to index in gate list
+            col = (Mouse.x - offset_x) // UI.grid_size
+            row = (Mouse.y - offset_y) // UI.grid_size
+            gate_instruction = (button.gate, [row])
+            if col < len(gateList):
+                # Insert into gatelist
+                gateList.insert(col - 1, gate_instruction)
+            else:
+                # Add to end of gatelist
+                gateList.append(gate_instruction) 
             button.selected = False  
         if not button.selected:
             button.checkClicked(Mouse)

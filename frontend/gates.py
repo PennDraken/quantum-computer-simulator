@@ -2,6 +2,8 @@ import pygame
 from enum import Enum
 import Utilities.Colors as Colors
 import screenHandler
+import pygame
+import UI
 
 Loc = screenHandler.Loc
 screen = screenHandler.screen
@@ -10,15 +12,15 @@ class Gate:
     def __init__(self, name : str , x : int , y : int , width : int , height : int):
         self.width = width
         self.height = height
-        self.gate = name
+        self.gate_text = name
         self.x = x
         self.y = y
     
-    def renderGate(gate_text : str, xpos: int, ypos: int, width : int, height : int, color):
-        rect = pygame.Rect(xpos, ypos, width, height)
+    def renderGate(gate_text : str, x: int, y: int, width : int, height : int, color):
+        rect = pygame.Rect(x, y, width, height)
         pygame.draw.rect(screen, color,rect,0)
         # screen.blit(pygame.font.SysFont('Times New Roman', 10).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
-        text(gate_text, xpos+width/2, ypos+height/2, Colors.black, pygame.font.Font(None, 20))
+        text(gate_text, x+width/2, y+height/2, Colors.black, pygame.font.Font(None, 20))
         return rect
     
 
@@ -30,8 +32,8 @@ class Gate:
 class gateHandler:
     xStart = 75
     yStart = 75
-    gateWidth = 40
-    gateHeight = 40
+    gateWidth = UI.gate_size
+    gateHeight = UI.gate_size
     step = 0
     
     def __init__(self):
@@ -52,29 +54,50 @@ class gateHandler:
         return self.gateMap[key]
 
 
-    def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, column, color): # integrating evenhandler for this method
-        grid_size = 50
+    def addGate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method        
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
 
         pygame.font.init()
+        # Draws lines for connecting qubits
         if nrQubits > 1:
             for i in range(1, nrQubits):
-                x = relative_position[0] + grid_size * column + 20
-                y = relative_position[1] + (qubits[i] * grid_size) + 25
-                screenHandler.drawQline((x, (relative_position[1] + (qubits[0] * grid_size)) + 20), (x, y))
-            for i in range(1, nrQubits):
-                x = relative_position[0] + grid_size * column + 20
-                y = relative_position[1] + (qubits[i] * grid_size) + 25
-                # need to change this
-                screenHandler.drawQlineMod((x, y), (x, y), Loc.NONE, Loc.END_FILLED)
+                # Draw lines here to qubits connected to gate
+                mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
+                y1 = qubits[i-1] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+                y2 = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
+                screenHandler.drawQline((mid_x, y1), (mid_x, y2))
 
-        x = relative_position[0] + grid_size * column
-        y = relative_position[1] + (qubits[0] * grid_size)
-        gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
-        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight, color) # Render gate
+            for i in range(1, nrQubits):
+                # Draw connections here (dots)
+                mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
+                y = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1]
+                # need to change this
+                screenHandler.drawQlineMod((mid_x, y), (mid_x, y), Loc.NONE, Loc.END_FILLED)
+
+        # Draw the actual gate
+        center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
+        x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
+        y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
+        gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
+        Gate.renderGate(gate.gate_text, x, y, self.gateWidth, self.gateHeight, color) # Render gate
         return gate # for gate shifting
+
+# This is a simple function that converts an element in gateList to a rect
+# This is useful for collision detection etc
+# Uses constants defined in UI to render gate
+# This function is used in addGate, before adding the gate to the gateHandler class
+def gatelist_gate_to_rect(gate_text : str, gate_index_in_list : int, operating_qubit : int, offset_x : int, offset_y : int)->pygame.rect:
+    # Find location of upper left corner in underlying grid
+    grid_x = gate_index_in_list * UI.grid_size + offset_y
+    grid_y = operating_qubit * UI.grid_size + offset_y
+    # Center rect on the grid location
+    offset = (UI.grid_size - UI.gate_size)/2
+    x = grid_x + offset
+    y = grid_y + offset
+    # Return found rect
+    return pygame.Rect(x, y, UI.gate_size, UI.gate_size)
 
 
 # Draws centered text on screen

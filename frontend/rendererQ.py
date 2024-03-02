@@ -44,8 +44,8 @@ offset = (75,75)
 # access screen
 pygame.display.Info()
 
-x = 75
-y = 75
+circuit_x = 75
+circuit_y = 75
 # Tag panning:offset som apliceras på allt i scenen
 circuit_dx = 0;
 circuit_dy = 0;
@@ -98,8 +98,8 @@ color = (250,250,250)
 #related to merge
 # gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
 gateList = circuit.as_frontend_gate_list()
-x = 75
-y = 75
+circuit_x = 0
+circuit_y = 75
 
 gatesList = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gateButtons = MenuButton.createGateButtons(gatesList, 40, 40)
@@ -125,7 +125,7 @@ while True:
     # Gates placed on the circuit
     activeGates = []
     # Draw circuit view
-    screenHandler.renderQlines(amount, circuit_dy, circuit_dx, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    screenHandler.renderQlines(amount, circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
         temp = gateList[i]      
@@ -133,9 +133,7 @@ while True:
             color = Colors.yellow
         else:
             color = Colors.white
-        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)) # <---------- made active gates change
-        # handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(x + circuit_dx,y + circuit_dy), i+1, color)
-
+        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)) # <---------- made active gates change
 
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
@@ -236,7 +234,7 @@ while True:
     if moving_gate and not (Mouse.r_click or Mouse.r_held):
         check = False
         for i in range(0,len(gateList)):
-            test = MenuButton.checkLines(Mouse.x, Mouse.y, ((x + circuit_dx) + 50 * i) - 20, ((x + circuit_dx) + 50 * i) + 20) 
+            test = MenuButton.checkLines(Mouse.x, Mouse.y, ((circuit_x + circuit_dx) + 50 * i) - 20, ((circuit_x + circuit_dx) + 50 * i) + 20) 
             print(test)
             if test:
                 gateList.insert(i -1, (selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
@@ -270,8 +268,8 @@ while True:
     # if displayCalc:
         # showCalculation((100,200), calculations)
 
-    if not moving_gate:
-        MenuButton.test(gateButtons, gateList, x, y, circuit_dx, circuit_dy)  # gate placement
+    # if not moving_gate:
+    MenuButton.check_moving_gate(gateButtons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
     pygame.display.update()
     framerate.tick(30)

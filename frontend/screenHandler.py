@@ -1,6 +1,7 @@
 import pygame
 import sys
 from enum import Enum
+import UI
 
 pygame.init()
 screen = pygame.display.set_mode((800, 700), pygame.RESIZABLE)
@@ -14,7 +15,7 @@ class Loc(Enum):
     END_CROSS = 4;
 
 
-# draws a line between 2 points on the canvas         
+# Draws a red line between 2 points on the canvas (used for rendering qubit lines and connections)
 def drawQline(start: tuple, end: tuple):
     pygame.draw.line(screen, (255, 0, 0), start, end, 1)
 
@@ -25,13 +26,12 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
     modCases(mod1, start, end)
     modCases(mod2, start, end)
 
-def renderQlines(qubits : int, dy : int, dx : int, width : int):
-    if(dx < 0):
-        dx = 0
-    y = 50 + dy
+def renderQlines(qubits : int, offset_dx : int, offset_dy : int, width : int):
+    y = UI.grid_size/2 + offset_dy
     for i in range(qubits):
-        y += 50
-        drawQline((0 - dx, y), (width + (dx * 2), y))
+        drawQline((0, y), (width, y))
+        y += UI.grid_size
+
 
 # draws a circle at a point on the canvas
 def modCases(mod : Loc, start : tuple, end : tuple):

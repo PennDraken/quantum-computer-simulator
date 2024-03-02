@@ -3,6 +3,7 @@ import Utilities.mouse as mouse
 import Utilities.Colors as Colors
 
 grid_size = 90
+gate_size = 70
 
 # A single button on screen
 class Button():
