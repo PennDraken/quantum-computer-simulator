@@ -121,8 +121,9 @@ while True:
             pygame.quit()
             exit()
             
-    
-    # Gates placed on the circuit
+    # Draw a dotted line to show where user has stepped to TODO make it dotted
+    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
+    # Gates placed on the circuit (used for collision detection, resets every frame)
     activeGates = []
     # Draw circuit view
     screenHandler.renderQlines(amount, circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
