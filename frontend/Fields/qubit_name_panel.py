@@ -17,11 +17,15 @@ class Qubit_Name_Panel:
     def draw(self):
         pygame.draw.rect(self.screen, Colors.black, (self.x, self.y, self.width, self.screen.get_height()))
         pygame.draw.rect(self.screen, Colors.white, (self.x, self.y, self.width, self.screen.get_height()), width=1)
-
+        # Label all qubits
         for i, qubit_str in enumerate(self.qubits_list):
             y = UI.grid_size * i + self.offset_y
             pygame.draw.rect(self.screen, Colors.white, (self.x, y, UI.grid_size, UI.grid_size), width=1)
             text(self.screen, f"|{qubit_str}>", self.x + UI.grid_size/2, y + UI.grid_size/2, Colors.white, self.title_font)
+        # Draw a + button underneath qubits (TODO make clickable)
+        y = UI.grid_size * len(self.qubits_list) + self.offset_y
+        # pygame.draw.rect(self.screen, Colors.white, (self.x, y, UI.grid_size, UI.grid_size), width=1)
+        text(self.screen, "+", self.x + UI.grid_size/2, y + UI.grid_size/2, Colors.white, self.title_font)
 
 
 # Draws centered text on screen TODO Make a general class for this type of prints

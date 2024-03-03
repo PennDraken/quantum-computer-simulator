@@ -22,10 +22,6 @@ parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
 sys.path.insert(0, parent_dir_path)
 
 screen = screenHandler.screen
-# this is mainly for testing, expect significant changes
-# screen.blit(pygame.font.SysFont('Times New Roman', 45).render('I', True, (170, 200, 200)) ,((x + (n * 50) + 3,y+ (n * 50) - 5))) 
-
-amount = 5 # stand in for number of qubits
 
 def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
     pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
@@ -122,7 +118,7 @@ while True:
     # Gates placed on the circuit (used for collision detection, resets every frame)
     activeGates = []
     # Draw circuit view
-    screenHandler.renderQlines(amount, circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    screenHandler.renderQlines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
         temp = gateList[i]      
