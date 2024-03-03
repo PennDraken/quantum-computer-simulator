@@ -23,7 +23,7 @@ class MenuButton:
         self.gatefield = pygame.Rect(150, 150, 175, 175) 
 
     def update(self, gate, x : int, y : int):
-        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height, Colors.white)
+        self.gatefield = Gate.draw_gate(gate, x, y, self.width, self.height, Colors.white)
         
     def checkClicked(self, mouse):
         if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and (Mouse.r_click or Mouse.r_held)):
@@ -47,7 +47,6 @@ def renderButton(buttonRows : [[MenuButton]], canvasYT : int ):
 
 
 def checkLines( x : int , y : int, xl, xr):
-  
     withinLx = xl < x
     withinRx = x < xr
     withinX = withinLx and withinRx
@@ -64,19 +63,19 @@ def check_moving_gate(gateButtons : [[MenuButton]], gateList : [(str, [int])], x
     grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
     grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
 
-    # Iterate through buttons
+    # Iterate through buttons in panel
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
-            # Move gate
-            print ("Clicked gate " + button.gate)
+            # Show gate snapping position
             pygame.draw.rect(screenHandler.screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
             # Show gate moving
-            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
-        elif button.selected and (not Mouse.r_held):
+            Gate.draw_gate(button.gate, Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
+            break
+        elif button.selected and not (Mouse.r_click or Mouse.r_held):
             # Drop gate on circuit view
-            print ("Release " + button.gate)
-            print (Mouse.dy)
-            print (floor((Mouse.y - Mouse.dy) / 50))
+            # print ("Release " + button.gate)
+            # print (Mouse.dy)
+            # print (floor((Mouse.y - Mouse.dy) / 50))
             # convert grid_x to index in gate list
             col = (Mouse.x - offset_x) // UI.grid_size
             row = (Mouse.y - offset_y) // UI.grid_size
@@ -87,6 +86,7 @@ def check_moving_gate(gateButtons : [[MenuButton]], gateList : [(str, [int])], x
             else:
                 # Add to end of gatelist
                 gateList.append(gate_instruction) 
-            button.selected = False  
+            button.selected = False
+            break
         if not button.selected:
             button.checkClicked(Mouse)
