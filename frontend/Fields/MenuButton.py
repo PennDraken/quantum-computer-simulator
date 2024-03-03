@@ -1,6 +1,5 @@
 import pygame
 import sys, os
-import Utilities.Colors as Colors
 
 # Add frontend to path
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -10,6 +9,7 @@ sys.path.insert(0, parent_dir_path)
 from gates import Gate
 from Utilities.mouse import Mouse
 from math import floor
+#from rendererQ import drag_bar_y
 
 
 class MenuButton:
@@ -21,7 +21,7 @@ class MenuButton:
         self.gatefield = pygame.Rect(150, 150, 175, 175) 
 
     def update(self, gate, x : int, y : int):
-        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height, Colors.white)
+        self.gatefield = Gate.renderGate(gate, x, y, self.width, self.height)
         
     def checkClicked(self, mouse):
         if (self.gatefield.collidepoint(pygame.mouse.get_pos()) and (Mouse.r_click or Mouse.r_held)):
@@ -52,11 +52,12 @@ def checkLines( x : int , y : int, xl, xr):
     
     return withinX
 
-def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
+def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int): # dragging and placing gates
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
             print ("Clicked gate " + button.gate)
-            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40, Colors.white)
+            Gate.renderGate(button.gate, Mouse.x,  Mouse.y, 40, 40)
+            return True
     
         elif button.selected and (not Mouse.r_held):
             print ("Release " + button.gate)
@@ -72,3 +73,5 @@ def test(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : i
             button.selected = False  
         if not button.selected:
             button.checkClicked(Mouse)
+    return False
+           
