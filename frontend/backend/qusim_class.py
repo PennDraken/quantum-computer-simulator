@@ -33,10 +33,12 @@ class Register():
         register_reversed = sort_register(copy.deepcopy(self), reversed_qubit_list)
         output_str = ""
         for i in range(0, len(self.vector)):
-            state_val = register_reversed.vector[i]
+            state_val = register_reversed.vector[i].astype(complex) # Load state value as complex
             # binary_str = bin(i)[2:].zfill(len(self.qubits))
             # state_str = f"|{binary_str}> = {state_val}\n"
-            state_str = f"{np.round(state_val, decimals=2)}\n"
+            state_val_real = state_val.real
+            state_val_imag = state_val.imag
+            state_str = f"{np.round(state_val_real, decimals=2)} + {np.round(state_val_imag, decimals=2)}j\n"
             output_str += state_str
         self.state_str = output_str
         return output_str
@@ -131,7 +133,7 @@ class System():
         # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
         norm_vector = self.normalize(measured_state)
         # Seperate out the measured qubit and remaining qubits into different registers
-        new_vector = np.zeros(2**(len(register.qubits) - 1))
+        new_vector = np.zeros(2**(len(register.qubits) - 1), dtype=complex)
         for index in range(0, len(new_vector)):
             # calculate the indices of the elements that should be put at index in new_vector
             index_a = insert_bit(index, 0, len(register.qubits) - qubit_index - 1)

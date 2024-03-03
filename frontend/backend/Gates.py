@@ -43,6 +43,8 @@ def string_to_gate(gate_str : str):
             return I
         case "CNOT":
             return CNOT
+        case "Y":
+            return Y
         case "X":
             return X
         case "Z":
