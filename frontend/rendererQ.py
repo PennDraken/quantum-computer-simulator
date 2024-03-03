@@ -213,6 +213,8 @@ while True:
         # Rotate Bloch sphere
         elif Mouse.status == "Panning sphere":
             bloch_sphere.pan(Mouse)
+    elif not (Mouse.l_held or Mouse.l_click) and (Mouse.status=="Panning" or Mouse.status=="Resizing bottom panel" or Mouse.status=="Resizing bottom panel"):
+        Mouse.status = None
 
     # Dragging gates logic
     offset_x = circuit_x + circuit_dx
@@ -227,6 +229,20 @@ while True:
                 gateList.remove(gate_data)
                 print("clicked gate")
                 break
+        if Mouse.status==None:
+            # Find qubit to drag
+            col = (Mouse.x - offset_x) // UI.grid_size
+            row = (Mouse.y - offset_y) // UI.grid_size
+            gate_data = gateList[col-1]
+            print(gate_data[0])
+            qubits = gate_data[1]
+            for qubit_index in range(1, len(qubits)):
+                if row==qubits[qubit_index]:
+                    Mouse.holding = (col, qubit_index)
+                    Mouse.status = "Holding qubit"
+                    print(f"Holding qubit{qubits[qubit_index]}")
+                    break
+
     elif Mouse.r_held and Mouse.status == "Moving gate":
         # Draw gate
         grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
@@ -234,7 +250,15 @@ while True:
         pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
         gate_data = Mouse.holding
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
-    elif Mouse.holding != None:
+    elif Mouse.r_held and Mouse.status == "Holding qubit":
+        print("Placeing qubit")
+        row = (Mouse.y - offset_y) // UI.grid_size
+        gateList[Mouse.holding[0]-1][1][Mouse.holding[1]] = row
+    elif Mouse.status == "Holding qubit":
+        Mouse.holding = None
+        Mouse.status = None
+    # Button release
+    elif Mouse.holding != None and Mouse.status == "Moving gate":
         # Dropping gate
         gate_data = Mouse.holding
         col = (Mouse.x - circuit_x - circuit_dx) // UI.grid_size
@@ -253,6 +277,7 @@ while True:
             gateList.append(gate_data)
         Mouse.holding = None
         Mouse.status = None
+    
 
     MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 

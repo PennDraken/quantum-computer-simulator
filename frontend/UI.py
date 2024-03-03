@@ -35,7 +35,7 @@ class ChoicePanel():
         self.screen = screen
         self.y = y
         self.choices = choices
-        self.selected = 1 # Selected choice index
+        self.selected = 0 # Selected choice index
         self.color_unselected = Colors.unselected
         self.color_hover = Colors.hover
         self.color_selected = Colors.selected

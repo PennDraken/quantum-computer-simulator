@@ -52,8 +52,8 @@ class Mouse():
         self.last_x = self.x
         self.last_y = self.y
 
-        if not (pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]):
-            self.status = None
+        # if not (pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]):
+        #     self.status = None
 
     # Draws the mouse
     def draw():
