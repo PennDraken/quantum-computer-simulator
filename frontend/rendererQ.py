@@ -95,8 +95,9 @@ gateList = circuit.as_frontend_gate_list()
 circuit_x = 0
 circuit_y = 75
 
-gatesList = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
-menu_buttons = MenuButton.createGateButtons(gatesList, 40, 40)
+# gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
+gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1])]
+menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 
 
 # keep track of shifting
