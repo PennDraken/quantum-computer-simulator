@@ -16,7 +16,7 @@ class Qubit_Name_Panel:
 
     def draw(self):
         pygame.draw.rect(self.screen, Colors.black, (self.x, self.y, self.width, self.screen.get_height()))
-        pygame.draw.rect(self.screen, Colors.white, (self.x, self.y, self.width, self.screen.get_height()), width=1)
+        pygame.draw.rect(self.screen, Colors.white, (self.x, self.y, self.width, self.screen.get_height()), width=2)
         # Label all qubits
         for i, qubit_str in enumerate(self.qubits_list):
             y = UI.grid_size * i + self.offset_y
