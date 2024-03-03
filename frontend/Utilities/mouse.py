@@ -11,6 +11,7 @@ class Mouse():
     l_click = False # Only true at frame user presses l_click
     l_held = False  # Only true when button is held down
     status = None # Set this object to for example a string when the mouse interacts with a certain object. Gets reset on button release
+    holding = None # Set this to object were holding (used for moving gates)
     r_click = False # Only true at frame user presses r_click
     r_held = False  # Only true when button is held down
 
@@ -35,7 +36,7 @@ class Mouse():
         else: # Mouse left released
             self.l_held = False
             self.l_click = False
-            self.status = None
+            
         # Check right click
         if pygame.mouse.get_pressed()[2]:
             if not self.r_held and not self.r_click:
@@ -46,10 +47,13 @@ class Mouse():
         else: # Mouse right released
             self.r_held = False
             self.r_click = False
+
         # Update old position
         self.last_x = self.x
         self.last_y = self.y
 
+        if not (pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]):
+            self.status = None
 
     # Draws the mouse
     def draw():

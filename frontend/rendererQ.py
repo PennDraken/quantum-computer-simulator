@@ -9,7 +9,8 @@ import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import backend.qusim_class as qusim_class
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
-
+import copy
+import gates
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
@@ -73,7 +74,7 @@ circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 
 # circuit.step_fwd()
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
-circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
+circuit_navigation_panel = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
 displayCalc = False
 dragging = False
@@ -124,17 +125,18 @@ while True:
     # Draw a dotted line to show where user has stepped to TODO make it dotted
     pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     # Gates placed on the circuit (used for collision detection, resets every frame)
-    activeGates = []
     # Draw circuit view
     screenHandler.renderQlines(amount, circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
     # Draw example circuit
+    gates_on_circuit = []
     for i in range(0,len(gateList)):
-        temp = gateList[i]      
+        gate_data = gateList[i]      
         if i==circuit.position-1:
             color = Colors.yellow
         else:
             color = Colors.white
-        activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)) # <---------- made active gates change
+        gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)
+        gates_on_circuit.append(gate_data) # <---------- made active gates change
 
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
@@ -152,12 +154,13 @@ while True:
     calculation_window.systems = circuit.systems # update states
 
     # Draw navigation window with run and step buttons
-    circuit_navigation_window.draw()
+    circuit_navigation_panel.draw()
 
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
         MenuButton.renderButton([gateButtons], drag_bar_y + 20)
+        MenuButton.check_moving_gate(gateButtons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
     elif option == "Math view":
         # Implement math view renderer here
         calculation_window.draw()
@@ -186,66 +189,15 @@ while True:
         tab_panel.click(Mouse.x, Mouse.y)
         if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
             Mouse.status = "Resizing bottom panel"
-        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
-            circuit_navigation_window.click(Mouse.x, Mouse.y)
-        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y: # <------ use this check
+        elif Mouse.y < circuit_navigation_panel.y+circuit_navigation_panel.height:
+            circuit_navigation_panel.click(Mouse.x, Mouse.y)
+        elif Mouse.y > circuit_navigation_panel.y+circuit_navigation_panel.height and Mouse.y < drag_bar_y: # <------ use this check
             Mouse.status = "Panning"
         elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector
             # Bloch sphere
             if tab_panel.get_selected()=="Bloch sphere":
                 Mouse.status = "Panning sphere"
-                
-    
-    if Mouse.r_click:
-        if Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
-            print ("shift")
-            print (Mouse.x, Mouse.y)
-            for i in range (0, len(activeGates)):
-                gate = activeGates[i]
-                if gate.gCollider().collidepoint(Mouse.x, Mouse.y):
-                    moving_gate = True
-                    selectedGate = gate 
-                    del gateList[i]#gateList.remove()
-        #Mouse.status = "Shifting"            
-                
-        # try check here
-        #pass
-        #for i in range(0,len(gateList)):
-        #    gate = gateList[i]
-        #    sx = (x + circuit_dx) + 50 * i+1
-        #    sy = (y + circuit_dy) + gate[1][0] * 50
-        #    if Mouse.x>sx and Mouse.x<sx + 40 and Mouse.y>sy and Mouse.y<sy + 40:
-        #        print("Clicked gate")
-
-
-    if selectedGate != None:
-        print ("gate selected")
-        print (selectedGate.gate)
-        print (selectedGate.width)
-        print (selectedGate.height)
-        print (moving_gate)
-        #print (Mouse.status + "")
-           
-
-    if Mouse.r_held:
-        if moving_gate and selectedGate != None:
-            Gate.renderGate(selectedGate.gate, Mouse.x, Mouse.y, selectedGate.width, selectedGate.height, Colors.white) # Render gate 
-    
-    if moving_gate and not (Mouse.r_click or Mouse.r_held):
-        check = False
-        for i in range(0,len(gateList)):
-            test = MenuButton.checkLines(Mouse.x, Mouse.y, ((circuit_x + circuit_dx) + 50 * i) - 20, ((circuit_x + circuit_dx) + 50 * i) + 20) 
-            print(test)
-            if test:
-                gateList.insert(i -1, (selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1]))
-                check = True
-        if not check:
-            gateList.append((selectedGate.gate, [floor((Mouse.y - circuit_dy) / 50) - 1])) 
-        moving_gate = False
-        selectedGate = None
-        Mouse.status = None
-
     # Left mouse is being held down
     elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom
@@ -260,17 +212,50 @@ while True:
         # Rotate Bloch sphere
         elif Mouse.status == "Panning sphere":
             bloch_sphere.pan(Mouse)
+
+    # Dragging gates logic
+    offset_x = circuit_x + circuit_dx
+    offset_y = circuit_y + circuit_dy
+    if Mouse.r_click:
+        # Find gate we're dragging
+        for i,gate_data in enumerate(gateList):
+            rect = gates.gatelist_gate_to_rect(gate_text=gate_data[0], gate_index_in_list=i, operating_qubit=gate_data[1][0], offset_x = circuit_x + circuit_dx, offset_y = circuit_y + circuit_dy)
+            if rect.collidepoint(Mouse.x, Mouse.y):
+                Mouse.holding = copy.deepcopy(gate_data)
+                Mouse.status = "Moving gate"
+                gateList.remove(gate_data)
+                print("clicked gate")
+                break
+    elif Mouse.r_held and Mouse.status == "Moving gate":
+        # Draw gate
+        grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
+        grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
+        pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
+        gate_data = Mouse.holding
+        Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
+    elif Mouse.holding != None:
+        # Dropping gate
+        gate_data = Mouse.holding
+        col = (Mouse.x - circuit_x - circuit_dx) // UI.grid_size
+        row = (Mouse.y - circuit_y - circuit_dy) // UI.grid_size
+        # Move qubits to correct position
+        qubits = gate_data[1]
+        delta_row = row -gate_data[1][0]
+        for i, qubit in enumerate(qubits):
+            gate_data[1][i] = qubits[i] + delta_row
+        # Where to place gate in list
+        if col < len(gateList):
+            # Insert into gatelist
+            gateList.insert(col - 1, gate_data)
+        else:
+            # Add to end of gatelist
+            gateList.append(gate_data)
+        Mouse.holding = None
+        Mouse.status = None
+
+
+
     # ---------------------------------------------------------------
-
-    #screenInfo = pygame.display.Info()
-    #screenWidth = screenInfo.current_w
-    #screenHeight = screenInfo.current_h
-
-    # if displayCalc:
-        # showCalculation((100,200), calculations)
-
-    # if not moving_gate:
-    MenuButton.check_moving_gate(gateButtons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
     pygame.display.update()
     framerate.tick(30)

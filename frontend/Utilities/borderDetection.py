@@ -1,5 +1,5 @@
 
-class BoarderDetection:
+class BorderDetection:
     def withinHitbox(self, width : int, height : int, xPos : int, yPos, mouseX : int, mouseY : int): 
         selectReduction = 0
         withinLowery = (yPos + (height) - selectReduction) > mouseY

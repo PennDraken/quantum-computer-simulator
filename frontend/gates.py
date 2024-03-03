@@ -16,16 +16,14 @@ class Gate:
         self.x = x
         self.y = y
     
-    def renderGate(gate_text : str, x: int, y: int, width : int, height : int, color):
+    def draw_gate(gate_text : str, x: int, y: int, width : int, height : int, color):
         rect = pygame.Rect(x, y, width, height)
         pygame.draw.rect(screen, color,rect,0)
         # screen.blit(pygame.font.SysFont('Times New Roman', 10).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
         text(gate_text, x+width/2, y+height/2, Colors.black, pygame.font.Font(None, 20))
         return rect
     
-
-    
-    def gCollider(self):
+    def as_rect(self):
         rect = pygame.Rect(self.x, self.y, self.width, self.height)
         return rect
         
@@ -53,8 +51,8 @@ class gateHandler:
     def getGateCount(self, key: int):
         return self.gateMap[key]
 
-
-    def addGate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method        
+    # Renders a gate + lines for qubits
+    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method        
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
@@ -81,7 +79,7 @@ class gateHandler:
         x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
         y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
         gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
-        Gate.renderGate(gate.gate_text, x, y, self.gateWidth, self.gateHeight, color) # Render gate
+        Gate.draw_gate(gate.gate_text, x, y, self.gateWidth, self.gateHeight, color) # Render gate
         return gate # for gate shifting
 
 # This is a simple function that converts an element in gateList to a rect
@@ -90,7 +88,7 @@ class gateHandler:
 # This function is used in addGate, before adding the gate to the gateHandler class
 def gatelist_gate_to_rect(gate_text : str, gate_index_in_list : int, operating_qubit : int, offset_x : int, offset_y : int)->pygame.rect:
     # Find location of upper left corner in underlying grid
-    grid_x = gate_index_in_list * UI.grid_size + offset_y
+    grid_x = (gate_index_in_list + 1) * UI.grid_size + offset_x
     grid_y = operating_qubit * UI.grid_size + offset_y
     # Center rect on the grid location
     offset = (UI.grid_size - UI.gate_size)/2
