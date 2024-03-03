@@ -5,7 +5,7 @@ import UI
 
 pygame.init()
 screen = pygame.display.set_mode((800, 700), pygame.RESIZABLE)
-pygame.display.set_caption("circuitQ")
+pygame.display.set_caption("Kvantis")
 
 class Loc(Enum):
     NONE = 0;
