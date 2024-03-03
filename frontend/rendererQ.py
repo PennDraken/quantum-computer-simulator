@@ -263,22 +263,24 @@ while True:
         Mouse.status = None
     # Button release
     elif Mouse.holding != None and Mouse.status == "Moving gate":
-        # Dropping gate
-        gate_data = Mouse.holding
-        col = (Mouse.x - circuit_x - circuit_dx) // UI.grid_size
-        row = (Mouse.y - circuit_y - circuit_dy) // UI.grid_size
-        # Move qubits to correct position
-        qubits = gate_data[1]
-        delta_row = row -gate_data[1][0]
-        for i, qubit in enumerate(qubits):
-            gate_data[1][i] = qubits[i] + delta_row
-        # Where to place gate in list
-        if col < len(gateList):
-            # Insert into gatelist
-            gateList.insert(col - 1, gate_data)
-        else:
-            # Add to end of gatelist
-            gateList.append(gate_data)
+        # Ensure dropping only allowed on panel
+        if Mouse.y < drag_bar_y:
+            # Dropping gate
+            gate_data = Mouse.holding
+            col = (Mouse.x - circuit_x - circuit_dx) // UI.grid_size
+            row = (Mouse.y - circuit_y - circuit_dy) // UI.grid_size
+            # Move qubits to correct position
+            qubits = gate_data[1]
+            delta_row = row -gate_data[1][0]
+            for i, qubit in enumerate(qubits):
+                gate_data[1][i] = qubits[i] + delta_row
+            # Where to place gate in list
+            if col < len(gateList):
+                # Insert into gatelist
+                gateList.insert(col - 1, gate_data)
+            else:
+                # Add to end of gatelist
+                gateList.append(gate_data)
         Mouse.holding = None
         Mouse.status = None
     
