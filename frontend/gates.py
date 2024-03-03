@@ -1,49 +1,90 @@
 import pygame
-import sys
 from enum import Enum
+import Utilities.Colors as Colors
+import screenHandler
 
-pygame.init()
-screen = pygame.display.set_mode((800, 700), pygame.RESIZABLE)
-pygame.display.set_caption("circuitQ")
+Loc = screenHandler.Loc
+screen = screenHandler.screen
 
-class Loc(Enum):
-    NONE = 0;
-    START_FILLED = 1; 
-    END_FILLED = 2
-    START_CROSS = 3; 
-    END_CROSS = 4;
+class Gate:
+    def __init__(self, name : str , x : int , y : int , width : int , height : int):
+        self.width = width
+        self.height = height
+        self.gate = name
+        self.x = x
+        self.y = y
+    
+    def renderGate(gate : str, xpos: int, ypos: int, width : int, height : int):
+        rect = pygame.Rect(xpos, ypos, width, height)
+        pygame.draw.rect(screen,Colors.white,rect,0)
+        screen.blit(pygame.font.SysFont('Times New Roman', 45).render(gate, True, (170, 200, 200)), (xpos+4, ypos-3))
+        return rect
+    
+
+    
+    def gCollider(self):
+        rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        return rect
+        
+class gateHandler:
+    xStart = 75
+    yStart = 75
+    gateWidth = 40
+    gateHeight = 40
+    step = 0
+    
+    def __init__(self):
+        self.gateMap = {}
+    
+    def addGateCount(self, qubitIndex : int):
+        if qubitIndex not in self.gateMap:
+            self.gateMap[qubitIndex] = 1
+        else:
+            self.gateMap[qubitIndex] += 1  
+            
+    
+    def setGateCount(self, qubitIndex : int, value : int):
+        self.gateMap[qubitIndex] = value
+       
+
+    def getGateCount(self, key: int):
+        return self.gateMap[key]
 
 
-# draws a line between 2 points on the canvas         
-def drawQline(start: tuple, end: tuple):
-    pygame.draw.line(screen, (255, 0, 0), start, end, 1)
+    def addGate(self, gate : str, qubits, calculations : [str], relative_position : tuple, column): # integrating evenhandler for this method # change this to accomodate multi qubit gates
+        grid_size = 50
+        nrQubits = len(qubits)
+        if nrQubits < 1: # should be at least one qubit
+            raise ValueError
 
+        
+        pygame.font.init()
+        if not gate == "CNOT":
+          if nrQubits > 1:
+              for i in range(1, nrQubits):
+                  x = relative_position[0] + grid_size * column + 20
+                  y = relative_position[1] + (qubits[i] * grid_size) + 25 # <- adjust qubits i
+                  screenHandler.drawQline((x, (relative_position[1] + (qubits[0] * grid_size)) + 20), (x, y))
+              for i in range(1, nrQubits):
+                  x = relative_position[0] + grid_size * column + 20
+                  y = relative_position[1] + (qubits[i] * grid_size) + 25
+                  # need to change this
+                  screenHandler.drawQlineMod((x, y), (x, y), Loc.NONE, Loc.END_FILLED)
 
-# draws a line between 2 points on the canvas and adds a circle at the start and end
-def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc):
-    drawQline(start,end)
-    modCases(mod1, start, end)
-    modCases(mod2, start, end)
-
-def renderQlines(qubits : int, dy : int, dx : int, width : int):
-    if(dx < 0):
-        dx = 0
-    y = 50 + dy
-    for i in range(qubits):
-        y += 50
-        drawQline((0 - dx, y), (width + (dx * 2), y))
-
-# draws a circle at a point on the canvas
-def modCases(mod : Loc, start : tuple, end : tuple):
-    match mod:
-        case Loc.START_FILLED:
-            pygame.draw.circle(screen, (255, 255, 255),start,4)
-        case Loc.END_FILLED:
-            pygame.draw.circle(screen, (255, 255, 255),end, 4) 
-        case Loc.START_CROSS: 
-            pygame.draw.circle(screen, (255, 255, 255),start,15, 2) #change 
-        case Loc.END_CROSS:
-            pygame.draw.circle(screen, (255, 255, 255),end, 15, 2) #change
-        case Loc.NONE:
-            pass
-
+        elif gate == "CNOT":
+            x = relative_position[0] + grid_size * column + 20
+            y = relative_position[1] + (qubits[0] * grid_size) + 25 # <- adjust qubits i
+            if len(qubits) == 1:
+              screenHandler.drawQlineMod((x, y), (x, (relative_position[1] + ((qubits[0] + 1) * grid_size) + 25)), Loc.NONE, Loc.END_FILLED)
+            else:
+                screenHandler.drawQlineMod((x, y), (x, (relative_position[1] + ((qubits[1]) * grid_size) + 25)), Loc.NONE, Loc.END_FILLED)
+                
+            #else:
+            #    screenHandler.drawQlineMod((x, y), (x, (relative_position[1] + ((qubits[1]) * grid_size) + 25)), Loc.NONE, Loc.END_FILLED)
+         
+        x = relative_position[0] + grid_size * column
+        y = relative_position[1] + (qubits[0] * grid_size)
+        gate = Gate(gate, x, y, self.gateWidth, self.gateHeight) # New gate object
+        Gate.renderGate(gate.gate, x, y, self.gateWidth, self.gateHeight) # Render gate 
+        return gate # for gate shifting
+       
