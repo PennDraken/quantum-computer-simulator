@@ -57,12 +57,15 @@ class Calculation_Viewer_Window:
                 # Draws the vector state of the register
                 for row, line in enumerate(lines):
                     text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, color, self.state_font)
-                
+                    if row > 16:
+                        break # We dont want to print too many numbers
+
                 # Draw the grid rectangle showing end of qubit
                 pygame.draw.rect(self.screen, color, (x, y, self.grid_size, len(register.qubits) * self.grid_size), width=2)
                 
                 # Increment grid row based on how many qubits were in register
                 grid_row += len(register.qubits)
+                
 
 
 

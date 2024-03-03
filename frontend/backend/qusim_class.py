@@ -208,7 +208,7 @@ class Circuit():
     def __init__(self, description):
         self.systems = []  # Index corresponds to state in circuit
         self.history : bool = True
-        self.show_output : bool = True
+        self.show_output : bool = False
         # First element is qubit list, rest are gate operations
         # self.description = [["A","B"],"H 0","CNOT 0 1"]
         self.description = description
@@ -216,7 +216,7 @@ class Circuit():
         qubits = self.description[0]
         system = System()
         for qubit in qubits:
-            system.add_qubit(qubit, np.array([1,0]))
+            system.add_qubit(qubit, Gates.zero_state)
         self.systems.append(system)
         self.position = 0
 
@@ -240,7 +240,8 @@ class Circuit():
             # Apply measure
             qubit = new_system.qubits[qubits_indices[0]]
             p = new_system.measure(qubit)
-            print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
+            if self.show_output:
+                print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
         else:
             # It is gate
             gate = Gates.string_to_gate(op_type)
@@ -258,7 +259,7 @@ class Circuit():
                 for register in new_system.registers:
                     if register.qubits==[new_system.qubits[qubits_indices[1]]]:
                         if np.array_equal(register.vector, np.array([0, 1])):
-                            print("equal to 1")
+                            # print("equal to 1")
                             # bit was 1 so we apply gate
                             new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
                             break
@@ -291,7 +292,7 @@ class Circuit():
     def run(self):
         pass
 
-    # Used for frontend
+    # Used for frontend. Converts a circuit to a format that frontend can use
     def as_frontend_gate_list(self):
         description = self.description
         converted_list = []
@@ -301,6 +302,15 @@ class Circuit():
             qubits = [int(qubit) for qubit in re.findall(r'\d+', ' '.join(parts[1:]))]
             converted_list.append((gate, qubits))
         return converted_list
+    
+    # Used for frontend. Converts and sets list which is frontend gate representation to a format that backend can use.
+    def set_circuit_from_frontend_gate_list(self, gate_list):
+        description = []
+        # Set qubits
+        description.append(self.systems[0].qubits)
+        for gate_str, qubits in gate_list:
+            description.append(gate_str + " " + " ".join(map(str, qubits)))
+        self.description = description
 
 # ----------------------------------------------------------------------------------------------------
 # METHODS
