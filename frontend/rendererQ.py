@@ -7,6 +7,7 @@ import Utilities.Colors as Colors
 import bloch_sphere
 import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
+import Fields.qubit_name_panel as qubit_name_panel
 import backend.qusim_class as qusim_class
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 
@@ -64,16 +65,11 @@ bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
-# circuit.step_fwd()
-# circuit.step_fwd()
-# circuit.step_fwd()
-# circuit.step_fwd()
-# circuit.step_fwd()
-# circuit.step_fwd()
-# circuit.step_fwd()
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
 circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
+
+qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_window.y + circuit_navigation_window.height, circuit.systems[0].qubits, circuit_dy)
 
 displayCalc = False
 dragging = False
@@ -136,6 +132,10 @@ while True:
             color = Colors.white
         activeGates.append(handler.addGate(temp[0], temp[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)) # <---------- made active gates change
 
+    # Draw qubit names on left side
+    qubit_name_panel.offset_y = circuit_y + circuit_dy
+    qubit_name_panel.draw()
+
     # Draw drag bar
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
@@ -151,7 +151,7 @@ while True:
     calculation_window.circuit_dx = circuit_dx
     calculation_window.systems = circuit.systems # update states
 
-    # Draw navigation window with run and step buttons
+    # Draw window with run and step buttons
     circuit_navigation_window.draw()
 
     # Draw selected screen
@@ -257,6 +257,8 @@ while True:
         elif Mouse.status == "Panning":
             circuit_dx += Mouse.dx
             circuit_dy += Mouse.dy
+            if circuit_dx>0:
+                circuit_dx=0
         # Rotate Bloch sphere
         elif Mouse.status == "Panning sphere":
             bloch_sphere.pan(Mouse)
