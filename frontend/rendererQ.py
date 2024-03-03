@@ -44,8 +44,8 @@ pygame.display.Info()
 circuit_x = 75
 circuit_y = 75
 # Tag panning:offset som apliceras på allt i scenen
-circuit_dx = 0;
-circuit_dy = 0;
+circuit_dx = 0
+circuit_dy = 0
 # Tag meny: menyns höjd variabel 
 # textCanvasY =  pygame.display.Info().current_h - 100 #920
 
@@ -255,6 +255,8 @@ while True:
             circuit_dy += Mouse.dy
             if circuit_dx>0:
                 circuit_dx=0
+            if circuit_dy>0:
+                circuit_dy=0
         # Rotate Bloch sphere
         elif Mouse.status == "Panning sphere":
             bloch_sphere.pan(Mouse)
