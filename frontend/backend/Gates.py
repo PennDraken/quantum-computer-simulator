@@ -25,14 +25,36 @@ def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
         vector = np.kron(vector, single_qubit_state if i == qubit_index else m)
     return vector
 
-def Rx(theta):
+def Rx(theta)->np.array:
     return np.array([[np.cos(theta/2), -1j*np.sin(theta/2)],
                      [-1j*np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
 
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
                      [np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+def QFT(N : int)->np.array:
+    #W = np.power(np.e, np.complex(-2* np.pi))
+    W = np.power(np.e, (2 * np.pi*1j)/N)
+    constant = 1/np.sqrt(N)
+    Matrix = np.ones((N,N), dtype= complex)
+    n = int(N/2)
+    for n in range(1,N):
+        for m in range(1, N):
+            temp = np.power(W, n * m)
+            Matrix[n][m] = temp
+            #Matrix[m][n] = temp
+    #print(Matrix[3][3])
+    Matrix *= constant
 
+QFT(4)
+def DFT(N : int)-> np.array:
+    W = np.power(np.e, (-2 * np.pi*1j)/N)
+    constant = 1/np.sqrt(N)
+    Matrix = np.ones((N,N), dtype= complex)
+    for n in range(1,N):
+        for m in range(1, N):
+            Matrix[n][m] = np.power(W, n * m)
+    Matrix *= constant
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
     # TODO More programmatic approach, perhaps dictionaries or eval()
