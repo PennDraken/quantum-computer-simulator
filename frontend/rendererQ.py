@@ -65,8 +65,8 @@ bloch_sphere.add_random_point_on_unit_sphere()
 # Calculation window (generate example circuit)
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
-# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
-circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
+circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
+# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
@@ -86,15 +86,8 @@ coordinates = []
 
 gateBoxHit = False
 gateButton = False
-         
-xtest = 0
-ytest = 0
-# just for testing 
-color = (250,250,250)
         
-#buttons for the gate tab
-
-#related to merge
+# available buttons in the gate tab
 # gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
 gateList = circuit.as_frontend_gate_list()
 circuit_x = 0
@@ -115,11 +108,15 @@ selectedGate = None
 #wasShifting = False
 
 while True:
-    screen.fill((0,0,0))
+    redraw_screen = False
     for event in pygame.event.get():
+        redraw_screen = True
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+    # Clear screen
+    screen.fill((0,0,0))
     # Update circuit behind the scenes TODO support additional qubits/ removal of qubits
     circuit.set_circuit_from_frontend_gate_list(gateList)
 
@@ -287,10 +284,14 @@ while True:
         Mouse.holding = None
         Mouse.status = None
     
+    if option=="Logic gates":
+        MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
-    MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
+    # Draw everything here
+    # TODO move this
+    if redraw_screen:
+        pygame.display.update()
 
-    pygame.display.update()
-    framerate.tick(30)
+    framerate.tick(60)
     
     
