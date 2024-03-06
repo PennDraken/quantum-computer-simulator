@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------------------------------
 # IMPORTS
 import numpy as np
-import backend.Gates as Gates
+from . import Gates # Import in same directory as qusim_class
 import copy
 import re
 # ----------------------------------------------------------------------------------------------------
