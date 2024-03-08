@@ -32,8 +32,9 @@ def Rx(theta)->np.array:
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
                      [np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+
+# Generates a Quantum Fourier Transform matrix
 def QFT(N : int)->np.array:
-    #W = np.power(np.e, np.complex(-2* np.pi))
     W = np.power(np.e, (2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
     Matrix = np.ones((N,N), dtype= complex)
@@ -42,11 +43,9 @@ def QFT(N : int)->np.array:
         for m in range(1, N):
             temp = np.power(W, n * m)
             Matrix[n][m] = temp
-            #Matrix[m][n] = temp
-    #print(Matrix[3][3])
     Matrix *= constant
+    return Matrix
 
-QFT(4)
 def DFT(N : int)-> np.array:
     W = np.power(np.e, (-2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
@@ -55,6 +54,8 @@ def DFT(N : int)-> np.array:
         for m in range(1, N):
             Matrix[n][m] = np.power(W, n * m)
     Matrix *= constant
+    return Matrix
+
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
     # TODO More programmatic approach, perhaps dictionaries or eval()
@@ -75,3 +76,37 @@ def string_to_gate(gate_str : str):
             return Ry(np.pi/4)
         case _ :
             return None # TODO Error
+
+def checkIfCoprime(a, b)->bool: # Checks if two numbers are coprime, i.e. their greatest common divisor is 1, i.e. gcd(a,b) = 1
+    while b != 0:
+        a, b = b, a % b
+    return a # If a is 1, then a and b are coprime
+
+def checkIfNodd(n : int)->bool:
+    return n % 2 != 0
+
+def find_n(N: int)->int:
+    return int(np.ceil(np.log2(N)))
+
+# This is the function we want the quantum subroutine to find. This is a working example in classical code potentially.
+def findPeriod(a, N)->int: # Finds the period of a function f(x) = a^x mod N
+    for r in range(a, N):
+        if a**r % N == 1:
+            return r
+    return None
+
+def amodN(a: int, N: int)->np.array:
+    if not 1 < a < N or not checkIfNodd(N):
+        return None
+    
+    if checkIfCoprime(a, N) != 1: # If a and N are not coprime, then we a is a factor of N
+        return N/a # Returns the other factor of N
+    
+    strings = []
+    for i in range(0, 2*find_n(N)): # 2*n-1 is the maximum number of qubits needed
+        x = 2**i      
+        strings.append(f"{a}^{x} mod {15}")   
+    return strings
+
+print(amodN(7, 15))
+

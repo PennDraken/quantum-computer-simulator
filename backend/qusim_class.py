@@ -3,9 +3,12 @@
 # ----------------------------------------------------------------------------------------------------
 # IMPORTS
 import numpy as np
-import backend.Gates as Gates
 import copy
 import re
+if __name__ == "__main__":
+    import Gates
+else:
+    from . import Gates # Import in same directory as qusim_class
 # ----------------------------------------------------------------------------------------------------
 # CLASSES
 # A single qubit (currently unused)
@@ -68,23 +71,90 @@ class System():
         register = register_a
         # merge registers into a single register if theyre not already merged
         if register_a != register_b:
-            register = combine_registers(register_a, register_b)
+            # if self.qubits.index(qubit_a)<self.qubits.index(qubit_b):
+            register = merge_registers(register_a, register_b)
             self.registers.remove(register_b)
 
         # swap so that registers are next to each other
         # qubit_b should be placed at index_qubit_a+1
         index_qubit_a = register.qubits.index(qubit_a)
-        target_index = index_qubit_a+1
-        qubit_at_target = register.qubits[target_index]
-        register = swap(register, qubit_at_target, qubit_b)
-        # apply expanded gate
-        gate = expand_gate(gate, index_qubit_a, len(register.qubits))
-        register.vector = gate.dot(register.vector)
-        # swap back
-        register = swap(register, qubit_at_target, qubit_b)
-        # update our state
-        # set register_a to register to update state
-        self.registers[self.registers.index(register_a)] = register
+        index_qubit_b = register.qubits.index(qubit_b)
+        if index_qubit_a < index_qubit_b:
+            # Move qubit b so that they're adjacent
+            target_index = index_qubit_a+1
+            qubit_at_target = register.qubits[target_index]
+            register = swap(register, qubit_at_target, qubit_b)
+            # apply expanded gate
+            gate = expand_gate(gate, index_qubit_a, len(register.qubits))
+            register.vector = gate.dot(register.vector)
+            # swap back
+            register = swap(register, qubit_at_target, qubit_b)
+            # update our state
+            # set register_a to register to update state
+            self.registers[self.registers.index(register_a)] = register
+        else:
+            # First swap qubit a and b, so qubit a is to the left of qubit b
+            register = swap(register, qubit_b, qubit_a)
+            target_index = index_qubit_b+1
+            qubit_at_target = register.qubits[target_index]
+            register = swap(register, qubit_at_target, qubit_b)
+            # apply expanded gate
+            gate = expand_gate(gate, index_qubit_b, len(register.qubits))
+            register.vector = gate.dot(register.vector)
+            # swap back
+            register = swap(register, qubit_at_target, qubit_b)
+            register = swap(register, qubit_b, qubit_a)
+            # update our state
+            # set register_a to register to update state
+            self.registers[self.registers.index(register_a)] = register
+
+    # Applies a gate to a qubit list
+    def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: []):
+        # Get all different register
+        unmerged_registers = []
+        for qubit_index in qubit_index_list:
+            qubit = self.qubits[qubit_index]
+            unmerged_registers.append(find_register(self, qubit))
+        # Remove duplicates (by casting to dict and back to list)
+        unmerged_registers = list(dict.fromkeys(unmerged_registers))    
+        # Merge registers
+        merged_register = unmerged_registers.pop() # Remove first element
+        register_index = self.registers.index(merged_register)
+        self.registers.remove(merged_register)
+        for register in unmerged_registers:
+            merged_register = merge_registers(merged_register, register)
+            self.registers.remove(register) # Remove from register self list
+
+        # Store indices of how qubits are stored in register
+        unswapped_qubits_index_list = []
+        for qubit in merged_register.qubits:
+            state_index = self.qubits.index(qubit)
+            unswapped_qubits_index_list.append(state_index)
+        # Perform swap operation
+        ordered_vector = copy.deepcopy(merged_register.vector)
+        for state_index in range(0,len(merged_register.vector)):
+            new_index = state_index
+            for index in range(0, len(qubit_index_list)):
+                # Find the bits to swap in state_index to calculate where the state should be placed
+                index_original = unswapped_qubits_index_list[index]
+                index_target   = qubit_index_list[index]
+                new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
+            ordered_vector[new_index] = merged_register.vector[state_index]
+        # Apply gate
+        gate = expand_gate(gate, 0, len(merged_register.qubits))
+        ordered_vector = gate.dot(ordered_vector)
+        # Swap back
+        for state_index in range(0,len(merged_register.vector)):
+            new_index = state_index
+            for index in range(0, len(qubit_index_list)):
+                # Find the bits to swap in state_index to calculate where the state should be placed
+                index_original = unswapped_qubits_index_list[index]
+                index_target   = qubit_index_list[index]
+                new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
+            merged_register.vector[new_index] = ordered_vector[state_index]
+        # Sort register into qubit order TODO
+        # Update our register state
+        self.registers.append(merged_register)
 
 
     # Merges all registers to one register and updates state
@@ -104,8 +174,8 @@ class System():
         return Register(vector=vector, qubits=qubits)
 
     # Measures a qubit
-    # returns status of qubit after measurement as 0 or 1
-    # TODO Also seperates the measured qubit into a seperate register
+    # returns state of qubit after measurement as 0 or 1
+    # Also seperates the measured qubit into a seperate register
     def measure(self, qubit):
         # Find register
         register = None
@@ -187,10 +257,13 @@ class System():
             print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
         # Print the vector matrix
         print("\nState:")
-        reversed_qubit_list = register.qubits[::-1]
-        print(f"|{''.join(reversed_qubit_list)}>")
+
+        # Sort the qubits based on the list in self.systems.qubits
+        reversed_qubit_key = self.qubits[::-1]
+        sorted_register_qubits = sorted(register.qubits, key=lambda x: reversed_qubit_key.index(x))
+        print(f"|{''.join(sorted_register_qubits)}>")
         # Resort state vector based on new qubit list
-        register_reversed = sort_register(register, reversed_qubit_list)
+        register_reversed = sort_register(register, sorted_register_qubits)
         for i in range(0, len(register.vector)):
             state_val = register_reversed.vector[i]
             binary_str = bin(i)[2:].zfill(len(register.qubits))
@@ -346,7 +419,7 @@ def sort_register(register: Register, sorted_qubits)->Register:
     # Finished
     return sorted_register
 
-def combine_registers(register_a, register_b):
+def merge_registers(register_a, register_b):
     vector = np.kron(register_a.vector, register_b.vector)
     qubits = register_a.qubits + register_b.qubits
     return Register(qubits, vector)
@@ -376,6 +449,8 @@ def expand_gate(gate, index, qubit_count):
 
 # Swaps two qubits in a register
 def swap(register: Register, qubit_a, qubit_b):
+    if qubit_a==qubit_b:
+        return register # early return
     index_qubit_a = register.qubits.index(qubit_a)
     index_qubit_b = register.qubits.index(qubit_b)
     new_vector : np.array = register.vector.copy()
@@ -432,25 +507,39 @@ def apply_gate_register(register, qubit, gate: np.array):
     register.vector = expanded_gate.dot(register.vector)
     return register
 
-# ----------------------------------------------------------------------------------------------------
-# DEMO
-# Bell state
-# q = System()
-# q.add_qubit("A", np.array([1,0]))
-# q.add_qubit("B", np.array([1,0]))
-# q.apply_gate(Gates.H, "A")
-# print(q.registers[0].vector)
-# print(q.registers[1].vector)
-# q.apply_gate_multiple(Gates.CNOT, ["A","B"])
+# Returns the instructions for the circuit of the shor subroutine
+def shorSubroutineCircuit(guess : int, N : int):
+    n = (math.ceil(math.log2(N)))
+    qubits = []
+    for i in range(n*3):
+        qubits.append("q" + str(i))
+    temp = []
+    temp.append(qubits)
+    for k in range(n*2):
+        temp.append("H " + str(k))
+    temp.append("X " + str(n*2))
+    tGate = ("amodN(" + str(guess) +","+str(N)+")")
+    for l in range(n*2):
+        tString = tGate
+        tString = tString + " " + str(l)
+        for m in range(n*2, n*3):
+           tString = tString + " " + str(m)
+        temp.append(tString)  
+    tQFT = "QFT(" + str(N) +")"
+    for f in range(n*2):
+        tQFT = tQFT + " " + str(f)
+    temp.append(tQFT)
+    for g in range(n*2):
+        temp.append("measure " + str(g))
+    #print(temp[0:len(temp)])
+    return temp
 
-# q = System()
-# q.add_qubit("A", np.array([1,0]))
-# q.add_qubit("B", np.array([1,0]))
-# q.apply_gate(Gates.H, "A")
-# print(q.registers[0].vector)
-# print(q.registers[1].vector)
-# q.apply_gate_multiple(Gates.CNOT, "A", "B")
-# print(q.registers[0].vector)
-# print(swap_bits(0, 0, 2))
-# print(swap_bits(1, 0, 2))
-# print(swap_bits(2, 0, 2))
+# ----------------------------------------------------------------------------------------------------
+"""q = System()
+q.add_qubit("A", Gates.zero_state)
+q.add_qubit("B", Gates.one_state)
+q.add_qubit("C", Gates.zero_state)
+q.add_qubit("D", Gates.zero_state)
+q.add_qubit("E", Gates.one_state)
+q.add_qubit("F", Gates.zero_state)
+q.apply_gate_qubit_list(Gates.CNOT, [3,2,5])"""

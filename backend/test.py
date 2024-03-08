@@ -4,7 +4,6 @@
 # IMPORTS
 import numpy as np
 import Gates
-import numpy as np
 import qusim_class
 # ----------------------------------------------------------------------------------------------------
 # TESTS
