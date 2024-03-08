@@ -12,11 +12,11 @@ import backend.qusim_class as qusim_class
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 import gates
 import copy
-
+import re
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
-
+import Fields.TextInput as input_box
 import sys
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -101,7 +101,8 @@ circuit_y = 75
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
-
+gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
+input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned)
 
 # keep track of shifting
 moving_gate = False
@@ -114,7 +115,8 @@ selectedGate = None
 
 while True:
     screen.fill((0,0,0))
-    for event in pygame.event.get():
+    pygame_event = pygame.event.get()
+    for event in pygame_event:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -167,7 +169,13 @@ while True:
         # Implement math view renderer here
         calculation_window.draw()
     elif option == "Text view":
-        pass # TODO implement text view here
+        pressed_keys = pygame.key.get_pressed()
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+
+        input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
+        input_boxes.update(tab_panel.y, tab_panel.height)
+
     elif option == "Bloch sphere":
         bloch_sphere.draw()
         pass # Implement Bloch sphere render here
