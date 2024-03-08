@@ -74,3 +74,24 @@ def string_to_gate(gate_str : str):
             return Ry(np.pi/4)
         case _ :
             return None # TODO Error
+
+def checkIfCoprime(a, b): # Checks if two numbers are coprime, i.e. their greatest common divisor is 1, i.e. gcd(a,b) = 1
+    while b != 0:
+        a, b = b, a % b
+    return a == 1 # If a is 1, then a and b are coprime
+
+def findPeriod(a, N): # Finds the period of a function f(x) = a^x mod N
+    if not checkIfCoprime(a, N):
+        return None
+    for r in range(a, N):
+        if a**r % N == 1:
+            return r
+    return None
+
+def amodN(a: int, N: int)->np.array:
+    #Controlled multiplication by a mod N
+    strings = []
+    for i in range(0, findPeriod(a, N)):
+        x = 2**i
+        strings.append(f"{a}^{x} mod {15}")
+    return strings
