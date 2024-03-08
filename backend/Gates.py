@@ -82,7 +82,7 @@ def checkIfCoprime(a, b)->bool: # Checks if two numbers are coprime, i.e. their 
         a, b = b, a % b
     return a # If a is 1, then a and b are coprime
 
-def checkIfNodd(n : int)->bool:
+def checkIfNOdd(n : int)->bool:
     return n % 2 != 0
 
 def find_n(N: int)->int:
@@ -95,18 +95,37 @@ def findPeriod(a, N)->int: # Finds the period of a function f(x) = a^x mod N
             return r
     return None
 
-def amodN(a: int, N: int)->np.array:
-    if not 1 < a < N or not checkIfNodd(N):
+def amodNStrings(a: int, N: int)->np.array:
+    if not 1 < a < N or not checkIfNOdd(N):
         return None
     
     if checkIfCoprime(a, N) != 1: # If a and N are not coprime, then we a is a factor of N
         return N/a # Returns the other factor of N
     
     strings = []
-    for i in range(0, 2*find_n(N)): # 2*n-1 is the maximum number of qubits needed
-        x = 2**i      
+    for i in range(0, 2*find_n(N)): # 2n iterations
+        x = 2**(i)      
         strings.append(f"{a}^{x} mod {15}")   
-    return strings
+    return strings # return ['7^1 mod 15', '7^2 mod 15', '7^4 mod 15', '7^8 mod 15', '7^16 mod 15', '7^32 mod 15', '7^64 mod 15', '7^128 mod 15']
+
+a = 7
+N = 15
+print(amodNStrings(a, N))
+
+a_inv = pow(a, -1, N)
+print(a_inv)  # 13
+print(a * a_inv)  # 91
+print(a * a_inv % N)  # 1
+
+def controlled_mul_amodN(a, N)->np.array:
+    gate = np.zeros((N, N), dtype=complex)
+    return -1
+
+def controlled_swap(n)->np.array:
+    #qusim_class.swap(, )
+    return -1
+
+def amodN(a, N)->np.array:
+    return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
 
 print(amodN(7, 15))
-
