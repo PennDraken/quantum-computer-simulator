@@ -120,7 +120,7 @@ selectedGate = None
 
 while True:
     screen.fill((0,0,0))
-    pygame_event = pygame.event.get()
+    pygame_event = pygame.event.get() # This removes all events from stack
     redraw_screen = False
     if len(pygame_event) > 0: # Check if anything has happened since last frame
         redraw_screen = True
@@ -134,12 +134,12 @@ while True:
     # Update circuit behind the scenes TODO support additional qubits/ removal of qubits
     circuit.set_circuit_from_frontend_gate_list(gateList)
 
-    # Draw a dotted line to show where user has stepped to TODO make it dotted
+    # Draw a line to show where user has stepped to TODO make it dotted
     pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     # Gates placed on the circuit (used for collision detection, resets every frame)
     gates_on_circuit = []
     # Draw circuit view
-    screenHandler.renderQlines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w) # Draws horisontal lines for qubits
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.gray) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
@@ -308,7 +308,7 @@ while True:
         MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
     # Draw everything here
-    # TODO move this
+    # TODO move this?
     if redraw_screen:
         pygame.display.update()
 

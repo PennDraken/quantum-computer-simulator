@@ -65,14 +65,14 @@ class gateHandler:
                 mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
                 y1 = qubits[i-1] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
                 y2 = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
-                screenHandler.drawQline((mid_x, y1), (mid_x, y2))
+                screenHandler.draw_qubit_line((mid_x, y1), (mid_x, y2), color)
 
             for i in range(1, nrQubits):
                 # Draw connections here (dots)
                 mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
                 y = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1]
                 # need to change this
-                screenHandler.drawQlineMod((mid_x, y), (mid_x, y), Loc.NONE, Loc.END_FILLED)
+                screenHandler.drawQlineMod((mid_x, y), (mid_x, y), Loc.NONE, Loc.END_FILLED, color)
 
         # Draw the actual gate
         center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
