@@ -121,10 +121,10 @@ selectedGate = None
 while True:
     screen.fill((0,0,0))
     pygame_event = pygame.event.get()
-    for event in pygame_event:
-        redraw_screen = False
-    for event in pygame.event.get():
+    redraw_screen = False
+    if len(pygame_event) > 0: # Check if anything has happened since last frame
         redraw_screen = True
+    for event in pygame_event:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()

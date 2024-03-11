@@ -488,6 +488,7 @@ def insert_bit(binary_num, bit, n):
     result = cleared_bit | ((bit & 1) << n)
     return result
 
+# Cheks if two qubits are adjacent in a register. Not really used for anything right now.
 def check_adjacent(register, qubit_a, qubit_b):
     index_a = register.qubits.index(qubit_a)
     index_b = register.qubits.index(qubit_b)
@@ -508,8 +509,8 @@ def apply_gate_register(register, qubit, gate: np.array):
     return register
 
 # Returns the instructions for the circuit of the shor subroutine
-def shorSubroutineCircuit(guess : int, N : int):
-    n = (math.ceil(math.log2(N)))
+def shor_subroutine_circuit(guess : int, N : int):
+    n = (np.ceil(np.log2(N)))
     qubits = []
     for i in range(n*3):
         qubits.append("q" + str(i))

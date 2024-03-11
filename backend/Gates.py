@@ -108,14 +108,16 @@ def amodNStrings(a: int, N: int)->np.array:
         strings.append(f"{a}^{x} mod {15}")   
     return strings # return ['7^1 mod 15', '7^2 mod 15', '7^4 mod 15', '7^8 mod 15', '7^16 mod 15', '7^32 mod 15', '7^64 mod 15', '7^128 mod 15']
 
-a = 7
-N = 15
-print(amodNStrings(a, N))
-
-a_inv = pow(a, -1, N)
-print(a_inv)  # 13
-print(a * a_inv)  # 91
-print(a * a_inv % N)  # 1
+# Function that is used to verify amod?
+def fabian_print():
+    a = 7
+    N = 15
+    print(amodNStrings(a, N))
+    a_inv = pow(a, -1, N)
+    print(a_inv)  # 13
+    print(a * a_inv)  # 91
+    print(a * a_inv % N)  # 1
+    print(amodN(7, 15))
 
 def controlled_mul_amodN(a, N)->np.array:
     gate = np.zeros((N, N), dtype=complex)
@@ -128,4 +130,3 @@ def controlled_swap(n)->np.array:
 def amodN(a, N)->np.array:
     return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
 
-print(amodN(7, 15))
