@@ -192,13 +192,15 @@ while True:
         pass # Implement Bloch sphere render here
     # ---------------------------------------------------------------
 
-    # Mouse input
+    # Mouse themeing based on status
     Mouse.update(Mouse)
     # Update cursor + temporary colors
     if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
         drag_bar_color = Colors.yellow
     elif Mouse.status == "Panning":
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
+    elif Mouse.status == "Moving gate":
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
     else:
         pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
