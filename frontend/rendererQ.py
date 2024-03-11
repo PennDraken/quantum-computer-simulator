@@ -73,9 +73,9 @@ bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
-# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
+circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
-circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
+# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
@@ -245,7 +245,7 @@ while True:
     offset_y = circuit_y + circuit_dy
     if Mouse.r_click:
         # Find gate we're dragging
-        for i,gate_data in enumerate(gateList):
+        for i, gate_data in enumerate(gateList):
             rect = gates.gatelist_gate_to_rect(gate_text=gate_data[0], gate_index_in_list=i, operating_qubit=gate_data[1][0], offset_x = circuit_x + circuit_dx, offset_y = circuit_y + circuit_dy)
             if rect.collidepoint(Mouse.x, Mouse.y):
                 Mouse.holding = copy.deepcopy(gate_data)
@@ -271,14 +271,19 @@ while True:
         # Draw gate
         grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
         grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
-        pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
+        # Draw highlight square for gate
         gate_data = Mouse.holding
+        qubits = gate_data[1]
+        delta_qubit_index = max(qubits) - min(qubits) # Find height of qubits
+        highlight_height = (delta_qubit_index + 1) * UI.grid_size# The height of the highlighter square
+        pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, highlight_height), width = 1)
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
         print("Placeing qubit")
         row = (Mouse.y - offset_y) // UI.grid_size
         gateList[Mouse.holding[0]-1][1][Mouse.holding[1]] = row
     elif Mouse.status == "Holding qubit":
+        # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
         Mouse.holding = None
         Mouse.status = None
     # Button release
@@ -291,7 +296,7 @@ while True:
             row = (Mouse.y - circuit_y - circuit_dy) // UI.grid_size
             # Move qubits to correct position
             qubits = gate_data[1]
-            delta_row = row -gate_data[1][0]
+            delta_row = row - gate_data[1][0]
             for i, qubit in enumerate(qubits):
                 gate_data[1][i] = qubits[i] + delta_row
             # Where to place gate in list
