@@ -139,7 +139,7 @@ while True:
     # Gates placed on the circuit (used for collision detection, resets every frame)
     gates_on_circuit = []
     # Draw circuit view
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.gray) # Draws horisontal lines for qubits
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.dark_gray) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
