@@ -1,11 +1,15 @@
 # Constant definitions for different colors
-
-unselected = (127,127,127)
 gray = (127,127,127)
 dark_gray = (25,25,25)
-selected = (250,250,250)
-base = (250,250,250) # White
-hover = (255, 200, 100)
+dark_blue = (0, 15, 30)
 black = (0, 0, 0)
 white = (250,250,250)
-yellow = (255, 200, 100) # Yellow
+yellow = (255, 200, 100)
+red = (230, 10, 10)
+# -------------------------------------------------------
+# Theming here
+qubit_line = dark_blue
+selected = white
+unselected = gray
+hover = yellow
+base = white

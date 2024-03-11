@@ -139,7 +139,7 @@ while True:
     # Gates placed on the circuit (used for collision detection, resets every frame)
     gates_on_circuit = []
     # Draw circuit view
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.dark_gray) # Draws horisontal lines for qubits
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
@@ -250,7 +250,7 @@ while True:
             if rect.collidepoint(Mouse.x, Mouse.y):
                 Mouse.holding = copy.deepcopy(gate_data)
                 Mouse.status = "Moving gate"
-                gateList.remove(gate_data)
+                gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
                 print("clicked gate")
                 break
         if Mouse.status==None:
@@ -276,8 +276,12 @@ while True:
         qubits = gate_data[1]
         delta_qubit_index = max(qubits) - min(qubits) # Find height of qubits
         highlight_height = (delta_qubit_index + 1) * UI.grid_size# The height of the highlighter square
-        pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, highlight_height), width = 1)
-        Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
+        gate_color = Colors.white
+        if Mouse.y < drag_bar_y:
+            pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, highlight_height), width = 1)
+        else:
+            gate_color = Colors.red
+        Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
         print("Placeing qubit")
         row = (Mouse.y - offset_y) // UI.grid_size
@@ -309,7 +313,7 @@ while True:
         Mouse.holding = None
         Mouse.status = None
     
-    if option=="Logic gates":
+    if option=="Logic gates" and Mouse.status != "Moving gate":
         MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
     # Draw everything here
