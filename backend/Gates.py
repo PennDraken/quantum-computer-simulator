@@ -38,21 +38,22 @@ def QFT(N : int)->np.array:
     W = np.power(np.e, (2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
     Matrix = np.ones((N,N), dtype= complex)
-    n = int(N/2)
-    for n in range(1,N):
-        for m in range(1, N):
-            temp = np.power(W, n * m)
-            Matrix[n][m] = temp
+    for n in range(N):
+        for m in range(n, N):
+            value = np.power(W, n * m)
+            Matrix[n][m] = value
+            Matrix[m][n] = value
     Matrix *= constant
     return Matrix
-
 def DFT(N : int)-> np.array:
     W = np.power(np.e, (-2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
     Matrix = np.ones((N,N), dtype= complex)
-    for n in range(1,N):
-        for m in range(1, N):
-            Matrix[n][m] = np.power(W, n * m)
+    for n in range(N):
+        for m in range(n, N):
+            value = np.round(np.power(W, n * m), 5)
+            Matrix[n][m] = value
+            Matrix[m][n] = value
     Matrix *= constant
     return Matrix
 
@@ -125,7 +126,19 @@ def controlled_mul_amodN(a, N)->np.array:
 
 def controlled_swap(n)->np.array:
     #qusim_class.swap(, )
-    return -1
+    I = np.eye((2), dtype=complex)
+    SWAP = np.array([[1, 0, 0, 0],
+                     [0, 0, 1, 0],
+                     [0, 1, 0, 0],
+                     [0, 0, 0, 1]])
+    matrix = np.zeros((n,n), dtype=complex)
+    if n == 0:
+        matrix = np.kron(np.kron(I, I), I)
+    elif n == 1:
+        matrix = np.kron(np.kron(I, SWAP), I)
+    else:
+        matrix = np.kron(np.kron(SWAP, I), I)
+    return matrix
 
 def amodN(a, N)->np.array:
     return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
