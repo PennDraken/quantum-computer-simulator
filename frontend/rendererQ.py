@@ -1,9 +1,12 @@
 import sys
 import os
+# sys.path.append('../backend')
+for directory in sys.path:
+    backend_path = os.path.join(directory, 'backend')
+    if os.path.isdir(backend_path) and '__init__.py' in os.listdir(backend_path):
+        print(f"Backend package found in: {backend_path}")
+import backend.qusim_class
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
-sys.path.insert(0, parent_dir_path)
 
 from math import floor
 import UI
@@ -13,8 +16,6 @@ import bloch_sphere
 import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
-# import backend.qusim_class as qusim_class
-from backend import qusim_class
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 import gates
 import copy
@@ -23,8 +24,6 @@ from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
 import Fields.TextInput as input_box
-import sys
-import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
 sys.path.insert(0, parent_dir_path)

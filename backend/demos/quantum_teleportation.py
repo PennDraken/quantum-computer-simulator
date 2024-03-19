@@ -4,7 +4,7 @@ import numpy as np
 
 # This algorithm transports the state of qubit 0 to qubit 2
 #----------------------------------------------------------
-q = qusim_class.System() # init state
+q = qusim_class.Registers_Manager() # init state
 # Add qubits
 q.add_qubit("A", Gates.zero_state)
 q.add_qubit("B", Gates.zero_state)

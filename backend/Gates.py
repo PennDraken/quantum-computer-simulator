@@ -12,8 +12,8 @@ CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
 H = (1/np.sqrt(2))*np.array([[1,1],[1,-1]], dtype=complex)
 # Swap gate
 SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])
+# Basis states of qubits
 zero_state = np.array([1,0])
-# zero_state = 1/np.sqrt(2)*np.array([1,1j], dtype=complex)
 one_state = np.array([0,1])
 
 # TODO Name to something more intuitive
@@ -24,6 +24,30 @@ def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
     for i in range(1, qubit_count):
         vector = np.kron(vector, single_qubit_state if i == qubit_index else m)
     return vector
+
+# Expands gate to a given qubit index
+def expand_gate(gate, index, qubit_count):
+    # Check that gate fits at given index
+    width = int(np.log2(len(gate)))
+    assert index+width-1 < qubit_count, "Error! Gate does not fit"
+    if index == 0:
+        expanded_gate = gate
+        i = width  # start position
+        while i < qubit_count:
+            expanded_gate = np.kron(expanded_gate, I)
+            i += 1
+    else:
+        expanded_gate = I
+        i = 1
+        while i < qubit_count:
+            if i == index:
+                expanded_gate = np.kron(expanded_gate, gate)
+                i += width  # increment counter by size of gate
+            else:
+                expanded_gate = np.kron(expanded_gate, I)
+                i += 1
+    return expanded_gate
+
 
 def Rx(theta)->np.array:
     return np.array([[np.cos(theta/2), -1j*np.sin(theta/2)],

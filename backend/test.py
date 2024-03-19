@@ -10,7 +10,7 @@ import qusim_class
 def test_gateApply():
     target = np.array([1, 0, 0, 0])
     target = Gates.CNOT.dot(target)
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", [1, 0])
     q.add_qubit("B", [1, 0])
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
@@ -19,7 +19,7 @@ def test_gateApply():
 
     target = np.array([0, 0, 1, 0])
     target = Gates.CNOT.dot(target)
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", [0, 1])
     q.add_qubit("B", [1, 0])
     q.apply_gate_multiple(Gates.CNOT, "A", "B")
@@ -27,7 +27,7 @@ def test_gateApply():
     test(target, result, "Testing gate application")
 
 
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", np.array([1, 0]))
     q.add_qubit("B", np.array([1, 0]))
     q.apply_gate(Gates.H, "A")
@@ -45,7 +45,7 @@ def test_gateApply():
     # New case
     target = kron_list([q0, q1, q2])
     target = target.dot(np.kron(Gates.CNOT, Gates.I))
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
@@ -57,7 +57,7 @@ def test_gateApply():
     # New case
     target = kron_list([q0, q1, q2])
     target = target.dot(np.kron(Gates.I, Gates.CNOT))
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
@@ -72,7 +72,7 @@ def test_gateApply():
     target = target.dot(np.kron(Gates.CNOT, Gates.I))  # Apply CNOT
     target = target.dot(np.kron(Gates.I, Gates.SWAP))  # Swap back
 
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
@@ -102,7 +102,7 @@ def test_sort():
     q3 = 1/np.sqrt(2)*np.array([1, 1])
 
     # sorted same as unsorted test
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
@@ -114,7 +114,7 @@ def test_sort():
     test(result, result2, "Tested sorting already sorted state")
 
     # sort unsorted test
-    q = qusim_class.System()
+    q = qusim_class.Registers_Manager()
     q.add_qubit("A", q0)
     q.add_qubit("B", q1)
     q.add_qubit("C", q2)
