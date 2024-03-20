@@ -182,19 +182,9 @@ class Bloch_Sphere():
     # Sets the state from a rgister
     # Q-sphere uses hamming distance to find distance 
     def set_register(self, register):
-        """self.points = []
-        point = np.array([0,0,1])
-        self.points.append(point)
-        point = np.array([0,1,0])
-        self.points.append(point)
-        point = np.array([1,0,0])
-        self.points.append(point)
-        point = np.array([0,-1,0])
-        self.points.append(point)"""
-
         self.points = []
         vector = register.vector
-        max_number = len(register.vector) - 1 # |11111> All 1s
+        max_number = len(register.vector) - 1 # Maximum index reached
         max_distance = self.binary_hamming(0, max_number)
         # convert register to points
         for i,state in enumerate(vector):
