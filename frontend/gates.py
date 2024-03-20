@@ -54,6 +54,10 @@ class gateHandler:
 
     def getGateCount(self, key: int):
         return self.gateMap[key]
+    
+    #alignmentValue = 35
+    #adjustedDistance = (self.gateHeight / 3)
+    adjust = 0
 
     # Renders a gate + lines for qubits
     def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method        
@@ -67,29 +71,32 @@ class gateHandler:
             for i in range(1, nrQubits):
                 # Draw lines here to qubits connected to gate
                 mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
-                y1 = qubits[i-1] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+                y1 = qubits[0] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
                 y2 = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
-                screenHandler.draw_qubit_line((mid_x, y1), (mid_x, y2), color)
-
-            for i in range(1, nrQubits):
-                # Draw connections here (dots)
-                mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
-                y = qubits[i] * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1]
-                # need to change this
-                screenHandler.drawQlineMod((mid_x, y), (mid_x, y), Loc.NONE, Loc.END_FILLED, color)
+                #screenHandler.draw_qubit_line((mid_x, y1), (mid_x, y2), color) 
+                startSpecification = Loc.NONE
+                endSpecification =  Loc.END_FILLED
+                if gate_text == "CNOT" or gate_text == "Toffoli":
+                    startSpecification = Loc.START_CROSS
+                elif gate_text == "Swap":
+                    startSpecification = Loc.START_CROSS2
+                    endSpecification = Loc.END_CROSS2
+                screenHandler.drawQlineMod((mid_x, y1), (mid_x, y2), startSpecification, endSpecification, color)
+                
+           
 
         # Draw the actual gate
+        #pygame.draw.circle(screen, (0, 0, 255), pos, 50)
         center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
         x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
         y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
-        gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
-        Gate.draw_gate(gate.gate_text, x, y, self.gateWidth, self.gateHeight, color) # Draws gate
+        if gate_text != "CNOT" and gate_text != "Toffoli" and gate_text != "Swap":
+          gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
+          Gate.draw_gate(gate.gate_text, x, y, self.gateWidth + self.adjust, self.gateHeight + self.adjust, color) # Draws gate
+        else: 
+          gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) 
         return gate # for gate shifting
-
-# This is a simple function that converts an element in gateList to a rect
-# This is useful for collision detection etc
-# Uses constants defined in UI to render gate
-# This function is used in addGate, before adding the gate to the gateHandler class
+    
 def gatelist_gate_to_rect(gate_text : str, gate_index_in_list : int, operating_qubit : int, offset_x : int, offset_y : int)->pygame.rect:
     # Find location of upper left corner in underlying grid
     grid_x = (gate_index_in_list + 1) * UI.grid_size + offset_x
