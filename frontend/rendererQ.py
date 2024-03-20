@@ -73,7 +73,6 @@ bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
-# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
 
@@ -285,8 +284,16 @@ while True:
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
         print("Placeing qubit")
-        row = (Mouse.y - offset_y) // UI.grid_size
-        gateList[Mouse.holding[0]-1][1][Mouse.holding[1]] = row
+        qubit_row = (Mouse.y - offset_y) // UI.grid_size
+        # Check if occupied
+        # Mouse.holding is a tuple (col, qubit_index)
+        # Check if gateList occupied
+        col = Mouse.holding[0]-1
+        occupied_qubits = gateList[col][1]
+        if qubit_row not in occupied_qubits:
+            # Reminder gateList is formatted like this: column, [gate, qubits: []]
+            gateList[col][1][Mouse.holding[1]] = qubit_row # Change row of qubit by swapping¨
+        
     elif Mouse.status == "Holding qubit":
         # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
         Mouse.holding = None
