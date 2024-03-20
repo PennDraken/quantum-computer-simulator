@@ -368,6 +368,12 @@ class Circuit():
         while self.position + 1<len(self.description):
             self.step_fwd()
 
+    # Gets current system as a single register
+    def single_register(self):
+        system = self.systems[self.position]
+        single_register = system.get_as_register()
+        return single_register
+
     # Used for frontend. Converts a circuit to a format that frontend can use
     def as_frontend_gate_list(self):
         description = self.description

@@ -189,8 +189,10 @@ while True:
         input_boxes.update(tab_panel.y, tab_panel.height)
 
     elif option == "Bloch sphere":
+        # update bloch_sphere
+        single_register = circuit.single_register()
+        bloch_sphere.set_register(single_register)
         bloch_sphere.draw()
-        pass # Implement Bloch sphere render here
     # ---------------------------------------------------------------
 
     # Mouse themeing based on status

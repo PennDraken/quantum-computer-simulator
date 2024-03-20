@@ -40,7 +40,7 @@ def plot_point(screen, x,y,r,px,py,pz, a, a2):
     # if pz<0:
         # drawX(x+px, p['y'], 10, pygame.Color("coral4"))
     # Pointing towards
-    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+    if pz>=0: # z axis is positive outside of screen (check if vector points towards viewpoint)
         r2=10
         pygame.draw.circle(screen, pygame.Color("gold3"), [x+px, p['y']], r2, width=5)
 
@@ -54,7 +54,7 @@ def plot_point_line(screen, x,y,r,px,py,pz, a, a2):
     if pz<0:
         pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=1)
     # Pointing towards
-    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+    else: # z axis is positive outside of screen (check if vector points towards viewpoint)
         pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=5)
 
 def plot_point_text(screen, x,y,r,px,py,pz, a, a2):
@@ -93,7 +93,7 @@ def ry(x,y,z,a):
     return {'x' : xp, 'y' : yp, 'z' : zp}
 
 # Converts alpha beta values to a blochvector
-def blochVector(alpha, beta)->list:
+def state_to_point(alpha, beta)->list:
     u = complex(beta) / complex(alpha)
     ux = u.real
     uy = u.imag
@@ -154,7 +154,7 @@ class Bloch_Sphere():
         x = np.sin(phi) * np.cos(theta)
         y = np.sin(phi) * np.sin(theta)
         z = np.cos(phi)
-        self.points.append( np.array([x, y, z]))
+        self.points.append(np.array([x, y, z]))
 
     def add_point(self, x, y, z):
         point = np.array([x, y, z])
@@ -176,8 +176,54 @@ class Bloch_Sphere():
         for p in self.points:
             plot_point(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
 
-        for p in self.points:
-            plot_point_text(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
+        # for p in self.points:
+            # plot_point_text(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
+
+    # Sets the state from a rgister
+    # Q-sphere uses hamming distance to find distance 
+    def set_register(self, register):
+        """self.points = []
+        point = np.array([0,0,1])
+        self.points.append(point)
+        point = np.array([0,1,0])
+        self.points.append(point)
+        point = np.array([1,0,0])
+        self.points.append(point)
+        point = np.array([0,-1,0])
+        self.points.append(point)"""
+
+        self.points = []
+        vector = register.vector
+        max_number = 2**len(register.vector)-1 # |11111> All 1s
+        max_distance = self.binary_hamming(0, max_number)
+        # convert register to points
+        for i,state in enumerate(vector):
+            probability = np.abs(state)**2
+            if probability==0:
+                continue
+
+            distance = self.binary_hamming(i, max_number)
+            # normalise
+            distance_norm = 1 - (distance / max_distance) # 1 - to flip rotation
+
+            theta = distance_norm * np.pi # Vertical movement
+            x = 0
+            y = np.round(np.cos(theta),2)
+            z = np.round(np.sin(theta),2)
+            point = np.array([x,y,z])
+            self.points.append(point)
+
+    def binary_hamming(self, num1, num2):
+        # Convert numbers to binary strings
+        binary_str1 = bin(num1)[2:]
+        binary_str2 = bin(num2)[2:]
+        # Make binary strings of equal length by padding with zeros
+        max_length = max(len(binary_str1), len(binary_str2))
+        binary_str1 = binary_str1.zfill(max_length)
+        binary_str2 = binary_str2.zfill(max_length)
+        # Calculate Hamming distance
+        hamming_distance = sum(ch1 != ch2 for ch1, ch2 in zip(binary_str1, binary_str2))
+        return hamming_distance
 
     def pan(self, mouse):
         if mouse.l_held:
