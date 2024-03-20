@@ -194,7 +194,7 @@ class Bloch_Sphere():
 
         self.points = []
         vector = register.vector
-        max_number = 2**len(register.vector)-1 # |11111> All 1s
+        max_number = len(register.vector) - 1 # |11111> All 1s
         max_distance = self.binary_hamming(0, max_number)
         # convert register to points
         for i,state in enumerate(vector):
@@ -204,7 +204,7 @@ class Bloch_Sphere():
 
             distance = self.binary_hamming(i, max_number)
             # normalise
-            distance_norm = 1 - (distance / max_distance) # 1 - to flip rotation
+            distance_norm = (distance / max_distance) # 1 - to flip rotation
 
             theta = distance_norm * np.pi # Vertical movement
             x = 0
