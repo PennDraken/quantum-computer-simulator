@@ -223,7 +223,7 @@ while True:
             Mouse.status = "Resizing bottom panel"
         elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
             circuit_navigation_window.click(Mouse.x, Mouse.y)
-        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y: # <------ use this check
+        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
             Mouse.status = "Panning"
         elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector
@@ -281,7 +281,6 @@ while True:
 
     elif Mouse.r_held and Mouse.status == "Moving gate":
         # Draw gate
-        
         grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
         grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
         # Draw highlight square for gate
@@ -299,9 +298,14 @@ while True:
             gate_color = Colors.red
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
-        print("Placeing qubit")
-        row = (Mouse.y - offset_y) // UI.grid_size
-        gateList[Mouse.holding[0]-1][1][Mouse.holding[1]] = row
+        qubit_row = (Mouse.y - offset_y) // UI.grid_size
+        # Mouse.holding is a tuple (col, qubit_index)
+        # Check if gateList location is occupied
+        col = Mouse.holding[0]-1
+        occupied_qubits = gateList[col][1]
+        if qubit_row not in occupied_qubits:
+            # Reminder gateList is formatted like this: column, [gate, qubits: []]
+            gateList[col][1][Mouse.holding[1]] = qubit_row # TODO Change row of qubit by swapping?
     elif Mouse.status == "Holding qubit":
         # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
         Mouse.holding = None
