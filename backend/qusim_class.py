@@ -363,9 +363,10 @@ class Circuit():
             self.systems[self.position].print_merged_register_QC()
 
 
-    # Runts through the cicuit as fast as possible
+    # Runs through the cicuit as fast as possible
     def run(self):
-        pass
+        while self.position + 1<len(self.description):
+            self.step_fwd()
 
     # Used for frontend. Converts a circuit to a format that frontend can use
     def as_frontend_gate_list(self):
