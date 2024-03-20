@@ -114,8 +114,6 @@ moving_gate = False
 # the gate being shifted
 selectedGate = None
 
-# check if gate was shifting
-#wasShifting = False
 
 sizeQ = 40
 
@@ -130,13 +128,13 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.MOUSEWHEEL:
-          UI.grid_size += (5 * event.y) 
-          UI.gate_size += (5 * event.y)
-          handler.adjust += (5 * event.y) 
-          screenHandler.offsetMod += (5 * event.y)  
-          sizeQ += (2 * event.y) 
-          qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
-          qubit_name_panel.state_font = pygame.font.Font(None, 20)
+            UI.grid_size += (5 * event.y) 
+            UI.gate_size += (5 * event.y)
+            handler.adjust += (5 * event.y) 
+            screenHandler.offsetMod += (5 * event.y)  
+            sizeQ += (2 * event.y) 
+            qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
+            qubit_name_panel.state_font = pygame.font.Font(None, 20)
 
     # Clear screen
     screen.fill((0,0,0))
