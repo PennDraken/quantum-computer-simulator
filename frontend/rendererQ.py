@@ -22,7 +22,7 @@ import re
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
-#import Fields.TextInput as input_box---------------------------------------------------------------------------------------------------------
+import Fields.TextInput as input_box
 import sys
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -106,7 +106,7 @@ circuit_y = 75
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [1, 0]), ("Ry(np.pi/4)", [0]), ("Toffoli", [2,1,0]), ("Swap", [1, 0])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-#input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) ---------------------------------------------------------------------------------------------------------------
+input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 
 
 # keep track of shifting
 moving_gate = False
