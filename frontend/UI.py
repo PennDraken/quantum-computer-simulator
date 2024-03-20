@@ -35,6 +35,7 @@ class ChoicePanel():
         self.screen = screen
         self.y = y
         self.choices = choices
+        self.icons = [] # Empty list containing images for the different choices
         self.selected = 0 # Selected choice index
         self.color_unselected = Colors.unselected
         self.color_hover = Colors.hover
@@ -56,7 +57,25 @@ class ChoicePanel():
                 pygame.draw.rect(self.screen, self.color_selected, rect)
             else:
                 pygame.draw.rect(self.screen, self.color_unselected, rect)
-            text(self.screen, self.choices[i], x + button_width/2, y + button_height/2, Colors.black)
+            # Draw text and icons
+            if self.icons != []: # TODO center both icon and text on tab
+                image = self.icons[i] # gets corresponsind image
+                icon_width = self.height
+                icon_rect = (x + self.height, y, icon_width, icon_width) # Note this rect does not scale icon
+                # Text and image
+                self.screen.blit(image, icon_rect)
+                offset = icon_width
+                text(self.screen, self.choices[i], x + button_width/2 + icon_width, y + button_height/2, Colors.black)
+            else:
+                # Just text
+                text(self.screen, self.choices[i], x + button_width/2, y + button_height/2, Colors.black)
+
+    # Sets images of choice panel (automatically scales to size)
+    def set_icons(self, images):
+        self.icons = []
+        for image in images:
+            scaled_image = pygame.transform.smoothscale(image, (self.height, self.height))
+            self.icons.append(scaled_image)
 
     # Handles mouse input
     def click(self, mouse_x, mouse_y):

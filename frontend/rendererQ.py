@@ -32,8 +32,6 @@ from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
 
-
-
 screen = screenHandler.screen
 
 def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
@@ -67,6 +65,7 @@ drag_bar_color = Colors.white
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
 
 tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
+tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
 bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 bloch_sphere.add_random_point_on_unit_sphere()
