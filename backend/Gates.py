@@ -139,6 +139,13 @@ def controlled_swap(n)->np.array:
     else:
         matrix = np.kron(np.kron(SWAP, I), I)
     return matrix
+    
+def add_control_qubit(matrix):
+  m, n = matrix.shape
+  new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
+  new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
+    
+  return new_matrix
 
 def amodN(a, N)->np.array:
     return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
