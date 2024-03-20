@@ -22,7 +22,7 @@ import re
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import screenHandler
-import Fields.TextInput as input_box
+#import Fields.TextInput as input_box---------------------------------------------------------------------------------------------------------
 import sys
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -73,6 +73,7 @@ bloch_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit)
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
+# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
 
@@ -102,10 +103,10 @@ circuit_x = 0
 circuit_y = 75
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
-gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0])]
+gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [1, 0]), ("Ry(np.pi/4)", [0]), ("Toffoli", [2,1,0]), ("Swap", [1, 0])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned)
+#input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) ---------------------------------------------------------------------------------------------------------------
 
 # keep track of shifting
 moving_gate = False
@@ -115,6 +116,8 @@ selectedGate = None
 
 # check if gate was shifting
 #wasShifting = False
+
+sizeQ = 40
 
 while True:
     screen.fill((0,0,0))
@@ -126,6 +129,14 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        elif event.type == pygame.MOUSEWHEEL:
+          UI.grid_size += (5 * event.y) 
+          UI.gate_size += (5 * event.y)
+          handler.adjust += (5 * event.y) 
+          screenHandler.offsetMod += (5 * event.y)  
+          sizeQ += (2 * event.y) 
+          qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
+          qubit_name_panel.state_font = pygame.font.Font(None, 20)
 
     # Clear screen
     screen.fill((0,0,0))
@@ -257,23 +268,28 @@ while True:
             # Find qubit to drag
             col = (Mouse.x - offset_x) // UI.grid_size
             row = (Mouse.y - offset_y) // UI.grid_size
-            gate_data = gateList[col-1]
-            print(gate_data[0])
-            qubits = gate_data[1]
-            for qubit_index in range(1, len(qubits)):
-                if row==qubits[qubit_index]:
-                    Mouse.holding = (col, qubit_index)
-                    Mouse.status = "Holding qubit"
-                    print(f"Holding qubit{qubits[qubit_index]}")
-                    break
+            if -1 < col-1 < len(gateList):
+              gate_data = gateList[col-1]
+              print(gate_data[0])
+              qubits = gate_data[1]
+              for qubit_index in range(1, len(qubits)):
+                  if row==qubits[qubit_index]:
+                      Mouse.holding = (col, qubit_index)
+                      Mouse.status = "Holding qubit"
+                      print(f"Holding qubit{qubits[qubit_index]}")
+                      break
 
     elif Mouse.r_held and Mouse.status == "Moving gate":
         # Draw gate
+        
         grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
         grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
         # Draw highlight square for gate
         gate_data = Mouse.holding
         qubits = gate_data[1]
+        if qubits[0] != min(qubits):
+            print (qubits[0])
+            grid_y -= (max(qubits) - min(qubits)) * UI.grid_size
         delta_qubit_index = max(qubits) - min(qubits) # Find height of qubits
         highlight_height = (delta_qubit_index + 1) * UI.grid_size# The height of the highlighter square
         gate_color = Colors.white
@@ -284,16 +300,8 @@ while True:
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
         print("Placeing qubit")
-        qubit_row = (Mouse.y - offset_y) // UI.grid_size
-        # Check if occupied
-        # Mouse.holding is a tuple (col, qubit_index)
-        # Check if gateList occupied
-        col = Mouse.holding[0]-1
-        occupied_qubits = gateList[col][1]
-        if qubit_row not in occupied_qubits:
-            # Reminder gateList is formatted like this: column, [gate, qubits: []]
-            gateList[col][1][Mouse.holding[1]] = qubit_row # Change row of qubit by swapping¨
-        
+        row = (Mouse.y - offset_y) // UI.grid_size
+        gateList[Mouse.holding[0]-1][1][Mouse.holding[1]] = row
     elif Mouse.status == "Holding qubit":
         # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
         Mouse.holding = None
@@ -330,5 +338,3 @@ while True:
         pygame.display.update()
 
     framerate.tick(60)
-    
-    
