@@ -86,10 +86,7 @@ qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_
 displayCalc = False
 dragging = False
 
-# Mouse status
-# drag/drop development below, unfinished
 # name of selected gate
-#selected = ""
 dragging2 = False
 coordinates = []
 
@@ -170,7 +167,7 @@ while True:
     # Draws background of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
     calculation_window.y = tab_panel.y + tab_panel.height
-    calculation_window.circuit_dx = circuit_dx
+    calculation_window.circuit_dx = circuit_x + circuit_dx
     calculation_window.systems = circuit.systems # update states
 
     # Draw window with run and step buttons

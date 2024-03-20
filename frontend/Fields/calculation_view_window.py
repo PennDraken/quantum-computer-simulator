@@ -28,6 +28,7 @@ class Calculation_Viewer_Window:
 
     def draw(self):
         # Precompute values
+        self.grid_size = UI.grid_size
         half_grid_size = self.grid_size / 2
         label_height = 30
         text_height = 20
