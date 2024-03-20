@@ -96,10 +96,8 @@ coordinates = []
 gateBoxHit = False
 gateButton = False
         
-# available buttons in the gate tab
-# gateList = [('X', [0,3]),('H', [1,4,2]),('X', [0,3]), ('Z', [1,3,2]),('X', [0,3])]
 gateList = circuit.as_frontend_gate_list()
-circuit_x = 0
+circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
@@ -113,7 +111,6 @@ moving_gate = False
 
 # the gate being shifted
 selectedGate = None
-
 
 sizeQ = 40
 
