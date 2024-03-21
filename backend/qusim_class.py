@@ -542,6 +542,28 @@ def shor_subroutine_circuit(guess : int, N : int):
     #print(temp[0:len(temp)])
     return temp
 
+
+def addition_transform_1(qubits_a : [], qubits_b : []):
+        for i in range(len(qubits_a) -1, 0, -1):
+            qubits_t = qubits_a[-i:]
+            qubits_t.append(qubits_b[i])
+            gate_t = combine_gates(i, len(qubits_t))
+            #print(gate_t)
+            #System.apply_gate_qubit_list(gate_t, qubits_t)
+                
+def combine_gates(i : int, n):
+     gate_i = np.array([])
+     state1 = True
+     for k in range(i):
+       if state1:
+         gate_i = expand_gate(generateConditional(i-k), i, n +1) 
+         print(n)
+         print(gate_i)
+         state1 = False
+       else:
+         gate_i = np.matmul(gate_i, expand_gate(generateConditional(i-k), i, n +1))
+     return gate_i
+
 # ----------------------------------------------------------------------------------------------------
 """q = System()
 q.add_qubit("A", Gates.zero_state)
