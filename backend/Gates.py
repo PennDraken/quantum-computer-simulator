@@ -150,3 +150,52 @@ def add_control_qubit(matrix):
 def amodN(a, N)->np.array:
     return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
 
+
+def expand_gate(gate, index, qubit_count):
+    # Check that gate fits at given index
+    width = int(np.log2(len(gate)))
+    assert index+width-1 < qubit_count, "Error! Gate does not fit"
+    if index == 0:
+        expanded_gate = gate
+        i = width  # start position
+        while i < qubit_count:
+            expanded_gate = np.kron(expanded_gate, I)
+            i += 1
+    else:
+        expanded_gate = I
+        i = 1
+        while i < qubit_count:
+            if i == index:
+                expanded_gate = np.kron(expanded_gate, gate)
+                i += width  # increment counter by size of gate
+            else:
+                expanded_gate = np.kron(expanded_gate, I)
+                i += 1
+    return expanded_gate
+
+
+def generateConditional(k : int):
+    #return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,5]])
+    return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,(np.e**((2*np.pi*1j) / (2**k)))]])
+
+# can use for other gates too   
+def conditional_auto_swap(gate, q1):
+     gate_1 = expand_gate(gate, 0, q1 +1)
+     for i in range(1, q1):
+         expanded_swap = expand_gate(SWAP, i, q1 +1)
+         #print(expanded_swap)
+         gate_1 = np.dot(gate_1, expanded_swap)
+     for i in range(q1 - 1, 0 ,-1):
+         expanded_swap = expand_gate(SWAP, i, q1 +1)  
+         gate_1 = np.dot(gate_1, expanded_swap)
+     return gate_1
+
+
+
+def testSwap():
+    gate = CNOT
+    temp = np.dot(SWAP, gate)
+    temp_2 = np.dot(temp, SWAP)
+    print(temp_2)
+
+
