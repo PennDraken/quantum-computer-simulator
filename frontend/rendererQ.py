@@ -13,7 +13,7 @@ sys.path.insert(0, parent_dir_path)
 # Custom modules
 import UI
 import Utilities.Colors as Colors
-import bloch_sphere
+import frontend.q_sphere as q_sphere
 import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
@@ -51,9 +51,9 @@ drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable c
 tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
 tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
-bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
-bloch_sphere.add_random_point_on_unit_sphere()
-bloch_sphere.add_random_point_on_unit_sphere()
+q_sphere = q_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
+q_sphere.add_random_point_on_unit_sphere()
+q_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit) Comment out to load different presets
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
@@ -130,7 +130,7 @@ while True:
     # Update positions
     tab_panel.y = drag_bar_y + drag_bar_height
     tab_panel.draw()
-    bloch_sphere.y = tab_panel.y + tab_panel.height
+    q_sphere.y = tab_panel.y + tab_panel.height
     # Draws background of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
     calculation_window.y = tab_panel.y + tab_panel.height
@@ -158,8 +158,8 @@ while True:
     elif option == "Bloch sphere":
         # update bloch_sphere
         single_register = circuit.single_register()
-        bloch_sphere.set_register(single_register)
-        bloch_sphere.draw()
+        q_sphere.set_register(single_register)
+        q_sphere.draw()
     # ---------------------------------------------------------------
 
     # Mouse themeing based on status
@@ -208,7 +208,7 @@ while True:
                 circuit_dy=0
         # Rotate Bloch sphere
         elif Mouse.status == "Panning sphere":
-            bloch_sphere.pan(Mouse)
+            q_sphere.pan(Mouse)
     elif not (Mouse.l_held or Mouse.l_click) and (Mouse.status=="Panning" or Mouse.status=="Resizing bottom panel" or Mouse.status=="Resizing bottom panel"):
         Mouse.status = None
 

@@ -179,7 +179,7 @@ class Bloch_Sphere():
         # for p in self.points:
             # plot_point_text(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
 
-    # Sets the state from a rgister
+    # Sets the states shown on q-sphere by providing a register containting state vector
     # Q-sphere uses hamming distance to find distance 
     def set_register(self, register):
         self.points = []
@@ -188,18 +188,28 @@ class Bloch_Sphere():
         max_distance = self.binary_hamming(0, max_number)
         # convert register to points
         for i,state in enumerate(vector):
+            # only plot states with probability higher than 0%
             probability = np.abs(state)**2
             if probability==0:
                 continue
-
+            
+            # latitude
             distance = self.binary_hamming(i, max_number)
             # normalise
             distance_norm = (distance / max_distance) # 1 - to flip rotation
-
             theta = distance_norm * np.pi # Vertical movement
-            x = 0
-            y = np.round(np.cos(theta),2)
-            z = np.round(np.sin(theta),2)
+
+            # longitude
+            longitudal_lines = 2 ** distance - 1 # This is the amount of longitudal lines at this location.
+            if longitudal_lines != 0:
+                phi = i/longitudal_lines * (2 * np.pi) # Calculate phi by finding fraction of index.
+            else:
+                phi = 0 # Div by zero error when distance is 0
+
+            # create point (note: some axes are not drawn according to mathematical convention, due to computer x, y, z screen conventions)
+            x = np.sin(theta) * np.cos(phi) # conventional x
+            y = np.round(np.cos(theta),2) # conventional z
+            z = np.round(np.sin(theta) * np.sin(phi),2) # conventional y
             point = np.array([x,y,z])
             self.points.append(point)
 
