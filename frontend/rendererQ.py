@@ -27,32 +27,23 @@ import screenHandler
 
 screen = screenHandler.screen
 
-def showCalculation(position : tuple, calculations : [str]): # not settled on calculation format, this is a test
-    pygame.draw.rect(screen,(position[0], position[1], 100, 100),0)
-    for calculation in calculations:
-        screen.blit(pygame.font.SysFont(calculation, 45).render(calculation, True, (170, 170, 200)), (position[0]+1, position[1]-2))
-
-
 handler = gateHandler()
 calculations = ["calculation_placeholder"]
 
 framerate = pygame.time.Clock()
 
 # sampleString = "H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0"
-# TODO: zoom out
-offset = (75,75)
 
 # access screen
 pygame.display.Info()
 
+# positioning of circuit
 circuit_x = 75
 circuit_y = 75
-# Tag panning:offset som apliceras på allt i scenen
 circuit_dx = 0
 circuit_dy = 0
-# Tag meny: menyns höjd variabel 
-# textCanvasY =  pygame.display.Info().current_h - 100 #920
 
+# The seperator between upper and lower screen
 drag_bar_y = screen.get_height() - 100
 drag_bar_color = Colors.white
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
@@ -64,7 +55,7 @@ bloch_sphere = bloch_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_
 bloch_sphere.add_random_point_on_unit_sphere()
 bloch_sphere.add_random_point_on_unit_sphere()
 
-# Calculation window (generate example circuit)
+# Calculation window (generate example circuit) Comment out to load different presets
 circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
@@ -75,16 +66,6 @@ calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0
 circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_window.y + circuit_navigation_window.height, circuit.systems[0].qubits, circuit_dy)
-
-displayCalc = False
-dragging = False
-
-# name of selected gate
-dragging2 = False
-coordinates = []
-
-gateBoxHit = False
-gateButton = False
         
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
@@ -96,15 +77,10 @@ menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 
 
-# keep track of shifting
-moving_gate = False
-
-# the gate being shifted
-selectedGate = None
-
-sizeQ = 40
+sizeQ = 40 # Zoom level
 
 while True:
+    # Clear screen
     screen.fill((0,0,0))
     pygame_event = pygame.event.get() # This removes all events from stack
     redraw_screen = False
@@ -123,9 +99,7 @@ while True:
             qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
             qubit_name_panel.state_font = pygame.font.Font(None, 20)
 
-    # Clear screen
-    screen.fill((0,0,0))
-    # Update circuit behind the scenes TODO support additional qubits/ removal of qubits
+    # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
 
     # Draw a line to show where user has stepped to TODO make it dotted
@@ -137,12 +111,12 @@ while True:
     # Draw example circuit
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
-        if i==circuit.position-1:
+        if i==circuit.position-1: # Change color for gates being run
             color = Colors.yellow
         else:
             color = Colors.white
         gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)
-        gates_on_circuit.append(gate_data) # <---------- made active gates change
+        gates_on_circuit.append(gate_data)
     
     # Draw qubit names on left side
     qubit_name_panel.offset_y = circuit_y + circuit_dy
