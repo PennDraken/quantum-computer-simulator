@@ -1,7 +1,7 @@
 # Constant definitions for different colors
 gray = (127,127,127)
 dark_gray = (25,25,25)
-dark_blue = (0, 15, 30)
+dark_blue = (30, 30, 50)
 black = (0, 0, 0)
 white = (250,250,250)
 yellow = (255, 200, 100)
