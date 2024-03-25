@@ -3,10 +3,11 @@
 # Example file showing a circle moving on screen
 import pygame
 import numpy as np
+from UI import Colors
 
 # Draws the 3D sphere
 def draw_bloch(screen, x, y, r, a, a2):
-    pygame.draw.ellipse(screen, pygame.Color("darkslategrey"), pygame.Rect(x-r,y-r,2*r,2*r), width=5) # could be cirlce instead
+    pygame.draw.ellipse(screen, Colors.dark_gray, pygame.Rect(x-r,y-r,2*r,2*r), width=5) # could be cirlce instead
     n = 5
     for i in range(-n,n+1,2):
         s=(i)*(r/n)
@@ -17,7 +18,7 @@ def draw_bloch(screen, x, y, r, a, a2):
         p1=rotate_point(x,y,x1,y1,a)
         p2=rotate_point(x,y,x2,y2,a)
         dx=np.sqrt(r**2-s**2)
-        oval(screen, x-dx,p1['y'],x+dx,p2['y'], pygame.Color("darkslategrey"))
+        oval(screen, x-dx,p1['y'],x+dx,p2['y'], Colors.dark_gray)
         # print(p1['y'])
 
 # Kind of unneccessary, just that the old code was implemented using oval(x1,y1,x2,y2) (not available in Pygame) instead of ellipse
@@ -30,7 +31,7 @@ def oval(screen, x1, y1, x2, y2, color):
     pygame.draw.ellipse(screen, color, (left, top, width, height), width=5)
 
 # Plots a point at x,y,z
-def plot_point(screen, x,y,r,px,py,pz, a, a2):
+def plot_point(screen, x,y,r,px,py,pz, a, a2, point_radius):
     np=ry(px,py,pz,a2)
     px=np['x']
     py=np['y']
@@ -41,8 +42,7 @@ def plot_point(screen, x,y,r,px,py,pz, a, a2):
         # drawX(x+px, p['y'], 10, pygame.Color("coral4"))
     # Pointing towards
     if pz>=0: # z axis is positive outside of screen (check if vector points towards viewpoint)
-        r2=10
-        pygame.draw.circle(screen, pygame.Color("gold3"), [x+px, p['y']], r2, width=5)
+        pygame.draw.circle(screen, Colors.yellow, [x+px, p['y']], point_radius, width=5)
 
 def plot_point_line(screen, x,y,r,px,py,pz, a, a2):
     np=ry(px,py,pz,a2)
@@ -52,26 +52,27 @@ def plot_point_line(screen, x,y,r,px,py,pz, a, a2):
     p=rotate_point(x,y,x+pz,y+py,a)
     # Pointing outwards
     if pz<0:
-        pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=1)
+        pygame.draw.line(screen, Colors.gray, (x+px, p['y']), (x,y), width=1)
     # Pointing towards
     else: # z axis is positive outside of screen (check if vector points towards viewpoint)
-        pygame.draw.line(screen, pygame.Color("gray20"), (x+px, p['y']), (x,y), width=5)
+        pygame.draw.line(screen, Colors.gray, (x+px, p['y']), (x,y), width=5)
 
-def plot_point_text(screen, x,y,r,px,py,pz, a, a2):
+def plot_point_text(screen, x,y,r,px,py,pz, a, a2, string : str):
     np=ry(px,py,pz,a2)
     px=np['x']
     py=np['y']
     pz=np['z']
     p=rotate_point(x,y,x+pz,y+py,a)    
     # Pointing towards
-    if pz>0: # z axis is positive outside of screen (check if vector points towards viewpoint)
+    if pz>=0: # z axis is positive outside of screen (check if vector points towards viewpoint)
         # Draw alpha beta values of point
         # We need to unrotate point to get its real values
         p_original = ry(px,py,pz, -a2)
         state = pointToAlphaBeta(p_original['x']/r, p_original['y']/r, p_original['z']/r) # scaling to unit sphere
         alpha = state[0]
         beta = state[1]
-        text(screen, f"{alpha:.2}*|0>+{beta:.2}*|1>", x+px, p['y']-20, "white")
+        # pygame.draw.rect(screen, Colors, (x+px, p['y']-20, ))
+        text(screen, string, x+px, p['y']-20, "white")
 
 # Draws a cross shape
 def drawX(screen, x, y, length, color, a, a2):
@@ -129,60 +130,67 @@ def text(screen, string, x, y, color):
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
 
-# Generates some random points on sphere
-points = []
-for i in range(0,5):
-    p = random_point_on_unit_sphere()
-    # p = p * sphere_r
-    points.append(p)
+# Represents the states of a system
+class State():
+    def __init__(self, coords_vector : np.array, label : str, probability, phase):
+        self.coords_vector=coords_vector
+        self.label=label
+        self.probability=probability
+        self.phase=phase
 
-class Bloch_Sphere():
+points = []
+
+class Q_Sphere():
     def __init__(self, screen, x, y, w, h):
         self.screen=screen
         self.x=x
         self.y=y
         self.w=w
         self.h=h
-        self.a=0.1
+        self.a=0.1 # Angles
         self.a2=0
-        self.sphere_r =  min(w, h)/2
-        self.points = []
-
+        self.sphere_r =  min(w, h)/2 
+        self.states = []
+        
     def add_random_point_on_unit_sphere(self):
         theta = np.random.uniform(0, 2*np.pi)
         phi = np.random.uniform(0, np.pi)
         x = np.sin(phi) * np.cos(theta)
         y = np.sin(phi) * np.sin(theta)
         z = np.cos(phi)
-        self.points.append(np.array([x, y, z]))
+        self.states.append(np.array([x, y, z]))
 
     def add_point(self, x, y, z):
         point = np.array([x, y, z])
-        self.points.append(point)
+        self.states.append(point)
 
     # Draws the Bloch sphere with vectors etc
     def draw(self):
+        self.w = self.screen.get_width()
         self.h = self.screen.get_height() - self.y
         center_x = self.x + self.screen.get_width()/2
         center_y = self.y + self.h/2
-        self.sphere_r = min(self.w, self.h)/2
+        self.sphere_r = min(self.w, self.h)/2 - 20 # 20 is padding
         # draw sphere
         draw_bloch(self.screen, center_x, center_y, self.sphere_r, self.a, self.a2)
 
         # draw points (theyre seperated to layers so points are always drawn over lines, (depth))
-        for p in self.points:
+        for state in self.states:
+            p = state.coords_vector
             plot_point_line(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
 
-        for p in self.points:
-            plot_point(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
+        for state in self.states:
+            p = state.coords_vector
+            plot_point(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2, state.probability * 40)
 
-        # for p in self.points:
-            # plot_point_text(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2)
+        for state in self.states:
+            p = state.coords_vector
+            plot_point_text(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2, state.label)
 
     # Sets the states shown on q-sphere by providing a register containting state vector
     # Q-sphere uses hamming distance to find distance 
     def set_register(self, register):
-        self.points = []
+        self.states = []
         vector = register.vector
         max_number = len(register.vector) - 1 # Maximum index reached
         max_distance = self.binary_hamming(0, max_number)
@@ -211,8 +219,11 @@ class Bloch_Sphere():
             y = np.round(np.cos(theta),2) # conventional z
             z = np.round(np.sin(theta) * np.sin(phi),2) # conventional y
             point = np.array([x,y,z])
-            self.points.append(point)
+            label = f"|{bin(i)[2:].zfill(len(register.qubits))}>" # Example: |1101>
+            state = State(point, label, probability, 0)
+            self.states.append(state)
 
+    # Finds hanning distance between two numbers TODO Could be faster
     def binary_hamming(self, num1, num2):
         # Convert numbers to binary strings
         binary_str1 = bin(num1)[2:]

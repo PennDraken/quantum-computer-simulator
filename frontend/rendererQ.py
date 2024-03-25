@@ -51,7 +51,7 @@ drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable c
 tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
 tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
-q_sphere = q_sphere.Bloch_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
+q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 q_sphere.add_random_point_on_unit_sphere()
 q_sphere.add_random_point_on_unit_sphere()
 
