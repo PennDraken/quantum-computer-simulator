@@ -181,7 +181,7 @@ class Q_Sphere():
 
         for state in self.states:
             p = state.coords_vector
-            plot_point(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2, state.probability * 40)
+            plot_point(self.screen, center_x,center_y, self.sphere_r,p[0]*self.sphere_r,p[1]*self.sphere_r,p[2]*self.sphere_r, self.a, self.a2, state.probability * (self.sphere_r/5))
 
         for state in self.states:
             p = state.coords_vector
