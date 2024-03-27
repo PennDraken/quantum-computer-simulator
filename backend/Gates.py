@@ -1,4 +1,6 @@
 import numpy as np
+
+
 # Stores the different gates TODO More gates
 # Identity
 I = np.array([[1,0],[0,1]]) 
@@ -32,6 +34,13 @@ def Rx(theta)->np.array:
 def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
                      [np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
+
+# Generates an identity matrix of size qubit count
+def gen_I(qubit_count):
+    gate = I
+    for i in range(1,qubit_count):
+        gate = np.kron(gate,I)
+    return gate
 
 # Generates a Quantum Fourier Transform matrix
 def QFT(N : int)->np.array:
@@ -174,28 +183,46 @@ def expand_gate(gate, index, qubit_count):
     return expanded_gate
 
 
-def generateConditional(k : int):
+def conditional_phase_shift(k : int):
     #return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,5]])
     return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,(np.e**((2*np.pi*1j) / (2**k)))]])
 
-# can use for other gates too   
-def conditional_auto_swap(gate, q1):
-     gate_1 = expand_gate(gate, 0, q1 +1)
-     for i in range(1, q1):
-         expanded_swap = expand_gate(SWAP, i, q1 +1)
-         #print(expanded_swap)
-         gate_1 = np.dot(gate_1, expanded_swap)
-     for i in range(q1 - 1, 0 ,-1):
-         expanded_swap = expand_gate(SWAP, i, q1 +1)  
-         gate_1 = np.dot(gate_1, expanded_swap)
-     return gate_1
+# Uses conditional phase shift to generate A
+def A(n):
+    gate=gen_I(n)
+    for i in range(0,n):
+        control_qubit = i
+        target_qubit = n+1
+        phase_shift=conditional_phase_shift(i+1) # Note i+1 goes from 1 to n
+        # Move target qubit (also expands it)
+        modified_phase_shift = gate_change_connections(phase_shift, control_qubit, target_qubit)
+        # Apply gate
+        gate = gate * modified_phase_shift
+    return gate
 
 
+# Moves qubits by swapping indices and expanding (note gate is a 2 qubit gate)
+def gate_change_connections(gate: np.array, qubit_a, qubit_b):
+    # Expand gate
+    qubit_count = qubit_b + 1
+    gate = expand_gate(gate, qubit_a, qubit_count)
+    output_gate = gate # Copy contents to allow for swapping
+    # Move qubits
+    for i in range(0, len(gate)):
+        new_index = swap_bits(i, qubit_a + 1, qubit_b, qubit_count) # Swap index right of qubit a to qubit b location
+        output_gate[new_index] = gate[i]
+    return output_gate
 
-def testSwap():
-    gate = CNOT
-    temp = np.dot(SWAP, gate)
-    temp_2 = np.dot(temp, SWAP)
-    print(temp_2)
+# Swaps bits located at i and j
+# swaps bits (most significant bit has index 0, least significant has index n)
+def swap_bits(num: int, i: int, j: int, n: int):
+    # Extract the bits at positions i and j
+    bit_i = (num >> (n - 1 - i)) & 1
+    bit_j = (num >> (n - 1 - j)) & 1
+    # XOR the bits to swap them
+    xor_result = bit_i ^ bit_j
+    # Use XOR to flip the bits at positions i and j
+    num ^= (xor_result << (n - 1 - i)) | (xor_result << (n - 1 - j))
+    return num
 
-
+print(A(2))
