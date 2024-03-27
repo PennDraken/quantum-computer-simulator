@@ -543,32 +543,50 @@ def shor_subroutine_circuit(guess : int, N : int):
     return temp
 
 
-def addition_transform_1(qubits_a : [], qubits_b : []):
-        for i in range(len(qubits_a) -1, 0, -1):
+
+q = System()
+q.add_qubit("A", Gates.one_state)
+q.add_qubit("B", Gates.zero_state)
+q.add_qubit("C", Gates.one_state.dot(Gates.H))
+q.add_qubit("D", Gates.one_state)
+#q.add_qubit("E", Gates.zero_state)
+#q.add_qubit("F", Gates.one_state.dot(Gates.H))
+
+
+
+def addition_transform_1(qubits_a : [], qubits_b : []):    
+        for i in range(len(qubits_a) , 0, -1):
             qubits_t = qubits_a[-i:]
-            qubits_t.append(qubits_b[i])
-            gate_t = combine_gates(i, len(qubits_t))
-            #print(gate_t)
-            #System.apply_gate_qubit_list(gate_t, qubits_t)
+            qubits_t.append(qubits_b[i - 1])
+            gate_t = combine_conditional(i, len(qubits_t))
+            print(len(qubits_t))
+            print(len(gate_t))
+            print(gate_t)
+            #System.apply_gate_qubit_list_2(q, gate_t, qubits_t)
+         
                 
-def combine_gates(i : int, n):
+def combine_conditional(i : int, n):
      gate_i = np.array([])
      state1 = True
      for k in range(i):
        if state1:
-         gate_i = expand_gate(generateConditional(i-k), i, n +1)
-         #print(gate_i)
+         gate_i = expand_gate(Gates.CNOT, i, n)
+         #gate_i = expand_gate(generateConditional(i-k), i, n) 
          state1 = False
        else:
-         gate_i = np.matmul(gate_i, expand_gate(generateConditional(i-k), i, n +1))
+         gate_i = np.matmul(gate_i, expand_gate(Gates.CNOT, i, n))
+       #print(len(gate_i))
      return gate_i
 
 # ----------------------------------------------------------------------------------------------------
-"""q = System()
-q.add_qubit("A", Gates.zero_state)
-q.add_qubit("B", Gates.one_state)
-q.add_qubit("C", Gates.zero_state)
-q.add_qubit("D", Gates.zero_state)
-q.add_qubit("E", Gates.one_state)
-q.add_qubit("F", Gates.zero_state)
-q.apply_gate_qubit_list(Gates.CNOT, [3,2,5])"""
+
+
+
+
+#gate_T = conditional_auto_swap(Gates.CNOT, 3)
+#vector = np.array([[ 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 1+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j, 0+0j ]])
+#print( vector.dot(gate_T))
+
+#print (conditional_auto_swap(Gates.CNOT, 3))
+
+addition_transform_1([0,1],[2,3])
