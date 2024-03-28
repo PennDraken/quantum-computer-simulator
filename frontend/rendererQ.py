@@ -28,7 +28,6 @@ import screenHandler
 screen = screenHandler.screen
 
 handler = gateHandler()
-calculations = ["calculation_placeholder"]
 
 framerate = pygame.time.Clock()
 
@@ -48,7 +47,7 @@ drag_bar_y = screen.get_height() - 100
 drag_bar_color = Colors.white
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
 
-tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","Math view","Text view","Bloch sphere"])
+tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","State Viewer","Text Editor","Q-sphere"])
 tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
 q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
@@ -79,36 +78,8 @@ input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width()
 
 sizeQ = 40 # Zoom level
 
-while True:
-    # Clear screen
-    screen.fill((0,0,0))
-    pygame_event = pygame.event.get() # This removes all events from stack
-    redraw_screen = False
-    if len(pygame_event) > 0: # Check if anything has happened since last frame
-        redraw_screen = True
-    for event in pygame_event:
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        elif event.type == pygame.MOUSEWHEEL:
-            UI.grid_size += (5 * event.y) 
-            UI.gate_size += (5 * event.y)
-            handler.adjust += (5 * event.y) 
-            screenHandler.offsetMod += (5 * event.y)  
-            sizeQ += (2 * event.y) 
-            qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
-            qubit_name_panel.state_font = pygame.font.Font(None, 20)
-
-    # Update circuit behind the scenes
-    circuit.set_circuit_from_frontend_gate_list(gateList)
-
-    # Draw a line to show where user has stepped to TODO make it dotted
-    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
-    # Gates placed on the circuit (used for collision detection. is reset every frame)
-    gates_on_circuit = []
-    # Draw circuit view
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.qubit_line) # Draws horisontal lines for qubits
-    # Draw example circuit
+# Draws the circuit
+def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
         if i==circuit.position-1: # Change color for gates being run
@@ -117,102 +88,8 @@ while True:
             color = Colors.white
         gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)
         gates_on_circuit.append(gate_data)
-    
-    # Draw qubit names on left side
-    qubit_name_panel.offset_y = circuit_y + circuit_dy
-    qubit_name_panel.draw()
 
-    # Draw drag bar
-    if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
-        drag_bar_y = screen.get_height() - 70
-    pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height))
-    # Draw options panel
-    # Update positions
-    tab_panel.y = drag_bar_y + drag_bar_height
-    tab_panel.draw()
-    q_sphere.y = tab_panel.y + tab_panel.height
-    # Draws background of panel window (hides circuit)
-    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
-    calculation_window.y = tab_panel.y + tab_panel.height
-    calculation_window.circuit_dx = circuit_x + circuit_dx
-    calculation_window.systems = circuit.systems # update states
-
-    # Draw window with run and step buttons
-    circuit_navigation_window.draw()
-
-    # Draw selected screen
-    option = tab_panel.get_selected()
-    if option == "Logic gates": # TODO Use enum/ atoms instead of strings
-        MenuButton.renderButton([menu_buttons], drag_bar_y + 20)
-    elif option == "Math view":
-        # Implement math view renderer here
-        calculation_window.draw()
-    elif option == "Text view":
-        pressed_keys = pygame.key.get_pressed()
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-
-        input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
-        input_boxes.update(tab_panel.y, tab_panel.height)
-
-    elif option == "Bloch sphere":
-        # update bloch_sphere
-        single_register = circuit.single_register()
-        q_sphere.set_register(single_register)
-        q_sphere.draw()
-    # ---------------------------------------------------------------
-
-    # Mouse themeing based on status
-    Mouse.update(Mouse)
-    # Update cursor + temporary colors
-    if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
-        drag_bar_color = Colors.yellow
-    elif Mouse.status == "Panning":
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
-    elif Mouse.status == "Moving gate":
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
-    else:
-        pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
-        drag_bar_color = Colors.white
-
-    # Left click
-    if Mouse.l_click:
-        # Check for tabs here
-        tab_panel.click(Mouse.x, Mouse.y)
-        if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
-            Mouse.status = "Resizing bottom panel"
-        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
-            circuit_navigation_window.click(Mouse.x, Mouse.y)
-        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
-            Mouse.status = "Panning"
-        elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
-            # Below panel selector
-            # Bloch sphere
-            if tab_panel.get_selected()=="Bloch sphere":
-                Mouse.status = "Panning sphere"
-    # Left mouse is being held down
-    elif Mouse.l_held:
-        # Below is interaction for the reizeable panel at the bottom
-        if Mouse.status == "Resizing bottom panel":
-            drag_bar_y = Mouse.y # Move UI
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
-            drag_bar_color = Colors.yellow
-        # Drag circuit
-        elif Mouse.status == "Panning":
-            circuit_dx += Mouse.dx
-            circuit_dy += Mouse.dy
-            if circuit_dx>0:
-                circuit_dx=0
-            if circuit_dy>0:
-                circuit_dy=0
-        # Rotate Bloch sphere
-        elif Mouse.status == "Panning sphere":
-            q_sphere.pan(Mouse)
-    elif not (Mouse.l_held or Mouse.l_click) and (Mouse.status=="Panning" or Mouse.status=="Resizing bottom panel" or Mouse.status=="Resizing bottom panel"):
-        Mouse.status = None
-
-    # Dragging gates logic
+def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
     offset_x = circuit_x + circuit_dx
     offset_y = circuit_y + circuit_dy
     if Mouse.r_click:
@@ -239,7 +116,6 @@ while True:
                       Mouse.status = "Holding qubit"
                       print(f"Holding qubit{qubits[qubit_index]}")
                       break
-
     elif Mouse.r_held and Mouse.status == "Moving gate":
         # Draw gate
         grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
@@ -293,7 +169,135 @@ while True:
                 gateList.append(gate_data)
         Mouse.holding = None
         Mouse.status = None
+
+# Game loop
+while True:
+    # Clear screen
+    screen.fill((0,0,0))
+    pygame_event = pygame.event.get() # This removes all events from stack
+    redraw_screen = False
+    if len(pygame_event) > 0: # Check if anything has happened since last frame
+        redraw_screen = True
+    for event in pygame_event:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        elif event.type == pygame.MOUSEWHEEL:
+            UI.grid_size += (5 * event.y) 
+            UI.gate_size += (5 * event.y)
+            handler.adjust += (5 * event.y) 
+            screenHandler.offsetMod += (5 * event.y)  
+            sizeQ += (2 * event.y) 
+            qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
+            qubit_name_panel.state_font = pygame.font.Font(None, 20)
+
+    # Update circuit behind the scenes
+    circuit.set_circuit_from_frontend_gate_list(gateList)
+
+    # Draw a line to show where user has stepped to TODO make it dotted
+    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
+    # Gates placed on the circuit (used for collision detection. is reset every frame)
+    gates_on_circuit = []
+    # Draw circuit view
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.qubit_line) # Draws horisontal lines for qubits
+    # Draw example circuit
+    draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     
+    # Draw qubit names on left side
+    qubit_name_panel.offset_y = circuit_y + circuit_dy
+    qubit_name_panel.draw()
+
+    # Draw drag bar
+    if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
+        drag_bar_y = screen.get_height() - 70
+    pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height))
+    # Draw options panel
+    # Update positions
+    tab_panel.y = drag_bar_y + drag_bar_height
+    tab_panel.draw()
+    q_sphere.y = tab_panel.y + tab_panel.height
+    # Draws background of panel window (hides circuit)
+    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
+    calculation_window.y = tab_panel.y + tab_panel.height
+    calculation_window.circuit_dx = circuit_x + circuit_dx
+    calculation_window.systems = circuit.systems # update states
+
+    # Draw window with run and step buttons
+    circuit_navigation_window.draw()
+
+    # Draw selected screen
+    option = tab_panel.get_selected()
+    if option == "Logic gates": # TODO Use enum/ atoms instead of strings
+        MenuButton.renderButton([menu_buttons], drag_bar_y + 20)
+    elif option == "State Viewer":
+        calculation_window.draw()
+    elif option == "Text Editor":
+        pressed_keys = pygame.key.get_pressed()
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+        input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
+        input_boxes.update(tab_panel.y, tab_panel.height)
+    elif option == "Q-sphere":
+        # Updates and draws q-sphere
+        single_register = circuit.single_register()
+        q_sphere.set_register(single_register)
+        q_sphere.draw()
+    # ---------------------------------------------------------------
+
+    # Mouse themeing based on status
+    Mouse.update(Mouse)
+    # Update cursor + temporary colors
+    if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
+        drag_bar_color = Colors.yellow
+    elif Mouse.status == "Panning":
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
+    elif Mouse.status == "Moving gate":
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
+    else:
+        pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
+        drag_bar_color = Colors.white
+
+    # Left click
+    if Mouse.l_click:
+        # Check for tabs here
+        tab_panel.click(Mouse.x, Mouse.y)
+        if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
+            Mouse.status = "Resizing bottom panel"
+        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
+            circuit_navigation_window.click(Mouse.x, Mouse.y)
+        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
+            Mouse.status = "Panning"
+        elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
+            # Below panel selector
+            # Q-sphere
+            if tab_panel.get_selected()=="Q-sphere":
+                Mouse.status = "Panning sphere"
+    # Left mouse is being held down
+    elif Mouse.l_held:
+        # Below is interaction for the reizeable panel at the bottom
+        if Mouse.status == "Resizing bottom panel":
+            drag_bar_y = Mouse.y # Move UI
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
+            drag_bar_color = Colors.yellow
+        # Drag circuit
+        elif Mouse.status == "Panning":
+            circuit_dx += Mouse.dx
+            circuit_dy += Mouse.dy
+            if circuit_dx>0:
+                circuit_dx=0
+            if circuit_dy>0:
+                circuit_dy=0
+        # Rotate Q-sphere
+        elif Mouse.status == "Panning sphere":
+            q_sphere.pan(Mouse)
+    elif not (Mouse.l_held or Mouse.l_click) and (Mouse.status=="Panning" or Mouse.status=="Resizing bottom panel" or Mouse.status=="Resizing bottom panel"):
+        Mouse.status = None
+
+    # Dragging gates logic
+    drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
+    
+    # 
     if option=="Logic gates" and Mouse.status != "Moving gate":
         MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
@@ -303,3 +307,12 @@ while True:
         pygame.display.update()
 
     framerate.tick(60)
+
+# --------------------------------------------------------
+# Draw methods
+    
+
+
+
+# --------------------------------------------------------
+# Update methods

@@ -241,9 +241,9 @@ def combine_gates(i : int, n):
      state1 = True
      for k in range(i):
        if state1:
-         gate_i = expand_gate(generateConditional(i-k), i, n +1)
+         gate_i = expand_gate(conditional_phase_shift(i-k), i, n +1)
          #print(gate_i)
          state1 = False
        else:
-         gate_i = np.matmul(gate_i, expand_gate(generateConditional(i-k), i, n +1))
+         gate_i = np.matmul(gate_i, expand_gate(conditional_phase_shift(i-k), i, n +1))
      return gate_i
