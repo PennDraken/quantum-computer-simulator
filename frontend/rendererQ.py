@@ -17,7 +17,7 @@ import frontend.q_sphere as q_sphere
 import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
-from backend import qusim_class
+from backend.circuit import Circuit
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 import gates
 from gates import Gate, gateHandler
@@ -56,7 +56,7 @@ q_sphere.add_random_point_on_unit_sphere()
 q_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit) Comment out to load different presets
-circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
+circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])

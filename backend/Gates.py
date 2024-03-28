@@ -118,17 +118,6 @@ def amodNStrings(a: int, N: int)->np.array:
         strings.append(f"{a}^{x} mod {15}")   
     return strings # return ['7^1 mod 15', '7^2 mod 15', '7^4 mod 15', '7^8 mod 15', '7^16 mod 15', '7^32 mod 15', '7^64 mod 15', '7^128 mod 15']
 
-# Function that is used to verify amod?
-def fabian_print():
-    a = 7
-    N = 15
-    print(amodNStrings(a, N))
-    a_inv = pow(a, -1, N)
-    print(a_inv)  # 13
-    print(a * a_inv)  # 91
-    print(a * a_inv % N)  # 1
-    print(amodN(7, 15))
-
 def controlled_mul_amodN(a, N)->np.array:
     gate = np.zeros((N, N), dtype=complex)
     return -1
@@ -225,4 +214,36 @@ def swap_bits(num: int, i: int, j: int, n: int):
     num ^= (xor_result << (n - 1 - i)) | (xor_result << (n - 1 - j))
     return num
 
-print(A(2))
+def expand_gate(gate, index, qubit_count):
+    # Check that gate fits at given index
+    width = int(np.log2(len(gate)))
+    assert index+width-1 < qubit_count, "Error! Gate does not fit"
+    if index == 0:
+        expanded_gate = gate
+        i = width  # start position
+        while i < qubit_count:
+            expanded_gate = np.kron(expanded_gate, I)
+            i += 1
+    else:
+        expanded_gate = I
+        i = 1
+        while i < qubit_count:
+            if i == index:
+                expanded_gate = np.kron(expanded_gate, gate)
+                i += width  # increment counter by size of gate
+            else:
+                expanded_gate = np.kron(expanded_gate, I)
+                i += 1
+    return expanded_gate
+
+def combine_gates(i : int, n):
+     gate_i = np.array([])
+     state1 = True
+     for k in range(i):
+       if state1:
+         gate_i = expand_gate(generateConditional(i-k), i, n +1)
+         #print(gate_i)
+         state1 = False
+       else:
+         gate_i = np.matmul(gate_i, expand_gate(generateConditional(i-k), i, n +1))
+     return gate_i
