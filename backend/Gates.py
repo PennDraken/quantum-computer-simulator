@@ -176,18 +176,7 @@ def conditional_phase_shift(k : int):
     #return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,5]])
     return np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,(np.e**((2*np.pi*1j) / (2**k)))]])
 
-# Uses conditional phase shift to generate A
-def A(n):
-    gate=gen_I(n)
-    for i in range(0,n):
-        control_qubit = i
-        target_qubit = n+1
-        phase_shift=conditional_phase_shift(i+1) # Note i+1 goes from 1 to n
-        # Move target qubit (also expands it)
-        modified_phase_shift = gate_change_connections(phase_shift, control_qubit, target_qubit)
-        # Apply gate
-        gate = gate * modified_phase_shift
-    return gate
+
 
 
 # Moves qubits by swapping indices and expanding (note gate is a 2 qubit gate)
@@ -247,3 +236,58 @@ def combine_gates(i : int, n):
        else:
          gate_i = np.matmul(gate_i, expand_gate(conditional_phase_shift(i-k), i, n +1))
      return gate_i
+
+#--------------------------------------------ADD-----------------------------------------------
+# constructs the full add gate where a = size of register a 
+def add_calc_gate( a : int):
+    len_a = a
+    gate_a = np.array([])
+    add_gate = np.array([])
+    for i in range( 0, len_a ):
+        # A( stair_h, stair_w ) combining "stairsteps" from 1 to stair_w, ends with stair_w = 1
+        gate_a = A( len_a + 1, (len_a - i) ) 
+        print(len ( gate_a ) )
+        # fill under A
+        if(i != len_a -1):
+          gate_a = np.kron( gate_a, gen_I( len_a - 1 - i ) )
+        print(len ( gate_a ) )
+        # fill above A
+        if(i != 0):
+          gate_a = np.kron( gen_I( i ) , gate_a )
+        print(len ( gate_a ) )
+        # modify add gate by current A
+        print(len ( gate_a ) )
+        if (i == 0):
+            add_gate = gate_a
+        else:
+            add_gate = gate_a * add_gate 
+    return add_gate
+
+# Uses conditional phase shift to generate A
+def A(stair_h : int, stair_w : int):
+    gate=gen_I(stair_h)
+    for i in range(1,stair_w + 1):
+        control_qubit = i - 1 # upper "connected" index
+        target_qubit = stair_h # index of the gate box 
+        phase_shift=conditional_phase_shift(i) 
+        # Move target qubit (also expands it) -> -1 since phase_shift is 4x4
+        modified_phase_shift = gate_change_connections(phase_shift, control_qubit, target_qubit - 1)
+        # Apply gate
+        gate = gate * modified_phase_shift
+    return gate
+
+a = 2
+add_a = add_calc_gate(a)
+print(len(add_a))
+#print(add_a)
+
+for i in range(0, len(add_a)):
+    row = np.array([])
+    for j in range(len(add_a)):
+        if (add_a[i][j] == 0.0000000e+00+0.j):
+            row = np.append(row, 0)
+        elif (add_a[i][j] == 1.0000000e+00+0.j):
+            row = np.append(row, 1)
+        else:
+             row = np.append(row, str(add_a[i][j]))       
+    print(row)
