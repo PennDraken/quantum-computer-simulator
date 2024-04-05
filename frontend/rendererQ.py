@@ -85,7 +85,7 @@ sizeQ = 40 # Zoom level
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
     for i in range(0,len(gateList)):
         gate_data = gateList[i]      
-        if i==circuit.position-1: # Change color for gates being run
+        if i<=circuit.position-1: # Change color for gates being run
             color = Colors.yellow
         else:
             color = Colors.white
