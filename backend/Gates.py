@@ -10,6 +10,14 @@ Y = np.array([[0,-1j],[1j,0]], dtype=complex)
 Z = np.array([[1,0],[0,-1]], dtype=complex) 
 # Controlled gates
 CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
+Toffoli = np.array([[1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 1, 0]])
 # Hadamard gate
 H = (1/np.sqrt(2))*np.array([[1,1],[1,-1]], dtype=complex)
 # Swap gate
@@ -84,8 +92,12 @@ def string_to_gate(gate_str : str):
             return Z
         case "Ry(np.pi/4)": # TODO parse actual value
             return Ry(np.pi/4)
+        case "Toffoli":
+            return Toffoli
+        case "CUSTOM":
+            return None # TODO Implement
         case _ :
-            return None # TODO Error
+            return None # TODO Error management
 
 def checkIfCoprime(a, b)->bool: # Checks if two numbers are coprime, i.e. their greatest common divisor is 1, i.e. gcd(a,b) = 1
     while b != 0:

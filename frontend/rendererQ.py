@@ -18,6 +18,7 @@ import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
 from backend.circuit import Circuit
+import backend.algorithms as algorithms # This is used to quickly set starting circuit state
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 import gates
 from gates import Gate, gateHandler
@@ -55,10 +56,13 @@ q_sphere.add_random_point_on_unit_sphere()
 q_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit) Comment out to load different presets
-circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
+circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"]) # Quantum teleportation
+# circuit : Circuit = Circuit([["A","B","C","D","E","F","G"], "CU 4 5", "CUSTOM 2 3", "CUSTOM 0 1 2 3 4", "CUSTOM 2 3 5", "CUSTOM 1 3 5"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
+# circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+# circuit : Circuit = Circuit(algorithms.grover())
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
@@ -71,7 +75,7 @@ circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
-gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [1, 0]), ("Ry(np.pi/4)", [0]), ("Toffoli", [2,1,0]), ("Swap", [1, 0])]
+gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 

@@ -103,3 +103,38 @@ def text(screen, string, x, y, color):
     text_rect = text_surface.get_rect()
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
+
+# Useful method to quickly draw centered text on screen (Rotated 90 degrees)
+def rotated_text(screen, string, x, y, color, bg_rect=False):
+    # pygame.draw.circle(screen, Colors.white, (x, y), 40) # Uncomment this line to debug center of text
+    font = pygame.font.Font(None, 24)
+    text_color = pygame.Color(color)
+    text_surface = font.render(string, True, text_color)
+    text_rect = text_surface.get_rect(center=(x, y))
+    rect_width = text_surface.get_height() + 10
+    rect_height = text_surface.get_width() + 10
+    rect = pygame.Rect(text_rect.centerx - rect_width // 2, text_rect.centery - rect_height // 2, rect_width, rect_height)
+    if bg_rect:
+        pygame.draw.rect(screen, (200, 200, 200), rect) # BG of text
+    rotated_surface = pygame.transform.rotate(text_surface, 90)
+    rotated_rect = rotated_surface.get_rect(center=text_rect.center)
+    screen.blit(rotated_surface, rotated_rect.topleft)
+    
+# Draws a dashed line. Similar to pygames built in function
+def draw_dashed_line(surface, color, start_pos, end_pos, width=2, dash_length=grid_size/10):
+    x1, y1 = start_pos
+    x2, y2 = end_pos
+    dx = x2 - x1
+    dy = y2 - y1
+    distance = max(abs(dx), abs(dy))
+    dx_unit = dx / distance
+    dy_unit = dy / distance
+    dash_count = int(distance / dash_length)
+
+    for i in range(dash_count):
+        if i % 3 == 0:
+            start = (round(x1 + i * dash_length * dx_unit),
+                     round(y1 + i * dash_length * dy_unit))
+            end = (round(x1 + (i + 1) * dash_length * dx_unit),
+                   round(y1 + (i + 1) * dash_length * dy_unit))
+            pygame.draw.line(surface, color, start, end, width)
