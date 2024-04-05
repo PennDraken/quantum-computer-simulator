@@ -37,3 +37,7 @@ def grover():
             "H 0","H 1","H 2","H 3","X 0","X 1","X 2","X 3","I 0","I 1","I 2","H 3",
             "Toffoli 0 1 4","Toffoli 2 3 4","Toffoli 0 1 4","I 0","I 1","I 2","H 3","X 0","X 1","X 2","X 3","H 0","H 1","H 2","H 3",
             "measure 0","measure 1","measure 2","measure 3"]
+
+
+def quantum_teleportation():
+    return [["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]
