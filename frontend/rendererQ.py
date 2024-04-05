@@ -56,13 +56,12 @@ q_sphere.add_random_point_on_unit_sphere()
 q_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit) Comment out to load different presets
-circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]) # Quantum teleportation
+# circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]) # Quantum teleportation
 # circuit : Circuit = Circuit([["A","B","C","D","E","F","G"], "CU 4 5", "CUSTOM 2 3", "CUSTOM 0 1 2 3 4", "CUSTOM 2 3 5", "CUSTOM 1 3 5"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
-# circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B"],"H 0","CNOT 1 0","CNOT 1 0","CNOT 0 1"])
 # circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
-# circuit : Circuit = Circuit(algorithms.grover())
+circuit : Circuit = Circuit(algorithms.grover())
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
@@ -176,6 +175,7 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
 
 # Game loop
 while True:
+    Mouse.update(Mouse)
     # Clear screen
     screen.fill((0,0,0))
     pygame_event = pygame.event.get() # This removes all events from stack
@@ -249,7 +249,6 @@ while True:
     # ---------------------------------------------------------------
 
     # Mouse themeing based on status
-    Mouse.update(Mouse)
     # Update cursor + temporary colors
     if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZENS) # Set mouse cursor to "resize"-image
@@ -301,12 +300,11 @@ while True:
     # Dragging gates logic
     drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
     
-    # 
     if option=="Logic gates" and Mouse.status != "Moving gate":
         MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
+
     # Draw everything here
-    # TODO move this?
     if redraw_screen:
         pygame.display.update()
 

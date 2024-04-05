@@ -98,10 +98,16 @@ class Circuit():
             self.systems[self.position].print_merged_register_QC()
 
 
-    # Runs through the cicuit as fast as possible
+    # Runs through the cicuit to the end position
     def run(self):
         while self.position + 1<len(self.description):
             self.step_fwd()
+
+    # Resets the circuit to initial starting position
+    def reset(self):
+        self.position = 0
+        self.systems = [self.systems[0]]
+        
 
     # Gets current system as a single register
     def single_register(self):

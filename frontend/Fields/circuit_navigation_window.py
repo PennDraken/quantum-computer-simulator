@@ -16,7 +16,7 @@ class Circuit_Navigation_Window:
         self.circuit = circuit
         self.title_font = pygame.font.Font(None, 24)
         self.state_font = pygame.font.Font(None, 20)
-        self.options = ["Run","<<",">>"]
+        self.options = ["Reset","Run","<<",">>"]
 
     def draw(self):
         # update width
@@ -45,7 +45,9 @@ class Circuit_Navigation_Window:
             box_x = distance_between_boxes * i + distance_between_boxes/2 - self.button_width/2
             # check click collision
             if x > box_x and x < box_x + self.button_width and y > box_y and y < box_y + self.button_height:
-                if self.options[i]=="Run":
+                if self.options[i]=="Reset":
+                    self.circuit.reset()
+                elif self.options[i]=="Run":
                     self.circuit.run()
                 elif self.options[i]=="<<":
                     self.circuit.step_back()
