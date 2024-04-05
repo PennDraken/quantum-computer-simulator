@@ -8,6 +8,7 @@ class Calculation_Viewer_Window:
         self.screen: pygame.screen = screen
         self.x = x
         self.y = y
+        self.offset_y = 0
         self.circuit_dx = 0
         self.width = width
         self.height = height
@@ -33,42 +34,38 @@ class Calculation_Viewer_Window:
         label_height = 30
         text_height = 20
         
-
         for col, system in enumerate(self.systems):
             grid_row = 0
             for register_index, register in enumerate(system.registers):
                 x = self.x + col * self.grid_size + self.circuit_dx
-                y = self.y + grid_row * self.grid_size
-                
-                # TODO precalculate these somehow? (for performance)
-                label = register.get_label()
-                state_str = register.get_state_str()
-                lines = state_str.splitlines()
-                
-                # Draw the label showing the qubits of the register
-                # Change color to yellow if most recent
-                if col==len(self.systems)-1:
-                    color = Colors.yellow
-                else:
-                    color = Colors.white
+                y = self.y + grid_row * self.grid_size + self.offset_y
+                if y >= self.y - UI.grid_size and y < self.screen.get_height() and x + UI.gate_size > 0 and x < self.screen.get_width() + UI.gate_size: # Out of bounds check
+                    # TODO precalculate these somehow? (for performance)
+                    label = register.get_label()
+                    state_str = register.get_state_str()
+                    lines = state_str.splitlines()
+                    
+                    # Draw the label showing the qubits of the register
+                    # Change color to yellow if most recent
+                    if col==len(self.systems)-1:
+                        color = Colors.yellow
+                    else:
+                        color = Colors.white
 
-                pygame.draw.rect(self.screen, color, (x, y, self.grid_size, label_height), width=1)
-                text(self.screen, label, x + half_grid_size, y + 4, color, self.title_font)
+                    pygame.draw.rect(self.screen, color, (x, y, self.grid_size, label_height), width=1)
+                    text(self.screen, label, x + half_grid_size, y + 4, color, self.title_font)
 
-                # Draws the vector state of the register
-                for row, line in enumerate(lines):
-                    text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, color, self.state_font)
-                    if row > 16:
-                        break # We dont want to print too many numbers (now only 16)
+                    # Draws the vector state of the register
+                    for row, line in enumerate(lines):
+                        text(self.screen, line, x + half_grid_size, y + label_height + row * text_height, color, self.state_font)
+                        if row > 16:
+                            break # We dont want to print too many numbers (now only 16)
 
-                # Draw the grid rectangle showing end of qubit
-                pygame.draw.rect(self.screen, color, (x, y, self.grid_size, len(register.qubits) * self.grid_size), width=2)
+                    # Draw the grid rectangle showing end of qubit
+                    pygame.draw.rect(self.screen, color, (x, y, self.grid_size, len(register.qubits) * self.grid_size), width=2)
                 
                 # Increment grid row based on how many qubits were in register
                 grid_row += len(register.qubits)
-                
-
-
 
 def text(screen, string, x, y, color, font):
     text_color = pygame.Color(color)

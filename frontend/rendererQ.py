@@ -211,29 +211,26 @@ while True:
     qubit_name_panel.offset_y = circuit_y + circuit_dy
     qubit_name_panel.draw()
 
-    # Draw drag bar
+    
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
-    pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height))
+    tab_panel.y = drag_bar_y + drag_bar_height
+
     # Draw options panel
     # Update positions
-    tab_panel.y = drag_bar_y + drag_bar_height
-    tab_panel.draw()
-    q_sphere.y = tab_panel.y + tab_panel.height
+    
+    
     # Draws background of panel window (hides circuit)
-    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height()-tab_panel.y-tab_panel.height))
-    calculation_window.y = tab_panel.y + tab_panel.height
-    calculation_window.circuit_dx = circuit_x + circuit_dx
-    calculation_window.systems = circuit.systems # update states
-
-    # Draw window with run and step buttons
-    circuit_navigation_window.draw()
-
+    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
         MenuButton.renderButton([menu_buttons], drag_bar_y + 20)
     elif option == "State Viewer":
+        # Update calculation window
+        calculation_window.y = tab_panel.y + tab_panel.height
+        calculation_window.circuit_dx = circuit_x + circuit_dx
+        calculation_window.systems = circuit.systems # update states
         calculation_window.draw()
     elif option == "Text Editor":
         pressed_keys = pygame.key.get_pressed()
@@ -243,9 +240,16 @@ while True:
         input_boxes.update(tab_panel.y, tab_panel.height)
     elif option == "Q-sphere":
         # Updates and draws q-sphere
+        q_sphere.y = tab_panel.y + tab_panel.height
         single_register = circuit.single_register()
         q_sphere.set_register(single_register)
         q_sphere.draw()
+    
+    pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height)) # Drag bar
+    tab_panel.draw() # Tab panel options
+
+    # Draw toolbar with run and step buttons
+    circuit_navigation_window.draw()
     # ---------------------------------------------------------------
 
     # Mouse themeing based on status
@@ -276,6 +280,8 @@ while True:
             # Q-sphere
             if tab_panel.get_selected()=="Q-sphere":
                 Mouse.status = "Panning sphere"
+            elif tab_panel.get_selected()=="State Viewer":
+                Mouse.status = "Panning state view"
     # Left mouse is being held down
     elif Mouse.l_held:
         # Below is interaction for the reizeable panel at the bottom
@@ -291,6 +297,13 @@ while True:
                 circuit_dx=0
             if circuit_dy>0:
                 circuit_dy=0
+        elif Mouse.status == "Panning state view":
+            circuit_dx += Mouse.dx
+            calculation_window.offset_y += Mouse.dy
+            if circuit_dx>0:
+                circuit_dx=0
+            if calculation_window.offset_y>0:
+                calculation_window.offset_y = 0
         # Rotate Q-sphere
         elif Mouse.status == "Panning sphere":
             q_sphere.pan(Mouse)
