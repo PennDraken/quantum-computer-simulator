@@ -192,8 +192,8 @@ while True:
             handler.adjust += (5 * event.y) 
             screenHandler.offsetMod += (5 * event.y)  
             sizeQ += (2 * event.y) 
-            qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
-            qubit_name_panel.state_font = pygame.font.Font(None, 20)
+            # qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
+            # qubit_name_panel.small_font = pygame.font.Font(None, 20)
 
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)

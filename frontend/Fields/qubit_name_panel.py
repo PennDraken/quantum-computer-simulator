@@ -13,7 +13,7 @@ class Qubit_Name_Panel:
         self.height = UI.grid_size
         self.qubits_list = qubits_list
         self.title_font = pygame.font.Font(None, 40)
-        self.state_font = pygame.font.Font(None, 20)
+        self.small_font = pygame.font.Font(None, 20)
 
     def draw(self):
         pygame.draw.rect(self.screen, Colors.black, (self.x, self.y, self.width, self.screen.get_height()))
@@ -22,7 +22,11 @@ class Qubit_Name_Panel:
         for i, qubit_str in enumerate(self.qubits_list):
             y = UI.grid_size * i + self.offset_y
             pygame.draw.rect(self.screen, Colors.white, (self.x, y, self.width, UI.grid_size), width=1)
-            text(self.screen, f"|{qubit_str}>", self.x + self.width/2, y + UI.grid_size/2, Colors.white, self.title_font)
+            if len(qubit_str)<4:
+                text(self.screen, f"{qubit_str}", self.x + self.width/2, y + UI.grid_size/2, Colors.white, self.title_font)
+            else:
+                text(self.screen, f"{qubit_str}", self.x + self.width/2, y + UI.grid_size/2, Colors.white, self.small_font)
+
         # Draw a + button underneath qubits (TODO make clickable)
         y = UI.grid_size * len(self.qubits_list) + self.offset_y
         # pygame.draw.rect(self.screen, Colors.white, (self.x, y, UI.grid_size, UI.grid_size), width=1)

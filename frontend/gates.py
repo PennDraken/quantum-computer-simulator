@@ -66,9 +66,9 @@ class gateHandler:
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
         # Check inside screen
-        x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
-        if x<0 or x>screen.get_width():
-            return
+        x = UI.grid_size * column + offset_x_y_tuple[0]
+        if x < 0 or x > screen.get_width():
+            return # Were out of bounds so we dont need to draw this gate
         
         pygame.font.init()
         # Draws vertical lines for connecting qubits
