@@ -69,14 +69,14 @@ class gateHandler:
         
         pygame.font.init()
         # Draws vertical lines for connecting qubits
-        if (gate_text=="CNOT" or gate_text=="X" or gate_text=="Toffoli" or gate_text=="SWAP") and nrQubits > 1:
+        if (gate_text=="CNOT" or gate_text=="X" or gate_text=="Toffoli" or gate_text=="SWAP" or gate_text=="X" or gate_text=="Y" or gate_text=="Z") and nrQubits > 1:
             # Draw qubit line
             low_qubit = min(qubits)
             high_qubit = max(qubits)
             y1 = low_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
             y2 = high_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
             mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
-            screenHandler.draw_qubit_line((mid_x,y1),(mid_x,y2), color)
+            screenHandler.draw_qubit_line((mid_x,y1),(mid_x,y2), color) # Vertical line
             for qubit in qubits:
                 y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
                 if gate_text=="CNOT" or gate_text=="Toffoli":
@@ -86,20 +86,21 @@ class gateHandler:
                         screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
                 elif gate_text=="SWAP":
                    screenHandler.draw_mod(Loc.X_CROSS, mid_x, y, color)
+                # Controlled single qubit gates
                 else:
-                    pass
-
-        # Draw the actual gate
-        center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
-        x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
-        y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
-        if gate_text != "CNOT" and gate_text != "Toffoli" and gate_text != "SWAP":
+                    if qubit!=high_qubit:
+                        screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
+                    else:
+                        self.__render_box_gate__(gate_text, [qubits[-1]], calculations, offset_x_y_tuple, column, color)
+            gate = Gate(gate_text, mid_x, y, self.gateWidth, self.gateHeight) 
+        else:
+            # Draw the actual gate
+            center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
+            x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
+            y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
             gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
             # Gate.draw_gate(gate.gate_text, x, y, self.gateWidth + self.adjust, self.gateHeight + self.adjust, color) # Draws gate
             self.__render_box_gate__(gate_text, qubits, calculations, offset_x_y_tuple, column, color)
-
-        else: 
-            gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) 
         return gate # for gate shifting
 
     # Draws a gate as a box. Used for some custom gates (such as amod). Note: We might want to mark controlling qubit somehow

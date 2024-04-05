@@ -55,6 +55,7 @@ class Circuit():
             # It is gate
             gate = Gates.string_to_gate(op_type)
             qubits_indices = []
+            # Convert to useable data type
             for i in range(1, len(operation)):
                 qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for bot
             # Duplicate system
@@ -63,14 +64,14 @@ class Circuit():
             if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
                 new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
             elif len(gate)==2:
-                # this is an if based single qubit gate
-                # find vale of "qubit" (a bit in this case). If bit==1 we will apply gate
+                # this is an if controlled single qubit gate (controlled by a bit (measured register))
+                # find value of "qubit" (a bit in this case). If bit==1 we will apply gate
                 for register in new_system.registers:
-                    if register.qubits==[new_system.qubits[qubits_indices[1]]]:
+                    if register.qubits==[new_system.qubits[qubits_indices[0]]]:
                         if np.array_equal(register.vector, np.array([0, 1])):
                             # print("equal to 1")
                             # bit was 1 so we apply gate
-                            new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+                            new_system.apply_gate(gate, new_system.qubits[qubits_indices[1]])
                             break
             # Multi qubit gate
             elif len(qubits_indices)==2:
