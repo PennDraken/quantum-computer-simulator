@@ -77,8 +77,12 @@ class Circuit():
                             break
             # Multi qubit gate
             elif len(qubits_indices)==2:
+                # new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
                 new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
-        
+            # Multi qubit gate that is more than 2
+            elif len(qubits_indices)>2:
+                new_system.apply_gate_qubit_list(gate, qubits_indices)
+
         # Add to our history
         self.systems.append(new_system)
         # Print output
