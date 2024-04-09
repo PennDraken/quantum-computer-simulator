@@ -6,9 +6,9 @@ import numpy as np
 from UI import Colors
 
 # Draws the 3D sphere
-def draw_bloch(screen, x, y, r, a, a2):
+def draw_bloch(screen, x, y, r, a, a2, lines):
     pygame.draw.ellipse(screen, Colors.dark_gray, pygame.Rect(x-r,y-r,2*r,2*r), width=5) # could be cirlce instead
-    n = 5
+    n = lines
     for i in range(-n,n+1,2):
         s=(i)*(r/n)
         x1=x+np.sqrt(r**2-s**2)
@@ -151,6 +151,7 @@ class Q_Sphere():
         self.a2=0
         self.sphere_r =  min(w, h)/2 
         self.states = []
+        self.latitudal_lines = 4
         
     def add_random_point_on_unit_sphere(self):
         theta = np.random.uniform(0, 2*np.pi)
@@ -172,7 +173,7 @@ class Q_Sphere():
         center_y = self.y + self.h/2
         self.sphere_r = min(self.w, self.h)/2 - 20 # 20 is padding
         # draw sphere
-        draw_bloch(self.screen, center_x, center_y, self.sphere_r, self.a, self.a2)
+        draw_bloch(self.screen, center_x, center_y, self.sphere_r, self.a, self.a2, self.latitudal_lines)
 
         # draw points (theyre seperated to layers so points are always drawn over lines, (depth))
         for state in self.states:
@@ -193,7 +194,9 @@ class Q_Sphere():
         self.states = []
         vector = register.vector
         max_number = len(register.vector) - 1 # Maximum index reached
-        max_distance = self.binary_hamming(0, max_number)
+        max_distance = binary_hamming(0, max_number)
+        self.latitudal_lines = max_distance
+
         # convert register to points
         for i,state in enumerate(vector):
             # only plot states with probability higher than 0%
@@ -202,15 +205,19 @@ class Q_Sphere():
                 continue
             
             # latitude
-            distance = self.binary_hamming(i, max_number)
-            # normalise
+            distance = binary_hamming(i, max_number)
+            # normalise TODO align to latitudes instead of theta
             distance_norm = (distance / max_distance) # 1 - to flip rotation
             theta = distance_norm * np.pi # Vertical movement
 
-            # longitude
-            longitudal_lines = 2 ** distance - 1 # This is the amount of longitudal lines at this location.
-            if longitudal_lines != 0:
-                phi = i/longitudal_lines * (2 * np.pi) # Calculate phi by finding fraction of index.
+            # longitude TODO fix this calculation
+            # longitudal_lines = 2 ** distance - 1 # This is the amount of longitudal lines at this location.
+            # longitudal_lines = unique_binary_numbers(count_ones(i), len(register.qubits)) # Finds the permutations of longitudes.
+            outcomes = generate_binary_numbers(count_ones(i), len(register.qubits))
+            longitudal_pos = outcomes.index(i)
+            
+            if len(outcomes) != 0:
+                phi = longitudal_pos/len(outcomes) * (2 * np.pi) # Calculate phi by finding fraction of index.
             else:
                 phi = 0 # Div by zero error when distance is 0
 
@@ -223,18 +230,7 @@ class Q_Sphere():
             state = State(point, label, probability, 0)
             self.states.append(state)
 
-    # Finds hanning distance between two numbers TODO Could be faster
-    def binary_hamming(self, num1, num2):
-        # Convert numbers to binary strings
-        binary_str1 = bin(num1)[2:]
-        binary_str2 = bin(num2)[2:]
-        # Make binary strings of equal length by padding with zeros
-        max_length = max(len(binary_str1), len(binary_str2))
-        binary_str1 = binary_str1.zfill(max_length)
-        binary_str2 = binary_str2.zfill(max_length)
-        # Calculate Hamming distance
-        hamming_distance = sum(ch1 != ch2 for ch1, ch2 in zip(binary_str1, binary_str2))
-        return hamming_distance
+    
 
     def pan(self, mouse):
         if mouse.l_held:
@@ -244,3 +240,62 @@ class Q_Sphere():
             delta_angle_y = mouse.dy/factor
             self.a2 = (self.a2 + delta_angle_x) % (2 * np.pi)
             self.a = (self.a + delta_angle_y) % (2 * np.pi)
+
+def unique_binary_numbers(n, N):
+    """
+    Calculate the number of unique binary numbers with n positive bits out of N total bits.
+    
+    Parameters:
+        n (int): Number of positive bits.
+        N (int): Total number of bits.
+    
+    Returns:
+        int: Number of unique binary numbers.
+    """
+    if n > N:
+        return 0
+    
+    binomial_coefficient = np.math.comb(N, n)
+    return binomial_coefficient * (2 ** n)
+
+# Finds hamming distance between two numbers
+def binary_hamming(num1, num2):
+    # Convert numbers to binary strings
+    binary_str1 = bin(num1)[2:]
+    binary_str2 = bin(num2)[2:]
+    # Make binary strings of equal length by padding with zeros
+    max_length = max(len(binary_str1), len(binary_str2))
+    binary_str1 = binary_str1.zfill(max_length)
+    binary_str2 = binary_str2.zfill(max_length)
+    # Calculate Hamming distance
+    hamming_distance = sum(ch1 != ch2 for ch1, ch2 in zip(binary_str1, binary_str2))
+    return hamming_distance
+
+def generate_binary_numbers(n, N):
+    """
+    Generate a list of integers with n positive bits placed in the first N bits.
+    
+    Parameters:
+        n (int): Number of positive bits.
+        N (int): Total number of bits.
+    
+    Returns:
+        list: List of integers with n positive bits placed in the first N bits.
+    """
+    if n > N:
+        return []
+
+    result = []
+    for i in range(2**N):
+        if count_ones(i) == n:
+            result.append(i)
+    return result
+
+# Counts the amount of binary 1s in an integer
+def count_ones(number):
+    count = 0
+    while number:
+        count += number & 1
+        number >>= 1
+    return count
+
