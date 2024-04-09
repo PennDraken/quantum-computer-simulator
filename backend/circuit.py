@@ -51,6 +51,8 @@ class Circuit():
             p = new_system.measure(qubit)
             if self.show_output:
                 print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
+        elif op_type=="label":
+            new_system : System = copy.deepcopy(self.systems[self.position-1])
         else:
             # It is gate
             gate = Gates.string_to_gate(op_type)
@@ -122,8 +124,14 @@ class Circuit():
         for item in description[1:]:
             parts = re.split(r'\s+', item.strip())
             gate = parts[0]
-            qubits = [int(qubit) for qubit in re.findall(r'\d+', ' '.join(parts[1:]))]
-            converted_list.append((gate, qubits))
+            if gate!="label":
+                qubits = [int(qubit) for qubit in re.findall(r'\d+', ' '.join(parts[1:]))]
+                converted_list.append((gate, qubits))
+            else:
+                label_text = parts[1] # Load the text
+                converted_list.append((gate, label_text))
+
+
         return converted_list
     
     # Used for frontend. Converts and sets list which is frontend gate representation to a format that backend can use.

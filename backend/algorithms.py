@@ -32,10 +32,12 @@ def shor_subroutine_circuit(guess : int, N : int):
 # https://i0.wp.com/quantumzeitgeist.com/wp-content/uploads/QZ-Grover-4.png?fit=2427%2C708&ssl=1
 def grover():
     return [["q0","q1","q2","q3","ancilla 0","ancilla 1","ancilla 2","ancilla 3","ancilla 4"],"H 0","H 1","H 2","H 3",
+            "label Oracle starts here",
             "Toffoli 0 1 4","Toffoli 2 3 5","CNOT 4 5","Toffoli 0 3 6","X 6","Toffoli 5 6 7","CNOT 7 8",
             "Toffoli 5 6 7","X 6","Toffoli 0 3 6","CNOT 4 5","Toffoli 2 3 5","Toffoli 0 1 4",
             "H 0","H 1","H 2","H 3","X 0","X 1","X 2","X 3","I 0","I 1","I 2","H 3",
             "Toffoli 0 1 4","Toffoli 2 3 4","Toffoli 0 1 4","I 0","I 1","I 2","H 3","X 0","X 1","X 2","X 3","H 0","H 1","H 2","H 3",
+            "label Rerun Oracle",
             "measure 0","measure 1","measure 2","measure 3"]
 
 

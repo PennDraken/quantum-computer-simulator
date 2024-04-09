@@ -61,7 +61,15 @@ class gateHandler:
     adjust = 0
 
     # Renders a gate + lines for qubits
-    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method        
+    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method
+        # First check if label TODO maybe move this somewhere else?
+        if (gate_text=="label"):
+            mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
+            UI.draw_dashed_line(screen, color, (mid_x, 0), (mid_x, screen.get_height()))
+            label_text = qubits # YES this is stupid
+            UI.rotated_text(screen, label_text, mid_x, screen.get_height()/2, Colors.blue, bg_rect=True)
+            return
+
         nrQubits = len(qubits)
         if nrQubits < 1: # should be at least one qubit
             raise ValueError
@@ -71,6 +79,7 @@ class gateHandler:
             return # Were out of bounds so we dont need to draw this gate
         
         pygame.font.init()
+        
         # Draws vertical lines for connecting qubits
         if (gate_text=="CNOT" or gate_text=="X" or gate_text=="Toffoli" or gate_text=="SWAP" or gate_text=="X" or gate_text=="Y" or gate_text=="Z") and nrQubits > 1:
             # Draw qubit line
