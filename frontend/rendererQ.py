@@ -18,6 +18,7 @@ import Fields.MenuButton as MenuButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
 from backend.circuit import Circuit
+from backend.Gates import string_to_gate
 import backend.algorithms as algorithms # This is used to quickly set starting circuit state
 from Fields.circuit_navigation_window import Circuit_Navigation_Window
 import gates
@@ -25,6 +26,7 @@ from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import Fields.TextInput as input_box
 import screenHandler
+import Fields.gate_date_visualizer as gate_data_visualizer
 
 screen = screenHandler.screen
 
@@ -96,7 +98,7 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
     offset_x = circuit_x + circuit_dx
     offset_y = circuit_y + circuit_dy
     if Mouse.r_click:
-        # Find gate we're dragging
+        # Find gate we're clicking on
         for i, gate_data in enumerate(gateList):
             rect = gates.gatelist_gate_to_rect(gate_text=gate_data[0], gate_index_in_list=i, operating_qubit=gate_data[1][0], offset_x = circuit_x + circuit_dx, offset_y = circuit_y + circuit_dy)
             if rect.collidepoint(Mouse.x, Mouse.y):
@@ -104,6 +106,7 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
                 Mouse.status = "Moving gate"
                 gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
                 print("clicked gate")
+                window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
                 break
         if Mouse.status==None:
             # Find qubit to drag
@@ -186,7 +189,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.MOUSEWHEEL:
+        elif event.type == pygame.MOUSEWHEEL: # Zooming circuit view
             UI.grid_size += (5 * event.y) 
             UI.gate_size += (5 * event.y)
             handler.adjust += (5 * event.y) 
@@ -218,7 +221,6 @@ while True:
 
     # Draw options panel
     # Update positions
-    
     
     # Draws background of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))

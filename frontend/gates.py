@@ -163,6 +163,8 @@ class gateHandler:
 
 
 def gatelist_gate_to_rect(gate_text : str, gate_index_in_list : int, operating_qubit : int, offset_x : int, offset_y : int)->pygame.rect:
+    if gate_text == "label":
+        return pygame.Rect(0,0,0,0) # TODO fix this collision
     # Find location of upper left corner in underlying grid
     grid_x = (gate_index_in_list + 1) * UI.grid_size + offset_x
     grid_y = operating_qubit * UI.grid_size + offset_y
