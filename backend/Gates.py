@@ -248,6 +248,150 @@ def expand_gate(gate, index, qubit_count):
                 i += 1
     return expanded_gate
 
+
+# constructs the full add gate where a = size of register a 
+def add_calc_gate( a : int):
+    len_a = a 
+    gate_a = np.array([])
+    add_gate = np.array([])
+    for i in range( 0, len_a ):
+        # A( stair_h, stair_w ) combining "stairsteps" from 1 to stair_w, ends with stair_w = 1
+        gate_a = A( len_a + 1, (len_a - i) ) 
+        print(len ( gate_a ) )
+        # fill under A
+        if(i != len_a -1):
+          gate_a = np.kron( gate_a, gen_I( len_a - 1 - i ) )
+        print(len ( gate_a ) )
+        # fill above A
+        if(i != 0):
+          gate_a = np.kron( gen_I( i ) , gate_a )
+        print(len ( gate_a ) )
+        # modify add gate by current A
+        print(len ( gate_a ) )
+        if (i == 0):
+            add_gate = gate_a
+        else:
+            add_gate = gate_a * add_gate 
+    return add_gate # an additional qubit should be added for overflow
+
+# Uses conditional phase shift to generate A
+def A(stair_h : int, stair_w : int):
+    gate=gen_I(stair_h)
+    for i in range(1,stair_w + 1):
+        control_qubit = i - 1 # upper "connected" index
+        target_qubit = stair_h # index of the gate box 
+        phase_shift=conditional_phase_shift(i) 
+        # Move target qubit (also expands it) -> -1 since phase_shift is 4x4
+        modified_phase_shift = gate_change_connections(phase_shift, control_qubit, target_qubit - 1) # <---- if this is correct then we are fine
+        # Apply gate
+        gate = gate * modified_phase_shift
+    return gate
+
+
+
+
+def adder(n , a):
+    gate = np.array([])
+    for i in range(0 , n):
+        if(i == 0):
+            gate = np.array([[1,0],[0,(np.e**((2*np.pi*a) / (2**i)))]])
+        else:
+            gate = np.kron(gate ,  np.array([[1,0],[0,(np.e**((2*np.pi*a) / (2**i)))]]) ) 
+    return gate
+            
+       
+    
+#print(len(adder(3 , 3)))
+
+
+def modularAdderGate(a : int , N :int):
+   
+    addA = adder(a ,a) 
+    addA =  np.kron( addA, I )
+
+    print(len(addA))  
+
+    #addAc = gate_change_connections( addA, 2, 1 )
+    #addAc = gate_change_connections( addAc, 2, 0 )
+    #addAc = np.kron( addAc , gen_I( 1 ) ) 
+
+    addAinv = np.linalg.inv( adder(a, a) )  
+    addAinv = np.kron( addAinv, I )
+    #addAcinv = gate_change_connections( addAinv, 2, 1 )
+    #addAcinv = gate_change_connections( addAcinv, 2, 0 )
+    #addAcinv = np.kron( addA , gen_I( 1 ) ) 
+    
+
+    #addNinv = np.kron( gen_I( 2 ) ,  np.linalg.inv(add_calc_gate(N))) 
+    #addNinv =  np.kron( addNinv , gen_I( 1 ) )
+    
+    #addN = np.kron( gen_I( 2 ) ,  add_calc_gate(N)) 
+    #addN = np.kron( addN, gen_I( 1 ) )
+
+    addN = adder(a, N) 
+    addN = np.kron( addN, I )
+    
+    print(len(addN))
+    
+    addNinv = np.linalg.inv( adder(a ,N) ) 
+    addNinv= np.kron(addNinv, I)
+    
+    addNc = gate_change_connections( addN , 0 , a)
+    
+    #addNc = gate_change_connections( addN, 2, N )
+    
+    #addAinv = np.linalg.inv( adder(a) ) 
+    
+    Qft =  QFT(2**a) 
+    Qft =  np.kron( Qft, I )
+    
+    print(len(Qft))
+    
+    Qftnv =  np.linalg.inv(QFT(2**a)) 
+    Qftnv =  np.kron( Qftnv, I )
+    
+    notX = np.kron( gen_I( a-1 ) , X)
+    notX = np.kron( notX, I ) 
+    
+    cNot = np.kron( gen_I( a - 1) , CNOT )
+    return addA*addNinv*Qftnv*cNot*Qft*addNc*addAinv*Qftnv*notX*cNot*notX*Qftnv*addA
+
+
+
+def multiAddGate( a : int , N : int):
+    Qft = np.kron( gen_I( N - a - 2 ) ,  QFT(a) ) 
+    Qft =  np.kron( Qft, gen_I( 1 ) )
+    
+    Qftnv =  np.kron( gen_I( N - a - 2 ) ,  np.linalg.inv(QFT(a)) ) 
+    Qftnv =  np.kron( Qftnv, gen_I( 1 ) )
+    
+    gate = np.kron( gen_I(a) , Qft )
+    for i in range(0 , a):
+        gate = gate * np.kron( gen_I(i) , gate_change_connections(modularAdderGate((2^i)*a , N), 0 , i ))
+    return gate
+        
+
+#print(len(modularAdderGate(3,5)))
+#print(len(multiAddGate(3,5)))
+ 
+#a = 3
+#add_a = add_calc_gate(a)
+#print(len(add_a))
+#print(add_a)
+
+def mod_array(gate):
+  for i in range(0, len(gate)):
+      row = np.array([])
+      for j in range(0, len(gate)):
+          if (gate[i][j] == 0.0000000e+00+0.j):
+              row = np.append(row, 0)
+          elif (gate[i][j] == 1.0000000e+00+0.j):
+              row = np.append(row, 1)
+          else:
+              row = np.append(row, str(gate[i][j]))       
+      print(row)
+ 
+
 def combine_gates(i : int, n):
      gate_i = np.array([])
      state1 = True
