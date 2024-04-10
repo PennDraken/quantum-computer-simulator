@@ -63,6 +63,11 @@ class Register():
             sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
         # Finished
         return sorted_register
+    
+    # Checks if probability adds up to 1 for all cases
+    def verify(self, note : str = ""):
+        probability = np.sum(np.abs(self.vector)**2)
+        assert np.isclose(probability, 1), f"Register did not pass test: Probability = {probability}\n Note associated with this message: \n{note}"
 
 # Applies gate to a single qubit in a register
 def apply_gate_register(register, qubit, gate: np.array):
@@ -76,8 +81,8 @@ def apply_gate_register(register, qubit, gate: np.array):
             expanded_gate = np.kron(expanded_gate, Gates.I)
     # Multiply this new gate with the state_vector
     register.vector = expanded_gate.dot(register.vector)
+    register.verify(gate)
     return register
-
 
 # Swaps two qubits in a register
 def swap(register: Register, qubit_a, qubit_b):
@@ -102,7 +107,6 @@ def check_adjacent(register, qubit_a, qubit_b):
     index_a = register.qubits.index(qubit_a)
     index_b = register.qubits.index(qubit_b)
     return abs(index_a-index_b) == 1
-
 
 def merge_registers(register_a, register_b):
     vector = np.kron(register_a.vector, register_b.vector)

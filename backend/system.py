@@ -30,6 +30,7 @@ class System():
         register = apply_gate_register(register, qubit, gate)
         self.registers[register_index] = register
 
+
     # Applies a 2 input gate to 2 qubits in a system
     def apply_gate_multiple(self, gate: np.array, qubit_a, qubit_b):
         # Find registers
@@ -75,6 +76,7 @@ class System():
             # set register_a to register to update state
             self.registers[self.registers.index(register_a)] = register
 
+
     # Applies a gate to a qubit list
     def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: []):
         # Get all different register
@@ -119,7 +121,6 @@ class System():
                 index_target   = qubit_index_list[index]
                 new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
             merged_register.vector[new_index] = ordered_vector[state_index]
-        # Sort register into qubit order TODO
         # Update our register state
         self.registers.append(merged_register)
 
@@ -160,7 +161,9 @@ class System():
         p0 = np.sum(np.abs(m0*register.vector)**2)
         p1 = np.sum(np.abs(m1*register.vector)**2)
         # Collapsing qubit based on probabilites p0 or p1
-        p = np.random.choice([0,1], p=[p0,p1])
+        # assert p0+p1==1, f"Error regarding probabilities p(0)={p0} + p(1)={p1} = {p0 + p1}"
+        assert abs(1-p1)+p1==1, f"Error regarding probabilities p(0)={p0}, p(1)={p1},  |1-p1|+p1 ={abs(1-p1)+p1}, p0 + p1 ={p0 + p1}"
+        p = np.random.choice([0,1], p=[1-p1,p1])
         # Set probability to 0 for all states where qubit is equal to 0
         measured_state = None
         if p==0:
@@ -177,10 +180,13 @@ class System():
             index_b = insert_bit(index, 1, len(register.qubits) - qubit_index - 1)
             # add the two elements that should be put into new indices
             new_vector[index] = norm_vector[index_a] + norm_vector[index_b]
+        new_vector = self.normalize(new_vector)
         # Add the two new registers to system self
         measured_register = Register([qubit], np.array([1 if p == 0 else 0, p])) # Create vector [1,0] or [0,1] based on p (result of measurement)
         register.qubits.remove(qubit) # Our other register should no longer contain measured qubit
-        self.registers[register_index] = Register(register.qubits, new_vector) # We update self to contain this register
+        remaining_register = Register(register.qubits, new_vector)
+        remaining_register.verify(f"Measure failed {qubit}")
+        self.registers[register_index] = remaining_register # We update self to contain this register
         self.registers.append(measured_register)
         return p # Returns probability of q_n=1 for qubit n
     

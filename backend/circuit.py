@@ -65,6 +65,7 @@ class Circuit():
             # Apply gate
             if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
                 new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+            # Bit controlled gate
             elif len(gate)==2:
                 # this is an if controlled single qubit gate (controlled by a bit (measured register))
                 # find value of "qubit" (a bit in this case). If bit==1 we will apply gate

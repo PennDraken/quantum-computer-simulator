@@ -29,9 +29,7 @@ import screenHandler
 import Fields.gate_date_visualizer as gate_data_visualizer
 
 screen = screenHandler.screen
-
 handler = gateHandler()
-
 framerate = pygame.time.Clock()
 
 # sampleString = "H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0"
