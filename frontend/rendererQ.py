@@ -102,7 +102,8 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
             if rect.collidepoint(Mouse.x, Mouse.y):
                 Mouse.holding = copy.deepcopy(gate_data)
                 Mouse.status = "Moving gate"
-                gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
+                # gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
+                gateList.pop(i)
                 print("clicked gate")
                 window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
                 break

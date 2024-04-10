@@ -91,11 +91,10 @@ class gateHandler:
             if gate_text=="CNOT" or gate_text=="Toffoli":
                 for qubit in qubits:
                     y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
-                    if gate_text=="CNOT" or gate_text=="Toffoli":
-                        if qubit == high_qubit:
-                            screenHandler.draw_mod(Loc.CIRCLE_CROSS, mid_x, y, color)
-                        else:
-                            screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
+                    if qubit == high_qubit:
+                        screenHandler.draw_mod(Loc.CIRCLE_CROSS, mid_x, y, color)
+                    else:
+                        screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
             elif gate_text=="SWAP":
                 for qubit in qubits:
                     y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
@@ -159,12 +158,9 @@ class gateHandler:
         else:
             UI.rotated_text(screen, gate_text, center_x, center_y, Colors.blue, bg_rect=True)
 
-
     # This is used to draw null-gates. Null-gates are gates which are temporarily added to list to highlight how the circuit will change.
     def __render_empty_gate__(): # TODO implement ()
         pass
-
-
 
 def gatelist_gate_to_rect(gate_text : str, gate_index_in_list : int, operating_qubit : int, offset_x : int, offset_y : int)->pygame.rect:
     if gate_text == "label":
