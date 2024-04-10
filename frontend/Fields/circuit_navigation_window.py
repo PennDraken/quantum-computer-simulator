@@ -17,6 +17,7 @@ class Circuit_Navigation_Window:
         self.title_font = pygame.font.Font(None, 24)
         self.state_font = pygame.font.Font(None, 20)
         self.options = ["Reset","Run","<<",">>"]
+        self.hover_button_i = None # Button currently being hovered on
 
     def draw(self):
         # update width
@@ -30,14 +31,22 @@ class Circuit_Navigation_Window:
             distance_between_boxes = self.width / len(self.options)
             box_x = distance_between_boxes * i + distance_between_boxes/2 - self.button_width/2
             # Draw button square
-            pygame.draw.rect(self.screen, Colors.white, (box_x, box_y, self.button_width, self.button_height))
+            if self.hover_button_i==i:
+                pygame.draw.rect(self.screen, Colors.hover, (box_x, box_y, self.button_width, self.button_height))
+            else:
+                pygame.draw.rect(self.screen, Colors.white, (box_x, box_y, self.button_width, self.button_height))
             # Draw button text centered on square
             text(self.screen, self.options[i], box_x + self.button_width/2, box_y + self.button_height/2, Colors.black, self.title_font)
 
-    # Handles mouse input
-    def click(self, x, y):
-        # update width
+    # Updates state
+    def update(self, mouse):
         self.width = self.screen.get_width()
+        self.__check_hover__(mouse.x, mouse.y)
+        if mouse.l_click:
+            self.click(mouse.x, mouse.y)
+
+    # Handles mouse left click input
+    def click(self, x, y):
         # iterate through all buttons
         box_y = self.height/2-self.button_height/2
         for i in range(0, len(self.options)):
@@ -53,6 +62,23 @@ class Circuit_Navigation_Window:
                     self.circuit.step_back()
                 elif self.options[i]==">>":
                     self.circuit.step_fwd()
+    
+
+    def __get_button_i__(self, x, y):
+        # iterate through all buttons
+        box_y = self.height/2-self.button_height/2
+        for i in range(0, len(self.options)):
+            distance_between_boxes = self.width / len(self.options)
+            box_x = distance_between_boxes * i + distance_between_boxes/2 - self.button_width/2
+            # check click collision
+            if x > box_x and x < box_x + self.button_width and y > box_y and y < box_y + self.button_height:
+                return i
+
+    # Highlights a button if x y are inside
+    def __check_hover__(self, x, y):
+        self.hover_button_i = self.__get_button_i__(x,y)
+
+    
 # Draws centered text on screen
 def text(screen, string, x, y, color, font):
     text_color = pygame.Color(color)

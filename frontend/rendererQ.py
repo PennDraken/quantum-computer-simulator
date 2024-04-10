@@ -180,7 +180,7 @@ while True:
     # Clear screen
     screen.fill((0,0,0))
     pygame_event = pygame.event.get() # This removes all events from stack
-    redraw_screen = False
+    redraw_screen = True
     if len(pygame_event) > 0: # Check if anything has happened since last frame
         redraw_screen = True
     for event in pygame_event:
@@ -264,7 +264,7 @@ while True:
     else:
         pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
         drag_bar_color = Colors.white
-
+    circuit_navigation_window.update(Mouse)
     # Left click
     if Mouse.l_click:
         # Check for tabs here
@@ -272,7 +272,8 @@ while True:
         if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
             Mouse.status = "Resizing bottom panel"
         elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
-            circuit_navigation_window.click(Mouse.x, Mouse.y)
+            pass
+            # circuit_navigation_window.click(Mouse.x, Mouse.y)
         elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
             Mouse.status = "Panning"
         elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
