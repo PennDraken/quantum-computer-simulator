@@ -211,7 +211,6 @@ while True:
     # Draw qubit names on left side
     qubit_name_panel.offset_y = circuit_y + circuit_dy
     qubit_name_panel.draw()
-
     
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70

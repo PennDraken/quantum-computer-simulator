@@ -78,10 +78,8 @@ class gateHandler:
         if x < 0 or x > screen.get_width():
             return # Were out of bounds so we dont need to draw this gate
         
-        pygame.font.init()
-        
         # Draws vertical lines for connecting qubits
-        if (gate_text=="CNOT" or gate_text=="X" or gate_text=="Toffoli" or gate_text=="SWAP" or gate_text=="X" or gate_text=="Y" or gate_text=="Z") and nrQubits > 1:
+        if nrQubits > 1 and (gate_text=="CNOT" or gate_text=="X" or gate_text=="Toffoli" or gate_text=="SWAP" or gate_text=="X" or gate_text=="Y" or gate_text=="Z"):
             # Draw qubit line
             low_qubit = min(qubits)
             high_qubit = max(qubits)
@@ -89,17 +87,23 @@ class gateHandler:
             y2 = high_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
             mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
             screenHandler.draw_qubit_line((mid_x,y1),(mid_x,y2), color) # Vertical line
-            for qubit in qubits:
-                y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
-                if gate_text=="CNOT" or gate_text=="Toffoli":
-                    if qubit == high_qubit:
-                        screenHandler.draw_mod(Loc.CIRCLE_CROSS, mid_x, y, color)
-                    else:
-                        screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
-                elif gate_text=="SWAP":
-                   screenHandler.draw_mod(Loc.X_CROSS, mid_x, y, color)
-                # Controlled single qubit gates
-                else:
+
+            if gate_text=="CNOT" or gate_text=="Toffoli":
+                for qubit in qubits:
+                    y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+                    if gate_text=="CNOT" or gate_text=="Toffoli":
+                        if qubit == high_qubit:
+                            screenHandler.draw_mod(Loc.CIRCLE_CROSS, mid_x, y, color)
+                        else:
+                            screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
+            elif gate_text=="SWAP":
+                for qubit in qubits:
+                    y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+                    screenHandler.draw_mod(Loc.X_CROSS, mid_x, y, color)
+            else:
+                for qubit in qubits:
+                    y = qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+                    # Controlled single qubit gates
                     if qubit!=high_qubit:
                         screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
                     else:
