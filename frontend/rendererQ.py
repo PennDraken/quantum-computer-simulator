@@ -27,6 +27,7 @@ from Utilities.mouse import Mouse
 import Fields.TextInput as input_box
 import screenHandler
 import Fields.gate_date_visualizer as gate_data_visualizer
+from tkinter.filedialog import asksaveasfile, askopenfile
 
 screen = screenHandler.screen
 handler = gateHandler()
@@ -252,10 +253,22 @@ while True:
                 submit = re.findall(r"'(.*)', \[(.*?)]", input_boxes.text)
                 gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
             case "EXPORT":
-                pass
+                    file_path = asksaveasfile(initialfile='Untitled.txt',
+                                      defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
+                    try:
+                        if file_path:
+                            file_path.writelines(input_boxes.text)
+                            file_path.close()
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
             case "IMPORT":
-                pass
-
+                file_path = askopenfile(mode ='r',filetypes=[("Text Documents", "*.txt")])
+                try:
+                    if file_path:
+                        submit = re.findall(r"'(.*)', \[(.*?)]", file_path.read())
+                        gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                except Exception as e:
+                    print(f"An error occurred: {e}")
     elif option == "Q-sphere":
         # Updates and draws q-sphere
         q_sphere.y = tab_panel.y + tab_panel.height
