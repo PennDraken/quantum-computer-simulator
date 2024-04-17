@@ -35,9 +35,6 @@ framerate = pygame.time.Clock()
 
 # sampleString = "H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0"
 
-# access screen
-pygame.display.Info()
-
 # positioning of circuit
 circuit_x = 75
 circuit_y = 75
@@ -180,6 +177,8 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
                 gateList.append(gate_data)
         Mouse.holding = None
         Mouse.status = None
+
+
 
 # Game loop
 while True:

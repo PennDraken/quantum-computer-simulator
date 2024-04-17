@@ -5,6 +5,9 @@ import UI
 import Utilities.Colors as Colors
 
 pygame.init()
+img = pygame.image.load("frontend/images/icons/program-logo-32.png")
+pygame.display.set_icon(img)
+
 screen = pygame.display.set_mode((800, 700), pygame.RESIZABLE)
 pygame.display.set_caption("Kvantis")
 
