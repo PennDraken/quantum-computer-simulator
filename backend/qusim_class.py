@@ -578,6 +578,183 @@ def combine_conditional(i : int, n):
        #print(len(gate_i))
      return gate_i
 
+
+
+def adder(circuit , a : int , n : int ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate(Gates.Rz((2*np.pi*a)/(2**(4*n-i))) , ""+i)
+        
+    
+
+
+def adderI (circuit , a : int ,n : int ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate(Gates.Rz((-1*(2*np.pi*a)/(2**(4*n-i)))) , ""+i)    
+
+
+
+
+def adderC (circuit, a : int , n : int , c : int ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate_qubit_list(Gates.Rz((2*np.pi*a)/(2**(4*n-i))) , [c , i]) 
+        
+
+
+
+def adderCC (circuit, a : int , n : int , c : int , cc : int  ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate_qubit_list(Gates.Rz((2*np.pi*a)/(2**(4*n-i))) , [c , cc , i]) 
+
+
+
+
+
+def adderCi (circuit, a : int , n : int , c : int ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate_qubit_list(Gates.Rz(-1*((2*np.pi*a)/(2**(4*n-i)))) , [c , i]) 
+        
+
+
+
+def adderCCi (circuit, a : int , n : int , c : int , cc : int  ):
+    for i in range(3*n,4*n): # register starts at qubit 3n
+        circuit.apply_gate_qubit_list(Gates.Rz((-1*(2*np.pi*a)/(2**(4*n-i)))) , [c , cc , i]) 
+
+
+
+def Qfti (circuit, n : int):
+    qubits = []
+    for i in range (start, end):
+        qubits.append(i)
+        circuit.apply_gate_qubit_list(np.linalg.inv(Gates.QFT(2**(n+1))) , qubits  )
+    
+    
+
+
+def Qft (circuit, n : int ,start : int, end : int ):
+    qubits = []
+    for i in range (start, end):
+        qubits.append(i)
+        circuit.apply_gate_qubit_list(Gates.QFT(2**(n+1)) , qubits  )
+
+
+
+
+
+def adderModN(circuit, a : int , n : int , N : int , c : int , cc : int ):
+    adderCC(circuit,  a , n , c ,cc)
+    adderI(circuit,  N , n )
+    
+    Qfti(circuit , n, 3*n , 4*n +1 )
+    circuit.apply_gate_qubit_list( Gates.CNOT, [4*n , 4*n + 1]) # between overflow bit and aux
+    Qft(circuit ,  n , 3*n , 4*n +1 )
+    
+    adderC(circuit, N , n , n * 4 + 1) # aux
+   
+    adderCCi(circuit,  a , n , c ,cc)
+    
+    Qfti(circuit , n , 3*n , 4*n +1  )
+    circuit.apply_gate(Gates.NOT , str(4*n))
+    circuit.apply_gate_qubit_list( Gates.CNOT, [4*n , 4*n + 1]) # between overflow bit and aux
+    circuit.apply_gate(Gates.NOT , str(4*n))
+    Qft(circuit , n , 3*n , 4*n +1 )
+    
+    adderCC(circuit, a , n , c , cc)
+
+
+def adderModNi(circuit, a : int , n : int , N : int , c : int , cc : int ): # c for x and cc for upper
+    adderCCi(circuit,  a , n , c ,cc)
+    
+    Qfti(circuit , n,  3*n , 4*n +1  )
+    circuit.apply_gate(Gates.NOT , str(4*n))
+    circuit.apply_gate_qubit_list( Gates.CNOT, [4*n , 4*n + 1]) # between overflow bit and aux
+    circuit.apply_gate(Gates.NOT , str(4*n))
+    Qft(circuit , n , 3*n , 4*n +1 )
+    
+    adderCC(circuit,  a , n , c ,cc)
+    
+
+    adderCi(circuit, N , n , n * 4 + 1) # aux
+   
+    Qfti(circuit , n,  3*n , 4*n +1 )
+    circuit.apply_gate(Gates.NOT , str(4*n))
+    Qft(circuit , n,  3*n , 4*n +1 )
+    
+    adder(circuit, N , n)
+    adderCCi( circuit, a , n , c ,cc)
+
+
+
+
+
+def cMultMod (circuit, a : int, n :int, N : int , cc : int):
+    
+    Qft(circuit, n , 3*n , 4*n +1)
+    
+    for i in range(0, n):
+        adderModN(circuit, ((2**i)*a) % N  , n , N , i , cc ) # í is the index of the controll bit in x
+        
+    Qfti(circuit , n,  3*n , 4*n +1 )
+
+
+    #TODO cSwap
+
+
+    Qft(circuit, n , 3*n , 4*n +1)
+    
+    #TODO OBS måste använda a mod invers nedanför a --> a_modInvers
+
+    i = 4*n - 1
+    while i >= 3*n:
+        adderModNi(circu, ((2**i)*a) % N  , n , N , i , cc ) 
+        
+    Qfti(circuit , n,  3*n , 4*n +1 )
+
+
+
+
+def shor(a : int, N : int):
+    
+    n = ceil(np.log2(N))
+     
+    q = System()
+    
+    # upper 
+    for i in range(0, 2*n):
+        q.add_qubit(str(i) , Gates.zero_state.dot(Gates.H))
+    
+    # x 
+    for j in range(2*n, 3*n):
+        q.add_qubit(str(i) , Gates.one_state)
+     
+    # aux  OBS unclear if this should be 1 or binary interpretation of a
+    for k in range(3*n, 4*n + 2):
+       q.add_qubit(str(i) , Gates.one_state)
+   
+    
+
+ 
+    for i in range(0, 2*n):
+        cMultMod(q, a**(2**i), n , N , i ) # i is the controlling bit among the first 2n qubits
+
+    Qfti(2*n , 0 , 2*n)
+
+    q.print_merged_register_QC
+      
+  
+
+shor(3 , 4)
+
+
+
+
+
+
+
+
+
+
+
 # ----------------------------------------------------------------------------------------------------
 
 
