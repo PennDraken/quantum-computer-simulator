@@ -5,7 +5,7 @@ import Utilities.Colors as Colors
 import UI
 
 class Circuit_Navigation_Window:
-    def __init__(self, screen, x: int, y: int, circuit):
+    def __init__(self, screen, x: int, y: int, circuit, images = [pygame.image.load("frontend/images/icons/circuit-reset.png"), pygame.image.load("frontend/images/icons/circuit-run.png"), pygame.image.load("frontend/images/icons/circuit-step-backwards.png"), pygame.image.load("frontend/images/icons/circuit-step-forwards.png")]):
         self.screen: pygame.screen = screen
         self.x = x
         self.y = y
@@ -13,12 +13,14 @@ class Circuit_Navigation_Window:
         self.height = 50
         self.button_width = 100
         self.button_height = 50
+        self.icon_size = int(self.button_height * 0.8)
         self.circuit = circuit
         self.title_font = pygame.font.Font(None, 24)
         self.state_font = pygame.font.Font(None, 20)
         self.options = ["Reset","Run","<<",">>"]
+        self.set_icons(images)
         self.hover_button_i = None # Button currently being hovered on
-
+        
     def draw(self):
         # update width
         self.width = self.screen.get_width()
@@ -35,8 +37,14 @@ class Circuit_Navigation_Window:
                 pygame.draw.rect(self.screen, Colors.hover, (box_x, box_y, self.button_width, self.button_height))
             else:
                 pygame.draw.rect(self.screen, Colors.white, (box_x, box_y, self.button_width, self.button_height))
-            # Draw button text centered on square
-            text(self.screen, self.options[i], box_x + self.button_width/2, box_y + self.button_height/2, Colors.black, self.title_font)
+            icon = self.icons[i]
+            if icon != None:
+                icon_rect = (box_x + self.button_width/2 - self.icon_size/2, box_y + self.button_height/2 - self.icon_size/2, self.icon_size, self.icon_size) # Note this rect does not scale icon
+                self.screen.blit(icon, icon_rect)
+                # text(self.screen, self.options[i], box_x + self.button_width/2, box_y + self.button_height/2, Colors.black, self.title_font)
+            else:
+                # Draw button text centered on square
+                text(self.screen, self.options[i], box_x + self.button_width/2, box_y + self.button_height/2, Colors.black, self.title_font)
 
     # Updates state
     def update(self, mouse):
@@ -62,7 +70,12 @@ class Circuit_Navigation_Window:
                     self.circuit.step_back()
                 elif self.options[i]==">>":
                     self.circuit.step_fwd()
-    
+
+    def set_icons(self, images):
+        self.icons = []
+        for image in images:
+            scaled_image = pygame.transform.smoothscale(image, (self.icon_size, self.icon_size))
+            self.icons.append(scaled_image)    
 
     def __get_button_i__(self, x, y):
         # iterate through all buttons
