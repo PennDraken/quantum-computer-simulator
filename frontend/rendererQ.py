@@ -27,6 +27,7 @@ from Utilities.mouse import Mouse
 import Fields.TextInput as input_box
 import screenHandler
 import Fields.gate_date_visualizer as gate_data_visualizer
+from tkinter.filedialog import asksaveasfile, askopenfile
 
 screen = screenHandler.screen
 handler = gateHandler()
@@ -72,12 +73,17 @@ qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
+color_selected = (150, 150, 150)  # light gray
+color_base = (122, 122, 122) #black
+buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
+
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 
+buttons_options = input_box.Button(screen, color_base, color_selected, buttons_text, input_boxes)
 
 sizeQ = 40 # Zoom level
 
@@ -233,11 +239,36 @@ while True:
         calculation_window.systems = circuit.systems # update states
         calculation_window.draw()
     elif option == "Text Editor":
+        buttons_options.update(screen.get_width(), tab_panel.y + tab_panel.height)
         pressed_keys = pygame.key.get_pressed()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         input_boxes.update(tab_panel.y, tab_panel.height)
+        buttons_options.draw()
+        gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
+        test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
+        match test:
+            case "SUBMIT":
+                submit = re.findall(r"'(.*)', \[(.*?)]", input_boxes.text)
+                gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+            case "EXPORT":
+                    file_path = asksaveasfile(initialfile='Untitled.txt',
+                                      defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
+                    try:
+                        if file_path:
+                            file_path.writelines(input_boxes.text)
+                            file_path.close()
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+            case "IMPORT":
+                file_path = askopenfile(mode ='r',filetypes=[("Text Documents", "*.txt")])
+                try:
+                    if file_path:
+                        submit = re.findall(r"'(.*)', \[(.*?)]", file_path.read())
+                        gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                except Exception as e:
+                    print(f"An error occurred: {e}")
     elif option == "Q-sphere":
         # Updates and draws q-sphere
         q_sphere.y = tab_panel.y + tab_panel.height
