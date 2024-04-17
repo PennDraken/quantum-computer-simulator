@@ -52,8 +52,6 @@ tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates",
 tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
 q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
-q_sphere.add_random_point_on_unit_sphere()
-q_sphere.add_random_point_on_unit_sphere()
 
 # Calculation window (generate example circuit) Comment out to load different presets
 # circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]) # Quantum teleportation
@@ -61,7 +59,9 @@ q_sphere.add_random_point_on_unit_sphere()
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 # circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
-circuit : Circuit = Circuit(algorithms.grover())
+# circuit : Circuit = Circuit(algorithms.grover(3,0b010))
+# circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
+circuit : Circuit = Circuit(algorithms.grover(3, 0b0110, iterations=3))
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
@@ -107,8 +107,8 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
                 print("clicked gate")
                 window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
                 break
+        # Find qubit to drag
         if Mouse.status==None:
-            # Find qubit to drag
             col = (Mouse.x - offset_x) // UI.grid_size
             row = (Mouse.y - offset_y) // UI.grid_size
             if -1 < col-1 < len(gateList):
@@ -130,14 +130,14 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
         qubits = gate_data[1]
         if qubits[0] != min(qubits):
             print (qubits[0])
-            grid_y -= (max(qubits) - min(qubits)) * UI.grid_size
+            grid_y -= (max(qubits) - min(qubits)) * UI.grid_size # Calculate rectangle height
         delta_qubit_index = max(qubits) - min(qubits) # Find height of qubits
         highlight_height = (delta_qubit_index + 1) * UI.grid_size# The height of the highlighter square
         gate_color = Colors.white
         if Mouse.y < drag_bar_y:
             pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, highlight_height), width = 1)
         else:
-            gate_color = Colors.red
+            gate_color = Colors.red # Delete highlight
         Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
     elif Mouse.r_held and Mouse.status == "Holding qubit":
         qubit_row = (Mouse.y - offset_y) // UI.grid_size
@@ -148,8 +148,8 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
         if qubit_row not in occupied_qubits:
             # Reminder gateList is formatted like this: column, [gate, qubits: []]
             gateList[col][1][Mouse.holding[1]] = qubit_row # TODO Change row of qubit by swapping?
+    # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
     elif Mouse.status == "Holding qubit":
-        # Qubits have already been placed so we just remove it from mouse  TODO Shift qubit at location
         Mouse.holding = None
         Mouse.status = None
     # Button release

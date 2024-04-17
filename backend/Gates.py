@@ -1,5 +1,5 @@
 import numpy as np
-
+import ast
 
 # Stores the different gates TODO More gates
 # Identity
@@ -77,27 +77,7 @@ def DFT(N : int)-> np.array:
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
     # TODO More programmatic approach, perhaps dictionaries or eval()
-    match gate_str:
-        case "H":
-            return H
-        case "I":
-            return I
-        case "CNOT":
-            return CNOT
-        case "Y":
-            return Y
-        case "X":
-            return X
-        case "Z":
-            return Z
-        case "Ry(np.pi/4)": # TODO parse actual value
-            return Ry(np.pi/4)
-        case "Toffoli":
-            return Toffoli
-        case "CUSTOM":
-            return None # TODO Implement
-        case _ :
-            return None # TODO Error management
+    return eval(gate_str)
 
 def checkIfCoprime(a, b)->bool: # Checks if two numbers are coprime, i.e. their greatest common divisor is 1, i.e. gcd(a,b) = 1
     while b != 0:
@@ -201,7 +181,65 @@ def A(n):
         gate = gate * modified_phase_shift
     return gate
 
+# Grovers algorithm
+# https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms/grovers-algorithm
+def Zf(n, solution_states):
+    """
+    Create the Zf gate matrix for a given number of qubits (n) and solution states.
+    
+    Parameters:
+        n (int): Number of qubits.
+        solution_states (list): List of solution states represented as integers.
+        
+    Returns:
+        numpy.ndarray: Zf gate matrix.
+    """
+    # Initialize the identity matrix
+    Zf_matrix = np.eye(2**n, dtype=complex)
+    
+    # Modify the diagonal elements for solution states
+    for state in range(solution_states):
+        Zf_matrix[state, state] = -1
+    return Zf_matrix
+    
+def Zor(n, target_state):
+    """
+    Create the Zor gate matrix for a given number of qubits (n) and target state. This is the oracle.
+    
+    Parameters:
+        n (int): Number of qubits.
+        target_state (int): Index of the target state.
+        
+    Returns:
+        numpy.ndarray: Zor gate matrix.
+    """
+    # Initialize the identity matrix
+    Zor_matrix = np.eye(2**n, dtype=complex)
+    # Modify the diagonal elements for the target state
+    Zor_matrix[target_state, target_state] = -1
+    return Zor_matrix
 
+# n is amount of qubits
+def Ug(n):
+    """
+    [-0.5  0.5
+    0.5 -0.5]
+    """
+    N = 2**n # number of rows/ columns
+    value = 1/2
+    matrix = np.full((N, N), value)  # Initialize an n x n matrix with 1/2
+    np.fill_diagonal(matrix, -value)  # Set the diagonal elements to -1/2
+
+    return normalize(matrix)
+
+
+def normalize(vector : np.array)->np.array:
+        scaler = np.sqrt(np.sum(np.abs(vector)**2))
+        new_vector = vector/scaler
+        return new_vector
+
+# -----------------------------------------------------------------------------
+# GATE MODIFIERS
 # Moves qubits by swapping indices and expanding (note gate is a 2 qubit gate)
 def gate_change_connections(gate: np.array, qubit_a, qubit_b):
     # Expand gate

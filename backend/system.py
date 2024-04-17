@@ -77,7 +77,7 @@ class System():
             self.registers[self.registers.index(register_a)] = register
 
 
-    # Applies a gate to a qubit list
+    # Applies a gate to a qubit list (of integers)
     def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: []):
         # Get all different register
         unmerged_registers = []
@@ -87,21 +87,22 @@ class System():
         # Remove duplicates (by casting to dict and back to list)
         unmerged_registers = list(dict.fromkeys(unmerged_registers))    
         # Merge registers
-        merged_register = unmerged_registers.pop() # Remove first element
+        merged_register = unmerged_registers.pop(0) # Remove first element
         register_index = self.registers.index(merged_register)
         self.registers.remove(merged_register)
         for register in unmerged_registers:
             merged_register = merge_registers(merged_register, register)
             self.registers.remove(register) # Remove from register self list
 
-        # Store indices of how qubits are stored in register
+        # Store indices of how qubits are ordered in register. This is the original state before swapping.
         unswapped_qubits_index_list = []
         for qubit in merged_register.qubits:
             state_index = self.qubits.index(qubit)
             unswapped_qubits_index_list.append(state_index)
+
         # Perform swap operation
         ordered_vector = copy.deepcopy(merged_register.vector)
-        for state_index in range(0,len(merged_register.vector)):
+        for state_index in range(0, len(merged_register.vector)):
             new_index = state_index
             for index in range(0, len(qubit_index_list)):
                 # Find the bits to swap in state_index to calculate where the state should be placed
@@ -109,9 +110,11 @@ class System():
                 index_target   = qubit_index_list[index]
                 new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
             ordered_vector[new_index] = merged_register.vector[state_index]
+
         # Apply gate
         gate = expand_gate(gate, 0, len(merged_register.qubits))
         ordered_vector = gate.dot(ordered_vector)
+
         # Swap back
         for state_index in range(0,len(merged_register.vector)):
             new_index = state_index
@@ -121,6 +124,7 @@ class System():
                 index_target   = qubit_index_list[index]
                 new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
             merged_register.vector[new_index] = ordered_vector[state_index]
+
         # Update our register state
         self.registers.append(merged_register)
 

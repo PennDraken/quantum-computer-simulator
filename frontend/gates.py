@@ -107,9 +107,17 @@ class gateHandler:
                         screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
                     else:
                         self.__render_box_gate__(gate_text, [qubits[-1]], calculations, offset_x_y_tuple, column, color)
-            gate = Gate(gate_text, mid_x, y, self.gateWidth, self.gateHeight) 
+            gate = Gate(gate_text, mid_x, y, self.gateWidth, self.gateHeight)
+        # Draw blank gate outline/ highlight
+        elif gate_text=="blank":
+            low_qubit = min(qubits)
+            high_qubit = max(qubits)
+            y1 = low_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of gate
+            y2 = high_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
+            x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
+            pygame.draw.rect(screen, Colors.white, (x, y1, x + UI.gate_size, y2-y1), width=2)
+        # Draw the actual gate
         else:
-            # Draw the actual gate
             center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
             x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
             y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
