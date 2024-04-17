@@ -61,7 +61,7 @@ class gateHandler:
     adjust = 0
 
     # Renders a gate + lines for qubits
-    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color): # integrating evenhandler for this method
+    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color, selected=False): # integrating evenhandler for this method
         # First check if label TODO maybe move this somewhere else?
         if (gate_text=="label"):
             mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
@@ -116,6 +116,20 @@ class gateHandler:
             y2 = high_qubit * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[1] # Find midpoint of second gate
             x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
             pygame.draw.rect(screen, Colors.white, (x, y1, x + UI.gate_size, y2-y1), width=2)
+        # Measure gate
+        elif gate_text=="measure":
+            center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid
+            x = UI.grid_size * column + center_offset + offset_x_y_tuple[0]
+            y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1]
+            gate_rect = (x, y, UI.gate_size, UI.gate_size) # Note this rect does not scale icon
+            if not selected:
+                image = pygame.image.load("frontend/images/gates/measure-unmeasured.png")
+            else:
+                image = pygame.image.load("frontend/images/gates/measure-measured-1.png")
+            image = pygame.transform.smoothscale(image, (UI.gate_size, UI.gate_size))
+            pygame.draw.rect(screen, color, gate_rect)
+            screen.blit(image, gate_rect)
+            gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight)
         # Draw the actual gate
         else:
             center_offset = (UI.grid_size - UI.gate_size)/2 # Used to draw gate at centre of grid

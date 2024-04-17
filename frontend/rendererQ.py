@@ -87,12 +87,13 @@ sizeQ = 40 # Zoom level
 # Draws the circuit
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
     for i in range(0,len(gateList)):
-        gate_data = gateList[i]      
-        if i<=circuit.position-1: # Change color for gates being run
+        gate_data = gateList[i]
+        selected = i<=circuit.position-1     
+        if selected: # Change color for gates already being applied
             color = Colors.yellow
         else:
             color = Colors.white
-        gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color)
+        gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color, selected)
         gates_on_circuit.append(gate_data)
 
 def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
