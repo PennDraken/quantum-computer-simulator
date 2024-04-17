@@ -61,7 +61,7 @@ q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), scr
 # circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
-circuit : Circuit = Circuit(algorithms.grover(3, 0b0110, iterations=3))
+circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 

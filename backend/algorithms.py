@@ -52,22 +52,28 @@ def grover_2_qubits(key):
             ]
 
 # https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms/grovers-algorithm
-def grover(n_qubits, oracle_target, iterations=2):
+def grover(n_qubits, states : list[int], iterations=2):
+    """
+    Implements Grovers algorithm.
+    Inputs:
+        n_qubits - Number of qubits in algorithm
+        states - States to search for. Example input: [0b0110,0b1000]
+        iterations - Number of iterations to apply grovers. Note increased iterations leads to amplitude decay of target states.
+    """
     # Create qubits
     qubits = []
     for i in range(n_qubits):
         qubits.append(str(i))
     circuit = [qubits]
-    # Hadamrds on all qubits
+    # Hadamards on all qubits
     for i in range(n_qubits):
         circuit.append(f"H {i}")
+    # Create Grover operator
     for i in range(iterations):
         # Label
         circuit.append(f"label Iteration_{i}")
-        # Zor
-        circuit.append(f"Zor({n_qubits},{oracle_target}) {qubits}")
-        # Ug
-        circuit.append(f"Ug({n_qubits}) {qubits}")
+        # Grover operator
+        circuit.append(f"grover_op({n_qubits},{states}) {qubits_between(0, n_qubits - 1)}")
     circuit.append(f"label Measurement section")
     for i in range(n_qubits):
         circuit.append(f"measure {i}")
@@ -77,3 +83,17 @@ def grover(n_qubits, oracle_target, iterations=2):
 
 def quantum_teleportation():
     return [["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Helper functions
+def qubits_between(start, end):
+    """
+    Generates a string consisting of all numbers between start and end seperated by spaces
+    Used to create algorithms where qubit sizes may vary
+    Example: qubits_between(2,5) returns "2 3 4 5"
+    """
+    if start > end:
+        return ""  # Return an empty string if start is greater than end
+    else:
+        return ' '.join(str(i) for i in range(start, end + 1))

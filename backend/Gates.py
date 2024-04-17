@@ -76,7 +76,7 @@ def DFT(N : int)-> np.array:
 
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
-    # TODO More programmatic approach, perhaps dictionaries or eval()
+    # TODO Dont use eval lol
     return eval(gate_str)
 
 def checkIfCoprime(a, b)->bool: # Checks if two numbers are coprime, i.e. their greatest common divisor is 1, i.e. gcd(a,b) = 1
@@ -183,54 +183,28 @@ def A(n):
 
 # Grovers algorithm
 # https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms/grovers-algorithm
-def Zf(n, solution_states):
+def grover_op(num_qubits, states : list[int]):
     """
-    Create the Zf gate matrix for a given number of qubits (n) and solution states.
-    
-    Parameters:
-        n (int): Number of qubits.
-        solution_states (list): List of solution states represented as integers.
-        
-    Returns:
-        numpy.ndarray: Zf gate matrix.
-    """
-    # Initialize the identity matrix
-    Zf_matrix = np.eye(2**n, dtype=complex)
-    
-    # Modify the diagonal elements for solution states
-    for state in range(solution_states):
-        Zf_matrix[state, state] = -1
-    return Zf_matrix
-    
-def Zor(n, target_state):
-    """
-    Create the Zor gate matrix for a given number of qubits (n) and target state. This is the oracle.
-    
-    Parameters:
-        n (int): Number of qubits.
-        target_state (int): Index of the target state.
-        
-    Returns:
-        numpy.ndarray: Zor gate matrix.
-    """
-    # Initialize the identity matrix
-    Zor_matrix = np.eye(2**n, dtype=complex)
-    # Modify the diagonal elements for the target state
-    Zor_matrix[target_state, target_state] = -1
-    return Zor_matrix
+    Description:
+        This Grover operator combines oracle and amplifier into a single function.
 
-# n is amount of qubits
-def Ug(n):
+    Input:
+        num_qubits - Number of qubits in system
+        states - List of integers, where the binary representation represents the states that we're searching for.
+    
+    Example:
+        grover_op(3, [0b101])
     """
-    [-0.5  0.5
-    0.5 -0.5]
-    """
-    N = 2**n # number of rows/ columns
-    value = 1/2
-    matrix = np.full((N, N), value)  # Initialize an n x n matrix with 1/2
-    np.fill_diagonal(matrix, -value)  # Set the diagonal elements to -1/2
+    small_val = 0.5**(num_qubits-1) # 2 qubits => 1/2, 3 qubits => 1/4, 4 qubits => 1/8, 5 qubits => 1/16 ...
+    big_val   = 1-small_val # Big value is placed on diagonal
+    N = 2**num_qubits # Columns and rows
+    matrix = np.full((N, N), small_val)
+    np.fill_diagonal(matrix, -big_val)
+    # Flip target states columns
+    for column in states:
+        matrix[:, column] = -matrix[:, column] # Negates the column
+    return matrix
 
-    return normalize(matrix)
 
 
 def normalize(vector : np.array)->np.array:
