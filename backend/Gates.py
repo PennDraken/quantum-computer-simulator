@@ -33,6 +33,10 @@ def Ry(theta):
     return np.array([[np.cos(theta/2), -np.sin(theta/2)],
                      [np.sin(theta/2), np.cos(theta/2)]], dtype=complex)
 
+def Rz(theta)->np.array:
+    return np.array([[np.e**((theta/2)),0], # add imaginary
+                     [0, np.e**((theta/2))]], dtype=complex)
+
 # Generates a Quantum Fourier Transform matrix
 def QFT(N : int)->np.array:
     W = np.power(np.e, (2 * np.pi*1j)/N)
