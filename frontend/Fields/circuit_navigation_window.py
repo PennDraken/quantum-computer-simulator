@@ -13,7 +13,7 @@ class Circuit_Navigation_Window:
         self.height = 50
         self.button_width = 100
         self.button_height = 50
-        self.icon_size = int(self.button_height * 0.8)
+        self.icon_size = int(self.button_height * 0.5)
         self.circuit = circuit
         self.title_font = pygame.font.Font(None, 24)
         self.state_font = pygame.font.Font(None, 20)
@@ -26,7 +26,8 @@ class Circuit_Navigation_Window:
         self.width = self.screen.get_width()
         # draw background
         pygame.draw.rect(self.screen, Colors.black, (self.x, self.y, self.width, self.height))
-        pygame.draw.rect(self.screen, Colors.white, (self.x, self.y, self.width, self.height), width=1)
+        w = 2 # Width of outline
+        pygame.draw.rect(self.screen, Colors.white, (self.x - w, self.y - w, self.width + 2*w, self.height + 2*w), width=w)
         # draw squares at equal distance
         box_y = self.height/2-self.button_height/2
         for i in range(0, len(self.options)):
