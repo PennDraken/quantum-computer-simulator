@@ -125,7 +125,7 @@ class gateHandler:
             if not selected:
                 image = pygame.image.load("frontend/images/gates/measure-unmeasured.png")
             else:
-                image = pygame.image.load("frontend/images/gates/measure-measured-1.png")
+                image = pygame.image.load("frontend/images/gates/measure-measured.png")
             image = pygame.transform.smoothscale(image, (UI.gate_size, UI.gate_size))
             pygame.draw.rect(screen, color, gate_rect)
             screen.blit(image, gate_rect)

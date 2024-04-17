@@ -200,8 +200,6 @@ while True:
             handler.adjust += (5 * event.y) 
             screenHandler.offsetMod += (5 * event.y)  
             sizeQ += (2 * event.y) 
-            # qubit_name_panel.title_font = pygame.font.Font(None, sizeQ)
-            # qubit_name_panel.small_font = pygame.font.Font(None, 20)
 
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
@@ -348,12 +346,11 @@ while True:
     if option=="Logic gates" and Mouse.status != "Moving gate":
         MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
-
     # Draw everything here
     if redraw_screen:
         pygame.display.update()
 
-    framerate.tick(60)
+    framerate.tick(30)
 
 # --------------------------------------------------------
 # Draw methods
