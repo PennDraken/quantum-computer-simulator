@@ -176,7 +176,7 @@ class gateHandler:
         center_y = (lowest_qubit + center_row + 0.5) * UI.grid_size + offset_x_y_tuple[1]
         # Draw text
         if len(gate_text)<3:
-            UI.text(screen, gate_text, center_x, center_y, Colors.blue)
+            UI.text_centered(screen, gate_text, center_x, center_y, Colors.blue)
         else:
             UI.rotated_text(screen, gate_text, center_x, center_y, Colors.blue, bg_rect=True)
 

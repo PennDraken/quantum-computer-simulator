@@ -1,19 +1,29 @@
 import pygame
 import numpy as np
+import Utilities.Colors as Colors
+import UI
+
 # Visualizes the matrix of a given gate
 class Matrix_Window():
-    def __init__(self, matrix):
-        self.matrix=matrix
-        self.matrix_string=self.set_matrix(matrix)
+    def __init__(self, screen):
+        self.matrix=[]
+        # self.matrix_string=self.set_matrix(matrix)
+        self.active=False
+        self.screen=screen
 
     def draw(self):
         # Create a string for the matrix
+        pygame.draw.rect(self.screen, Colors.black, (self.screen.get_rect()))
+        UI.text_multiline(self.screen, self.matrix_string, 0, 0, Colors.white)
+        pass
+
+    def update(self):
         pass
     
-    # Takes a np.array matrix and transforms 
+    # Takes a np.array matrix and transforms it into a string
     def set_matrix(self, matrix : np.array):
         matrix_string = ""
-        spacing = 14  # Distance between each number (number centered every 8 characters)
+        spacing = 20  # Distance between each number (number centered every 8 characters)
         for i in range(len(matrix)):
             for j in range(len(matrix[i])):
                 num = matrix[i][j]

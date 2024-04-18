@@ -24,9 +24,7 @@ class input_box:
         self.obj.display_editor(event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         self.text = self.obj.get_text_as_string()
 
-
 class Button():
-
     def __init__(self, screen, color_base, color_selected, buttons: [str], input_box_instance:input_box):
         self.screen = screen
         self.rect = [pygame.Rect(0, 0, 0, 0) for _ in buttons]

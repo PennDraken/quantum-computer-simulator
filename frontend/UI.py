@@ -65,10 +65,10 @@ class ChoicePanel():
                 # Text and image
                 self.screen.blit(image, icon_rect)
                 offset = icon_width
-                text(self.screen, self.choices[i], x + button_width/2 + icon_width, y + button_height/2, Colors.black)
+                text_centered(self.screen, self.choices[i], x + button_width/2 + icon_width, y + button_height/2, Colors.black)
             else:
                 # Just text
-                text(self.screen, self.choices[i], x + button_width/2, y + button_height/2, Colors.black)
+                text_centered(self.screen, self.choices[i], x + button_width/2, y + button_height/2, Colors.black)
 
     # Sets images of choice panel (automatically scales to size)
     def set_icons(self, images):
@@ -96,13 +96,23 @@ class ChoicePanel():
         return self.choices[self.selected]
 
 # Useful method to quickly draw centered text on screen
-def text(screen, string, x, y, color):
+def text_centered(screen, string, x, y, color):
     font = pygame.font.Font(None, 24)
     text_color = pygame.Color(color)
     text_surface = font.render(string, True, text_color)
     text_rect = text_surface.get_rect()
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
+
+# Draws
+def text_multiline(screen, string, x, y, color):
+    font = pygame.font.Font(None, 24)
+    lines = string.split('\n')
+    line_height = font.size("Tg")[1]  # Get height of a line (assuming all characters have the same height)
+    for line in lines:
+        text_surface = font.render(line, True, color)
+        screen.blit(text_surface, (x, y))
+        y += line_height
 
 # Useful method to quickly draw centered text on screen (Rotated 90 degrees)
 def rotated_text(screen, string, x, y, color, bg_rect=False):

@@ -135,8 +135,6 @@ class Circuit():
             else:
                 label_text = parts[1] # Load the text
                 converted_list.append((gate, label_text))
-
-
         return converted_list
     
     # Used for frontend. Converts and sets list which is frontend gate representation to a format that backend can use.

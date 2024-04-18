@@ -26,7 +26,7 @@ from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import Fields.TextInput as input_box
 import screenHandler
-import Fields.gate_date_visualizer as gate_data_visualizer
+import frontend.Fields.gate_data_visualizer as gate_data_visualizer
 from tkinter.filedialog import asksaveasfile, askopenfile
 
 screen = screenHandler.screen
@@ -65,6 +65,8 @@ calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0
 
 circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
+gate_data_window = gate_data_visualizer.Matrix_Window(screen)
+
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_window.y + circuit_navigation_window.height, circuit.systems[0].qubits, circuit_dy)
         
 gateList = circuit.as_frontend_gate_list()
@@ -79,8 +81,10 @@ buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 
-buttons_options = input_box.Button(screen, color_base, color_selected, buttons_text, input_boxes)
+
+description_string = '\n'.join(circuit.description[1:])
+input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit.description[1:])
+text_editor = input_box.Button(screen, color_base, color_selected, buttons_text, input_boxes)
 
 sizeQ = 40 # Zoom level
 
@@ -109,7 +113,9 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
                 # gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
                 gateList.pop(i)
                 print("clicked gate")
-                window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
+                # window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
+                gate_data_window.set_matrix(string_to_gate(gate_data[0]))
+                gate_data_window.active = True
                 break
         # Find qubit to drag
         if Mouse.status==None:
@@ -179,8 +185,6 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
         Mouse.holding = None
         Mouse.status = None
 
-
-
 # Game loop
 while True:
     Mouse.update(Mouse)
@@ -220,9 +224,6 @@ while True:
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
     tab_panel.y = drag_bar_y + drag_bar_height
-
-    # Draw options panel
-    # Update positions
     
     # Draws background of panel window (hides circuit)
     pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))
@@ -237,19 +238,19 @@ while True:
         calculation_window.systems = circuit.systems # update states
         calculation_window.draw()
     elif option == "Text Editor":
-        buttons_options.update(screen.get_width(), tab_panel.y + tab_panel.height)
+        text_editor.update(screen.get_width(), tab_panel.y + tab_panel.height)
         pressed_keys = pygame.key.get_pressed()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         input_boxes.update(tab_panel.y, tab_panel.height)
-        buttons_options.draw()
-        gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-        test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
+        text_editor.draw()
+        test = text_editor.handle_event(mouse_x, mouse_y, mouse_pressed, circuit.description[1:])
         match test:
+            # Updates circuit view
             case "SUBMIT":
-                submit = re.findall(r"'(.*)', \[(.*?)]", input_boxes.text)
-                gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                circuit.description = text_editor.text
+            # Saves file to disk
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
@@ -259,12 +260,15 @@ while True:
                             file_path.close()
                     except Exception as e:
                         print(f"An error occurred: {e}")
+            # Loads file from disk
             case "IMPORT":
                 file_path = askopenfile(mode ='r',filetypes=[("Text Documents", "*.txt")])
                 try:
                     if file_path:
-                        submit = re.findall(r"'(.*)', \[(.*?)]", file_path.read())
-                        gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                        # submit = re.findall(r"'(.*)', \[(.*?)]", file_path.read())
+                        # gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                        # circuit.set_circuit_from_frontend_gate_list(gateList)
+                        circuit.description[1:] = file_path.read()
                 except Exception as e:
                     print(f"An error occurred: {e}")
     elif option == "Q-sphere":
@@ -279,8 +283,13 @@ while True:
 
     # Draw toolbar with run and step buttons
     circuit_navigation_window.draw()
-    # ---------------------------------------------------------------
 
+    # Draw gate matrix representation
+    if gate_data_window.active:
+        # gate_data_window.draw()
+        # gate_data_window.update()
+        pass
+    # ---------------------------------------------------------------
     # Mouse themeing based on status
     # Update cursor + temporary colors
     if Mouse.status == None and Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
@@ -294,6 +303,7 @@ while True:
         pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
         drag_bar_color = Colors.white
     circuit_navigation_window.update(Mouse)
+    
     # Left click
     if Mouse.l_click:
         # Check for tabs here
