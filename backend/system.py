@@ -118,7 +118,7 @@ class System():
         merged_register.vector = gate.dot(merged_register.vector)
 
         # Resort register
-        merged_register = merged_register.sort_register(original_qubits)
+        # merged_register = merged_register.sort_register(original_qubits)
 
         # Update our register state
         self.registers.append(merged_register)

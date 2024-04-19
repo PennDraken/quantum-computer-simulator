@@ -68,6 +68,11 @@ def grover(n_qubits, states : list[int], iterations=2):
     # Hadamards on all qubits
     for i in range(n_qubits):
         circuit.append(f"H {i}")
+    # Mess up order
+    circuit.append("gen_I(2) 3 1")
+    circuit.append("gen_I(2) 4 1")
+    circuit.append("gen_I(3) 2 1 3")
+
     # Create Grover operator
     for i in range(iterations):
         # Label
