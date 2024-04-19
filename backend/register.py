@@ -50,9 +50,9 @@ class Register():
         # find all bits that should be swapped
         bits_to_swap = []
         for i in range(len(unsorted_qubits)):
-            q = unsorted_qubits[i]
+            qubit = unsorted_qubits[i]
             # find where this q should be moved to in sorted_qubits
-            target_i = sorted_qubits.index(q)
+            target_i = sorted_qubits.index(qubit)
             # check if swap is not already in bits_to_swap (no duplicate swaps)
             if not (target_i, i) in bits_to_swap:
                 bits_to_swap.append((i, target_i))
@@ -62,6 +62,7 @@ class Register():
             i_b = swap_pair[1]
             sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
         # Finished
+        self
         return sorted_register
     
     # Checks if probability adds up to 1 for all cases

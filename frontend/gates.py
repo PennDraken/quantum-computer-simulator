@@ -176,9 +176,9 @@ class gateHandler:
         center_y = (lowest_qubit + center_row + 0.5) * UI.grid_size + offset_x_y_tuple[1]
         # Draw text
         if len(gate_text)<3:
-            UI.text(screen, gate_text, center_x, center_y, Colors.blue)
+            UI.text(screen, gate_text, center_x, center_y, Colors.black)
         else:
-            UI.rotated_text(screen, gate_text, center_x, center_y, Colors.blue, bg_rect=True)
+            UI.rotated_text(screen, gate_text, center_x, center_y, Colors.black, bg_rect=True)
 
     # This is used to draw null-gates. Null-gates are gates which are temporarily added to list to highlight how the circuit will change.
     def __render_empty_gate__(): # TODO implement ()

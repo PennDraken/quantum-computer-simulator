@@ -81,9 +81,11 @@ class System():
     def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: []):
         # Get all different register
         unmerged_registers = []
+        sorted_qubit_index_list = []
         for qubit_index in qubit_index_list:
-            qubit = self.qubits[qubit_index]
-            unmerged_registers.append(find_register(self, qubit))
+            qubit_in_system = self.qubits[qubit_index]
+            sorted_qubit_index_list.append(qubit_in_system)
+            unmerged_registers.append(find_register(self, qubit_in_system))
         # Remove duplicates (by casting to dict and back to list)
         unmerged_registers = list(dict.fromkeys(unmerged_registers))    
         # Merge registers
@@ -94,36 +96,29 @@ class System():
             merged_register = merge_registers(merged_register, register)
             self.registers.remove(register) # Remove from register self list
 
-        # Store indices of how qubits are ordered in register. This is the original state before swapping.
-        unswapped_qubits_index_list = []
+        # Find order of swaps
+        original_qubits = merged_register.qubits
+        original_qubit_index_list = []
         for qubit in merged_register.qubits:
-            state_index = self.qubits.index(qubit)
-            unswapped_qubits_index_list.append(state_index)
+            original_qubit_index_list.append(self.qubits.index(qubit))
+        
+        sorted_qubit_index_list = sort_list_by_key(original_qubit_index_list, qubit_index_list)
 
-        # Perform swap operation
-        ordered_vector = copy.deepcopy(merged_register.vector)
-        for state_index in range(0, len(merged_register.vector)):
-            new_index = state_index
-            for index in range(0, len(qubit_index_list)):
-                # Find the bits to swap in state_index to calculate where the state should be placed
-                index_original = unswapped_qubits_index_list[index]
-                index_target   = qubit_index_list[index]
-                new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
-            ordered_vector[new_index] = merged_register.vector[state_index]
+        sorted_qubits = []
+        for qubit_index in sorted_qubit_index_list:
+            qubit = self.qubits[qubit_index]
+            sorted_qubits.append(qubit)
 
+        # Sort register
+        merged_register = merged_register.sort_register(sorted_qubits)
+        
         # Apply gate
-        gate = expand_gate(gate, 0, len(merged_register.qubits))
-        ordered_vector = gate.dot(ordered_vector)
+        gate_apply_index = merged_register.qubits.index(self.qubits[qubit_index_list[0]])
+        gate = expand_gate(gate, gate_apply_index, len(merged_register.qubits))
+        merged_register.vector = gate.dot(merged_register.vector)
 
-        # Swap back
-        for state_index in range(0,len(merged_register.vector)):
-            new_index = state_index
-            for index in range(0, len(qubit_index_list)):
-                # Find the bits to swap in state_index to calculate where the state should be placed
-                index_original = unswapped_qubits_index_list[index]
-                index_target   = qubit_index_list[index]
-                new_index = swap_bits(new_index, index_original, index_target, 2**len(merged_register.qubits))
-            merged_register.vector[new_index] = ordered_vector[state_index]
+        # Resort register
+        merged_register = merged_register.sort_register(original_qubits)
 
         # Update our register state
         self.registers.append(merged_register)
@@ -260,3 +255,11 @@ def find_register(system, qubit):
         if qubit in register.qubits:
             return register
     return "Qubit not found"
+
+# Useful for setting qubit state in a specific order
+def sort_list_by_key(input_list, key):
+    # Create a dictionary to store the indices of numbers in the key list
+    key_indices = {num: i for i, num in enumerate(key)}
+    # Sort the input list based on the indices of numbers in the key list
+    sorted_list = sorted(input_list, key=lambda x: key_indices.get(x, float('inf')))
+    return sorted_list
