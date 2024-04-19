@@ -62,6 +62,10 @@ def QFT(N : int)->np.array:
             Matrix[m][n] = value
     Matrix *= constant
     return Matrix
+
+# def QFTinv(N):
+
+
 def DFT(N : int)-> np.array:
     W = np.power(np.e, (-2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
@@ -134,7 +138,6 @@ def add_control_qubit(matrix):
   m, n = matrix.shape
   new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
   new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
-    
   return new_matrix
 
 def amodN(a, N)->np.array:
@@ -180,6 +183,36 @@ def A(n):
         # Apply gate
         gate = gate * modified_phase_shift
     return gate
+
+
+def function_ax_mod_N(a,x,N):
+    return (a*x)%N
+
+def gate_a_mod_N(a,N):
+    number_of_qubits = int(np.ceil(np.log2(N)))
+    number_of_states = 2**number_of_qubits
+    matrix = np.zeros((number_of_states, number_of_states))
+    for col in range(number_of_states):
+        row = function_ax_mod_N(a,col,N)
+        matrix[row, col] = 1
+    return matrix
+
+def function_exponentiation(a,i,N):
+    return (a**2**i)%N
+
+def gate_Ua(a, i, N):
+    number_of_qubits = int(np.ceil(np.log2(N)))
+    number_of_states = 2**number_of_qubits
+    matrix = np.zeros((number_of_states, number_of_states))
+    for row in range(number_of_states):
+        num_1 = function_exponentiation(a,i,N) * row
+        col = num_1 % N
+        print(f"state: {row} maps to {col}")
+        matrix[row, col] = 1
+    return matrix
+
+# print(gate_a_mod_N(7,15))
+print(gate_Ua(3,1,5))
 
 # Grovers algorithm
 # https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms/grovers-algorithm
