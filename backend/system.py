@@ -195,6 +195,29 @@ class System():
         new_vector = vector/scaler
         return new_vector
 
+    # Find register given a qubit
+    def find_register(self, qubit):
+        for register in self.registers:
+            for q in register.qubits:
+                if q == qubit:
+                    # We found register¨
+                    return register
+
+    # Only works for measured qubits
+    def get_number(self, qubit_index_start, qubit_index_end):
+        qubits = list(range(qubit_index_start, qubit_index_end))
+        registers = []
+        for qubit_index in qubits:
+            qubit = self.qubits[qubit_index]
+            register = self.find_register(qubit)
+            registers.append(register)
+        num = 0
+        for i, register in enumerate(registers):
+            vector = register.vector
+            if np.array_equal(vector, np.array([0,1])):
+                num += 2**i
+        return num
+
     # Prints all registers
     def print_registers(self):
         print("-------State of registers:---------------------------------------")

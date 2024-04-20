@@ -207,12 +207,12 @@ def gate_Ua(a, i, N):
     for row in range(number_of_states):
         num_1 = function_exponentiation(a,i,N) * row
         col = num_1 % N
-        print(f"state: {row} maps to {col}")
+        # print(f"state: {row} maps to {col}")
         matrix[row, col] = 1
     return matrix
 
 # print(gate_a_mod_N(7,15))
-print(gate_Ua(3,1,5))
+# print(gate_Ua(3,1,5))
 
 # Grovers algorithm
 # https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms/grovers-algorithm

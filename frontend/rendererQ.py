@@ -28,6 +28,7 @@ import Fields.TextInput as input_box
 import screenHandler
 import Fields.gate_date_visualizer as gate_data_visualizer
 from tkinter.filedialog import asksaveasfile, askopenfile
+import fractions
 
 screen = screenHandler.screen
 handler = gateHandler()
@@ -60,7 +61,36 @@ q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), scr
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
 # circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
-circuit : Circuit = Circuit(algorithms.shors(7, 15))
+def most_frequent(List):
+    counter = 0
+    num = List[0]
+    for i in List:
+        curr_frequency = List.count(i)
+        if(curr_frequency> counter):
+            counter = curr_frequency
+            num = i
+    return num
+
+r_list = []
+iterations = 30
+for i in range(iterations):
+    a=7
+    N=15
+    circuit : Circuit = Circuit(algorithms.shors(a, N))
+    circuit.run()
+    n = 4
+    val = circuit.systems[-1].get_number(0,2*n)
+    phase = val / 2**n
+    frac = fractions.Fraction(phase).limit_denominator(N)
+    r = frac.denominator
+    r_list.append(r)
+    print(i)
+print(f"List: {r_list}\n")
+r_guess = most_frequent(r_list)
+print(f"Most frequent: {r_guess}")
+print(f"Amount: {r_list.count(r_guess)}")
+print(f"4 Amount: {r_list.count(4)}")
+exit()
 
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
 

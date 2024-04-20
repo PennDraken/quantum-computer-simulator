@@ -62,7 +62,7 @@ class Register():
             i_b = swap_pair[1]
             sorted_register = swap(register, unsorted_qubits[i_a], unsorted_qubits[i_b])
         # Finished
-        self
+        # self
         return sorted_register
     
     # Checks if probability adds up to 1 for all cases

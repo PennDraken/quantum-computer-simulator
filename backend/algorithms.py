@@ -101,17 +101,17 @@ def shors(a, N):
     circuit.append(f"label Start_operation")
     top_qubits = list(range(2*n))
     bottom_qubits = list(range(2*n,3*n))
-    print(bottom_qubits)
     for i in range(0, 2*n):
         control_bit = (2*n-1) - i # Starts at bottom qubit
         qubits = [control_bit] + bottom_qubits
-        print(qubits)
         circuit.append(f"add_control_qubit(gate_Ua({a},{i},{N})) {qubits}")
     circuit.append(f"DFT({2**(2*n)}) {top_qubits}")
     circuit.append(f"label Start_measurement")
     for i in range(2*n):
         circuit.append(f"measure {i}")
     return circuit
+
+
 
 def quantum_teleportation():
     return [["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]

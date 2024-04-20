@@ -15,7 +15,7 @@ else:
 class Circuit():
     history : bool = False  # If previous states should be stored
     def __init__(self, description):
-        self.systems = []  # Index corresponds to state in circuit
+        self.systems : list(System) = []  # Index corresponds to state in circuit
         self.history : bool = True
         self.show_output : bool = False
         # First element is qubit list, rest are gate operations
@@ -59,7 +59,8 @@ class Circuit():
             qubits_indices = []
             # Convert to useable data type
             for i in range(1, len(operation)):
-                qubits_indices.append(int(operation[i])) # TODO Should we use names instead? Or perhaps add support for bot
+                qubit = operation[i].replace(",", "").replace("[", "").replace("]", "") # TODO Make it less stupid
+                qubits_indices.append(int(qubit)) # TODO Should we use names instead? Or perhaps add support for bot
             # Duplicate system
             new_system : System = copy.deepcopy(self.systems[self.position-1])
             # Apply gate
