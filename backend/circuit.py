@@ -28,6 +28,7 @@ class Circuit():
             system.add_qubit(qubit, Gates.zero_state)
         self.systems.append(system)
         self.position = 0
+        self.cached_gates = {} # Dictionary containing gates that have already been loaded (creating a gate takes longer time than applying it to a quantum state)
 
     # Steps forward in circuit
     # Adds a new system to our systems
@@ -52,10 +53,10 @@ class Circuit():
             if self.show_output:
                 print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
         elif op_type=="label":
-            new_system : System = copy.deepcopy(self.systems[self.position-1])
+            new_system : System = copy.deepcopy(self.systems[self.position-1]) # Do nothing
         else:
             # It is gate
-            gate = Gates.string_to_gate(op_type)
+            gate = self.load_gate(op_type)
             qubits_indices = []
             # Convert to useable data type
             for i in range(1, len(operation)):
@@ -135,8 +136,6 @@ class Circuit():
             else:
                 label_text = parts[1] # Load the text
                 converted_list.append((gate, label_text))
-
-
         return converted_list
     
     # Used for frontend. Converts and sets list which is frontend gate representation to a format that backend can use.
@@ -147,3 +146,14 @@ class Circuit():
         for gate_str, qubits in gate_list:
             description.append(gate_str + " " + " ".join(map(str, qubits)))
         self.description = description
+
+    # Loads a gate. Loads from class cache if previosuly loaded, otherwise creates it.
+    def load_gate(self, gate_description : str):
+        return Gates.string_to_gate(gate_description) 
+        if gate_description in self.cached_gates:
+            return self.cached_gates[gate_description] # Reuse gate
+        else:
+            # Gate has not been loaded previosuly so we load it and add it to memory
+            gate = Gates.string_to_gate(gate_description) 
+            self.cached_gates[gate_description] = gate
+            return gate
