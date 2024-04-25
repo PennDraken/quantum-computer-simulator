@@ -64,9 +64,9 @@ circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
-circuit_navigation_window = Circuit_Navigation_Window(screen, 0, 0, circuit)
+circuit_navigation_panel = Circuit_Navigation_Window(screen, 0, 0, circuit)
 
-qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_window.y + circuit_navigation_window.height, circuit.systems[0].qubits, circuit_dy)
+qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
         
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
@@ -290,7 +290,7 @@ while True:
     tab_panel.draw() # Tab panel options
 
     # Draw toolbar with run and step buttons
-    circuit_navigation_window.draw()
+    circuit_navigation_panel.draw()
     # ---------------------------------------------------------------
 
     # Mouse themeing based on status
@@ -305,17 +305,18 @@ while True:
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW) # Reset mouse image
         drag_bar_color = Colors.white
-    circuit_navigation_window.update(Mouse)
+    circuit_navigation_panel.update(Mouse)
     # Left click
+    tab_panel.hover(Mouse.x, Mouse.y)
     if Mouse.l_click:
         # Check for tabs here
         tab_panel.click(Mouse.x, Mouse.y)
         if Mouse.y > drag_bar_y and Mouse.y < drag_bar_y + drag_bar_height:
             Mouse.status = "Resizing bottom panel"
-        elif Mouse.y < circuit_navigation_window.y+circuit_navigation_window.height:
+        elif Mouse.y < circuit_navigation_panel.y+circuit_navigation_panel.height:
             pass
             # circuit_navigation_window.click(Mouse.x, Mouse.y)
-        elif Mouse.y > circuit_navigation_window.y+circuit_navigation_window.height and Mouse.y < drag_bar_y:
+        elif Mouse.y > circuit_navigation_panel.y+circuit_navigation_panel.height and Mouse.y < drag_bar_y:
             Mouse.status = "Panning"
         elif Mouse.y > drag_bar_y + drag_bar_height + tab_panel.height:
             # Below panel selector

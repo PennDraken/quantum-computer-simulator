@@ -10,9 +10,9 @@ class Circuit_Navigation_Window:
         self.x = x
         self.y = y
         self.width = screen.get_width()
-        self.height = 50
+        self.height = 40
         self.button_width = 100
-        self.button_height = 50
+        self.button_height = self.height
         self.icon_size = int(self.button_height * 0.5)
         self.circuit = circuit
         self.title_font = pygame.font.Font(None, 24)
@@ -25,9 +25,10 @@ class Circuit_Navigation_Window:
         # update width
         self.width = self.screen.get_width()
         # draw background
-        pygame.draw.rect(self.screen, Colors.black, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(self.screen, Colors.gray, (self.x, self.y, self.width, self.height))
+        self.button_width = self.width/len(self.options)
         w = 2 # Width of outline
-        pygame.draw.rect(self.screen, Colors.white, (self.x - w, self.y - w, self.width + 2*w, self.height + 2*w), width=w)
+        # pygame.draw.rect(self.screen, Colors.white, (self.x - w, self.y - w, self.width + 2*w, self.height + 2*w), width=w)
         # draw squares at equal distance
         box_y = self.height/2-self.button_height/2
         for i in range(0, len(self.options)):
@@ -37,7 +38,7 @@ class Circuit_Navigation_Window:
             if self.hover_button_i==i:
                 pygame.draw.rect(self.screen, Colors.hover, (box_x, box_y, self.button_width, self.button_height))
             else:
-                pygame.draw.rect(self.screen, Colors.white, (box_x, box_y, self.button_width, self.button_height))
+                pygame.draw.rect(self.screen, Colors.gray, (box_x, box_y, self.button_width, self.button_height))
             icon = self.icons[i]
             if icon != None:
                 icon_rect = (box_x + self.button_width/2 - self.icon_size/2, box_y + self.button_height/2 - self.icon_size/2, self.icon_size, self.icon_size) # Note this rect does not scale icon

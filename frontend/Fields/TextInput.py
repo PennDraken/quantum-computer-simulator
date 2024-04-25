@@ -5,7 +5,7 @@ class input_box:
     def __init__(self, screen, x, y, width, height, text):
         self.screen = screen
         self.text = text
-        self.text_editor = TextEditor(offset_x=x, offset_y=y, editor_width=width, editor_height=height, screen=screen)
+        self.text_editor = TextEditor(offset_x=0, offset_y=y, editor_width=width, editor_height=height, screen=screen)
         self.text_editor.set_text_from_list(self.text)
 
     def update(self, tab_panel_y, tab_height):

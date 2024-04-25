@@ -16,6 +16,7 @@ class Button():
         self.color_hover = color_hover
         self.color_selected = color_selected
         self.selected = False
+        self.hovered = False
 
     def draw(self):
         border = 3
@@ -29,6 +30,9 @@ class Button():
     def overlaps(self, x, y):
         return x > self.rect[0] and y > self.rect[1] and x < self.rect[0]+self.rect[2] and y < self.rect[1]+self.rect[3]
     
+   
+
+
 # Creates buttons with different choices
 class ChoicePanel():
     def __init__(self, screen, y, choices : [str]):
@@ -37,6 +41,7 @@ class ChoicePanel():
         self.choices = choices
         self.icons = [] # Empty list containing images for the different choices
         self.selected = 0 # Selected choice index
+        self.hovered = None
         self.color_unselected = Colors.unselected
         self.color_hover = Colors.hover
         self.color_selected = Colors.selected
@@ -53,7 +58,9 @@ class ChoicePanel():
             w = button_width
             h = button_height
             rect = pygame.Rect(x, y, w, h)
-            if i==self.selected:
+            if i==self.hovered:
+                pygame.draw.rect(self.screen, self.color_hover, rect)
+            elif i==self.selected:
                 pygame.draw.rect(self.screen, self.color_selected, rect)
             else:
                 pygame.draw.rect(self.screen, self.color_unselected, rect)
@@ -90,6 +97,21 @@ class ChoicePanel():
             rect = pygame.Rect(x, y, w, h)
             if rect.collidepoint(mouse_x, mouse_y):
                 self.selected = i
+
+    def hover(self, mouse_x, mouse_y):
+        # Check inside all the tabs
+        button_width = self.screen.get_width()/len(self.choices)
+        button_height = self.height
+        for i in range(0, len(self.choices)):
+            x = i * button_width
+            y = self.y
+            w = button_width
+            h = button_height
+            rect = pygame.Rect(x, y, w, h)
+            if rect.collidepoint(mouse_x, mouse_y):
+                self.hovered = i
+                return
+        self.hovered = None
 
     # Gets the value of the selected option
     def get_selected(self):
