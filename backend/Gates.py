@@ -197,18 +197,18 @@ def gate_a_mod_N(a,N):
         matrix[row, col] = 1
     return matrix
 
-def function_exponentiation(a,i,N):
-    return (a**2**i)%N
+def function_exponentiation(a,i,N,x):
+    return (x*(a**2)**i)%N
 
 def gate_Ua(a, i, N):
     number_of_qubits = int(np.ceil(np.log2(N)))
     number_of_states = 2**number_of_qubits
     matrix = np.zeros((number_of_states, number_of_states))
-    for row in range(number_of_states):
-        num_1 = function_exponentiation(a,i,N) * row
-        col = num_1 % N
+    for input_state in range(number_of_states-1):
+        output_state = function_exponentiation(a,i,N,input_state)
         # print(f"state: {row} maps to {col}")
-        matrix[row, col] = 1
+        matrix[output_state, input_state] = 1
+    matrix[number_of_states - 1, number_of_states - 1] = 1 # To make it unitary
     return matrix
 
 # print(gate_a_mod_N(7,15))
