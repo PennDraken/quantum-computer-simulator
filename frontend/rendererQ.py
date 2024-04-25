@@ -4,7 +4,7 @@ from math import floor
 import copy
 import re
 import pygame
-
+import json
 # Change path (in order to import backend module)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
@@ -80,8 +80,9 @@ buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
 menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-input_boxes = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, gates_cleaned) 
-buttons_options = input_box.Button(screen, color_base, color_selected, buttons_text, input_boxes)
+circuit_string = [str(circuit.description[0])] + circuit.description[1:]
+text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
+buttons_options = input_box.Button(screen, color_base, color_selected, buttons_text, text_box)
 
 sizeQ = 40 # Zoom level
 
@@ -242,21 +243,25 @@ while True:
         pressed_keys = pygame.key.get_pressed()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        input_boxes.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
-        input_boxes.update(tab_panel.y, tab_panel.height)
+        text_box.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
+        text_box.update(tab_panel.y, tab_panel.height)
         buttons_options.draw()
         gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
         test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
         match test:
             case "SUBMIT":
-                submit = re.findall(r"'(.*)', \[(.*?)]", input_boxes.text)
-                gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                description_string_list = text_box.text.split('\n')
+                qubits = eval(description_string_list[0])
+                circuit.description = [qubits] + description_string_list[1:]
+                gateList = circuit.as_frontend_gate_list()
+                qubit_name_panel.qubits_list = qubits
+                pass
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
                     try:
                         if file_path:
-                            file_path.writelines(input_boxes.text)
+                            file_path.writelines(text_box.text)
                             file_path.close()
                     except Exception as e:
                         print(f"An error occurred: {e}")
@@ -264,8 +269,7 @@ while True:
                 file_path = askopenfile(mode ='r',filetypes=[("Text Documents", "*.txt")])
                 try:
                     if file_path:
-                        submit = re.findall(r"'(.*)', \[(.*?)]", file_path.read())
-                        gateList = [(str(match[0]), [int(num) for num in match[1].split(',')]) for match in submit]
+                        pass
                 except Exception as e:
                     print(f"An error occurred: {e}")
     elif option == "Q-sphere":
@@ -292,7 +296,7 @@ while True:
     elif Mouse.status == "Moving gate":
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
     else:
-        pygame.mouse.set_cursor(pygame.cursors.arrow) # Reset mouse image
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW) # Reset mouse image
         drag_bar_color = Colors.white
     circuit_navigation_window.update(Mouse)
     # Left click

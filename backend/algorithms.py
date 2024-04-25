@@ -45,7 +45,7 @@ def grover_2_qubits(key):
     qubits = ["0","1"]
     return [qubits, 
             "H 0", "H 1",
-            f"Zor(2,{key}) 0 1",
+            f"Zor(2,{key}) 0 1",# "Zor(2,4) 0 1"
             f"Ug(2) 0 1",
             "measure 0",
             "measure 1"
@@ -68,10 +68,6 @@ def grover(n_qubits, states : list[int], iterations=2):
     # Hadamards on all qubits
     for i in range(n_qubits):
         circuit.append(f"H {i}")
-    # Mess up order
-    circuit.append("gen_I(2) 3 1")
-    circuit.append("gen_I(2) 4 1")
-    circuit.append("gen_I(3) 2 1 3")
 
     # Create Grover operator
     for i in range(iterations):

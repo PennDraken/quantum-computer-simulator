@@ -149,7 +149,6 @@ class Circuit():
 
     # Loads a gate. Loads from class cache if previosuly loaded, otherwise creates it.
     def load_gate(self, gate_description : str):
-        return Gates.string_to_gate(gate_description) 
         if gate_description in self.cached_gates:
             return self.cached_gates[gate_description] # Reuse gate
         else:
