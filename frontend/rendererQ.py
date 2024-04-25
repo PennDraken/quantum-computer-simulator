@@ -269,6 +269,13 @@ while True:
                 file_path = askopenfile(mode ='r',filetypes=[("Text Documents", "*.txt")])
                 try:
                     if file_path:
+                        file_content = file_path.read()
+                        text_box.set_text_from_string(file_content)
+                        description_string_list = text_box.text.split('\n')
+                        qubits = eval(description_string_list[0])
+                        circuit.description = [qubits] + description_string_list[1:]
+                        gateList = circuit.as_frontend_gate_list()
+                        qubit_name_panel.qubits_list = qubits
                         pass
                 except Exception as e:
                     print(f"An error occurred: {e}")

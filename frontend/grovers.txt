@@ -1,0 +1,20 @@
+['0', '1', '2', '3', '4']
+H 0
+H 1
+H 2
+H 3
+H 4
+label Iteration_0
+grover_op(5,[26]) 0 1 2 3 4
+label Iteration_1
+grover_op(5,[26]) 0 1 2 3 4
+label Iteration_2
+grover_op(5,[26]) 0 1 2 3 4
+label Iteration_3
+grover_op(5,[26]) 0 1 2 3 4
+label Measurement section
+measure 0
+measure 1
+measure 2
+measure 3
+measure 4
