@@ -14,7 +14,7 @@ from Utilities.mouse import Mouse
 from math import floor
 
 
-class MenuButton:
+class MenuGateObject:
     def __init__(self, name : str , width : int , height : int):
         self.gate = name
         self.width = width
@@ -33,11 +33,11 @@ class MenuButton:
 def createGateButtons(gate_data_list : [], width : int, height : int):
     temp = []
     for gate_data in gate_data_list:
-        temp.append(MenuButton(gate_data, width, height))
+        temp.append(MenuGateObject(gate_data, width, height))
     return temp
 
 
-def renderButton(buttonRows : [[MenuButton]], canvasYT : int ):
+def renderButton(buttonRows : [[MenuGateObject]], canvasYT : int ):
     xOffset = 75
     yOffset = 75
     for bRow in range (0, len(buttonRows)):
@@ -54,7 +54,7 @@ def checkLines( x : int , y : int, xl, xr):
     return withinX
 
 # Cheks if user has clicked gate. Start moving gate.
-def check_moving_gate(gateButtons : [[MenuButton]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
+def check_moving_gate(gateButtons : [[MenuGateObject]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
     # Calculate how much the cicuit view has shifted
     offset_x = x + circuit_dx
     offset_y = y + circuit_dy

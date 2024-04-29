@@ -14,7 +14,7 @@ sys.path.insert(0, parent_dir_path)
 import UI
 import Utilities.Colors as Colors
 import frontend.q_sphere as q_sphere
-import Fields.MenuButton as MenuButton
+import Fields.MenuButton as MenuGateButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
 from backend.circuit import Circuit
@@ -78,7 +78,7 @@ buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
-menu_buttons = MenuButton.createGateButtons(gate_option_list, 40, 40)
+menu_buttons = MenuGateButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
 text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
@@ -237,7 +237,7 @@ while True:
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
-        MenuButton.renderButton([menu_buttons], drag_bar_y + 20)
+        MenuGateButton.renderButton([menu_buttons], drag_bar_y + 20)
     elif option == "State Viewer":
         # Update calculation window
         calculation_window.y = tab_panel.y + tab_panel.height
@@ -370,7 +370,7 @@ while True:
     drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
     
     if option=="Logic gates" and Mouse.status != "Moving gate":
-        MenuButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
+        MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
 
     # Draw everything here
     if redraw_screen:
