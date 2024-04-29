@@ -197,11 +197,17 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.MOUSEWHEEL: # Zooming circuit view
-            UI.grid_size += (5 * event.y) 
-            UI.gate_size += (5 * event.y)
-            handler.adjust += (5 * event.y) 
-            screenHandler.offsetMod += (5 * event.y)  
-            sizeQ += (2 * event.y) 
+            if option == "Text Editor":
+                pass
+            else:
+                zoom_factor = 5 * event.y
+                # Check if zooming out is allowed
+                if UI.grid_size >= 50 or event.y > 0:
+                    UI.grid_size += zoom_factor
+                    UI.gate_size += zoom_factor
+                    handler.adjust += zoom_factor
+                    screenHandler.offsetMod += zoom_factor
+                    sizeQ += 2 * event.y
 
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
