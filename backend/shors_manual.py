@@ -129,10 +129,12 @@ print(f"Ua(3,0,5)*6={gate_Ua305.dot(vector)}")
 # assert (np.allclose(Ua(3,0,5).dot(vector), np.array([1,0,0,0,0,0,0,0]))), f"Not close \n{Ua(3,0,5).dot(vector)}"
 
 # Makes a gate controlled
-def controlled(matrix):
+def controlled(matrix, index=0):
   m, n = matrix.shape
   new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
   new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
+  if index!=0:
+      return controlled(new_matrix, index-1)
   return new_matrix
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
@@ -159,9 +161,8 @@ qubits_state = np.kron(qubits_state, np.array([0,1]))
 qubits_state = np.kron(qubits_state, np.array([0,1]))
 print(len(qubits_state))
 
-# Apply first controlled gate i=0
 for i in range(0,6):
-    gate = expand_gate(controlled(Ua(3,i,5)), (5-i), n*3)
+    gate = expand_gate(controlled(Ua(3,i,5), index=i), (5-i), n*3)
     qubits_state = gate.dot(qubits_state)
     print(f"Probability number list for i={i} is : {get_number_list(qubits_state, 0, 6)}")
     print(f"Probability number for lower list for i={i} is : {get_number_list(qubits_state, 6, 12)}")
@@ -237,8 +238,8 @@ def gate_experimentation7_15():
     statevector_index_7 = gate_7.dot(statevector_index_6)
     print(statevector_index_7)
 
-gate_experimentation7_15()
-exit()
+# gate_experimentation7_15()
+# exit()
 
 
 def gate_experimentation():
@@ -288,7 +289,7 @@ def gate_experimentation():
     statevector_index_5 = gate_5.dot(statevector_index_4)
     print(statevector_index_5)
         
-gate_experimentation()
+# gate_experimentation()
 
 # 3^2^0 mod 5 = 1
 # AC = 0b110 6 -> (6 * 3^2^0) mod 5 = 1
