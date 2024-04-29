@@ -292,7 +292,14 @@ while True:
         q_sphere.set_register(single_register)
         q_sphere.draw()
     
-    pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height)) # Drag bar
+    # Draw drag bar
+    if drag_bar_color==Colors.yellow:
+        # Big drag bar
+        pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height)) # Drag bar
+    else:
+        # Visually less prominent drag bar when not hovering
+        pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y+drag_bar_height//2, screen.get_width(), drag_bar_height//2+1)) # Drag bar
+
     tab_panel.draw() # Tab panel options
 
     # Draw toolbar with run and step buttons
