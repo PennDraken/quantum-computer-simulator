@@ -20,7 +20,7 @@ import Fields.qubit_name_panel as qubit_name_panel
 from backend.circuit import Circuit
 from backend.Gates import string_to_gate
 import backend.algorithms as algorithms # This is used to quickly set starting circuit state
-from Fields.circuit_navigation_window import Circuit_Navigation_Window
+from frontend.Fields.circuit_navigation_panel import Circuit_Navigation_Window
 import gates
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
@@ -30,10 +30,8 @@ import Fields.gate_date_visualizer as gate_data_visualizer
 from tkinter.filedialog import asksaveasfile, askopenfile
 
 screen = screenHandler.screen
-handler = gateHandler()
+gate_handler : gateHandler = gateHandler()
 framerate = pygame.time.Clock()
-
-# sampleString = "H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0 H 2 1 4 X 4 1 2 Z 2 0"
 
 # positioning of circuit
 circuit_x = 75
@@ -71,8 +69,6 @@ qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
-color_selected = (150, 150, 150)  # light gray
-color_base = (122, 122, 122) #black
 buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 
 
@@ -82,7 +78,7 @@ menu_buttons = MenuGateButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
 text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
-buttons_options = input_box.Button(screen, color_base, color_selected, buttons_text, text_box)
+buttons_options = input_box.Button(screen, Colors.black, Colors.selected, buttons_text, text_box)
 
 sizeQ = 40 # Zoom level
 
@@ -90,12 +86,15 @@ sizeQ = 40 # Zoom level
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
     for i in range(0,len(gateList)):
         gate_data = gateList[i]
-        selected = i<=circuit.position-1     
-        if selected: # Change color for gates already being applied
+        selected = i<=circuit.position-1
+        value = None # Value to show on gate     
+        if selected: # Change color for gates already having been applied
             color = Colors.yellow
+            if gate_data[0]=="measure":
+                value = circuit.systems[i+1].get_qubit(int(gate_data[1][0])) # Load qubit data
         else:
             color = Colors.white
-        gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color, selected)
+        gate_data = handler.render_gate(gate_data[0], gate_data[1], value,(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color, selected)
         gates_on_circuit.append(gate_data)
 
 def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
@@ -205,7 +204,7 @@ while True:
                 if UI.grid_size >= 50 or event.y > 0:
                     UI.grid_size += zoom_factor
                     UI.gate_size += zoom_factor
-                    handler.adjust += zoom_factor
+                    gate_handler.adjust += zoom_factor
                     screenHandler.offsetMod += zoom_factor
                     sizeQ += 2 * event.y
 
@@ -219,7 +218,7 @@ while True:
     # Draw circuit view
     screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
-    draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
+    draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     
     # Draw qubit names on left side
     qubit_name_panel.offset_y = circuit_y + circuit_dy

@@ -47,11 +47,9 @@ class gateHandler:
             self.gateMap[qubitIndex] = 1
         else:
             self.gateMap[qubitIndex] += 1  
-            
-    
+
     def setGateCount(self, qubitIndex : int, value : int):
         self.gateMap[qubitIndex] = value
-       
 
     def getGateCount(self, key: int):
         return self.gateMap[key]
@@ -61,7 +59,7 @@ class gateHandler:
     adjust = 0
 
     # Renders a gate + lines for qubits
-    def render_gate(self, gate_text : str, qubits, calculations : [str], offset_x_y_tuple : tuple, column, color, selected=False): # integrating evenhandler for this method
+    def render_gate(self, gate_text : str, qubits, input_data, offset_x_y_tuple : tuple, column, color, selected=False): # integrating evenhandler for this method
         # First check if label TODO maybe move this somewhere else?
         if (gate_text=="label"):
             mid_x = UI.grid_size * column + UI.grid_size/2 + offset_x_y_tuple[0]
@@ -106,7 +104,7 @@ class gateHandler:
                     if qubit!=high_qubit:
                         screenHandler.draw_mod(Loc.FILLED_CIRCLE, mid_x, y, color)
                     else:
-                        self.__render_box_gate__(gate_text, [qubits[-1]], calculations, offset_x_y_tuple, column, color)
+                        self.__render_box_gate__(gate_text, [qubits[-1]], input_data, offset_x_y_tuple, column, color)
             gate = Gate(gate_text, mid_x, y, self.gateWidth, self.gateHeight)
         # Draw blank gate outline/ highlight
         elif gate_text=="blank":
@@ -125,8 +123,16 @@ class gateHandler:
             if not selected:
                 image = pygame.image.load("frontend/images/gates/measure-unmeasured.png")
             else:
-                image = pygame.image.load("frontend/images/gates/measure-measured.png")
+                # Measured
+                if input_data==1:
+                    image = pygame.image.load("frontend/images/gates/measure-measured-1.png")
+                elif input_data==0:
+                    image = pygame.image.load("frontend/images/gates/measure-measured-0.png")
+                else:
+                    image = pygame.image.load("frontend/images/gates/measure-measured.png")
+
             image = pygame.transform.smoothscale(image, (UI.gate_size, UI.gate_size))
+                
             pygame.draw.rect(screen, color, gate_rect)
             screen.blit(image, gate_rect)
             gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight)
@@ -137,7 +143,7 @@ class gateHandler:
             y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1] 
             gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight) # New gate object
             # Gate.draw_gate(gate.gate_text, x, y, self.gateWidth + self.adjust, self.gateHeight + self.adjust, color) # Draws gate
-            self.__render_box_gate__(gate_text, qubits, calculations, offset_x_y_tuple, column, color)
+            self.__render_box_gate__(gate_text, qubits, input_data, offset_x_y_tuple, column, color)
         return gate # for gate shifting
 
     # Draws a gate as a box. Used for some custom gates (such as amod). Note: We might want to mark controlling qubit somehow

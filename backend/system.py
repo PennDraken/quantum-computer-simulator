@@ -30,6 +30,17 @@ class System():
         register = apply_gate_register(register, qubit, gate)
         self.registers[register_index] = register
 
+    # Gets result of a collapsed/ measured qubit as 0 or 1
+    def get_qubit(self, qubit_index):
+        qubit = self.qubits[qubit_index]
+        for register in self.registers:
+            if qubit in register.qubits:
+                if np.array_equal(register.vector, Gates.one_state):
+                    return 1
+                elif np.array_equal(register.vector, Gates.zero_state):
+                    return 0
+                else:
+                    return None # Qubit was not measured
 
     # Applies a 2 input gate to 2 qubits in a system
     def apply_gate_multiple(self, gate: np.array, qubit_a, qubit_b):
