@@ -38,10 +38,10 @@ def drawQlineMod(start : tuple, end : tuple, mod1 : Loc, mod2 : Loc, color):
     draw_qubit_connection_point(mod1, start, end, color)
     draw_qubit_connection_point(mod2, start, end, color)
 
-def draw_horizontal_qubit_lines(qubits : int, offset_dx : int, offset_dy : int, width : int, color):
+def draw_horizontal_qubit_lines(number_of_qubits : int, x : int, offset_dy : int, width : int, color):
     y = UI.grid_size/2 + offset_dy
-    for i in range(qubits):
-        draw_qubit_line((0, y), (width, y), color)
+    for i in range(number_of_qubits):
+        draw_qubit_line((x, y), (width, y), color)
         y += UI.grid_size
 
 

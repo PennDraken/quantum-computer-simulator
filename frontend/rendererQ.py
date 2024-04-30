@@ -44,7 +44,7 @@ drag_bar_y = screen.get_height() - 100
 drag_bar_color = Colors.white
 drag_bar_height = 15 # Height of draggable bar TODO make this into a reuseable class
 
-tab_panel = UI.ChoicePanel(screen, drag_bar_y + drag_bar_height, ["Logic gates","State Viewer","Text Editor","Q-sphere"])
+tab_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, drag_bar_y + drag_bar_height, ["Logic gates","State Viewer","Text Editor","Q-sphere"])
 tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.png"), pygame.image.load("frontend/images/icons/state-view-icon.png"), pygame.image.load("frontend/images/icons/text-edit-icon.png"), pygame.image.load("frontend/images/icons/q-sphere-icon.png")]) # Set icons for the different options
 
 q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
@@ -62,9 +62,9 @@ circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
-circuit_navigation_panel = Circuit_Navigation_Window(screen, 0, 0, circuit)
+circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
-qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
+qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
         
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
@@ -211,29 +211,31 @@ while True:
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
 
-    # Draw a line to show where user has stepped to TODO make it dotted
-    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
     pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y + drag_bar_height - circuit_navigation_panel.height))
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
+    # Draw a line to show where user has stepped to TODO make it dotted
+    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width() - qubit_name_panel.width, Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
-    
+    pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
+
     # Draw qubit names on left side
-    qubit_name_panel.offset_y = circuit_y + circuit_dy
+    qubit_name_panel.set_rectangle((0, circuit_navigation_panel.height, 90, drag_bar_y - circuit_navigation_panel.height))
+    qubit_name_panel.set_offset_y(circuit_y + circuit_dy)
     qubit_name_panel.draw()
     
     if drag_bar_y > screen.get_height() - 70: # TODO Replace with drag_bar_height for more natural resizing
         drag_bar_y = screen.get_height() - 70
-    tab_panel.y = drag_bar_y + drag_bar_height
+    tab_panel.set_rectangle((0, drag_bar_y + drag_bar_height, screen.get_width(), tab_panel.height))
 
     # Draw options panel
     # Update positions
     
     # Draws background of panel window (hides circuit)
-    pygame.draw.rect(screen, Colors.black, (0, tab_panel.y+tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))
+    rect = pygame.draw.rect(screen, Colors.black, (0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))
     # Draw selected screen
     option = tab_panel.get_selected()
     if option == "Logic gates": # TODO Use enum/ atoms instead of strings
@@ -291,14 +293,18 @@ while True:
         single_register = circuit.single_register()
         q_sphere.set_register(single_register)
         q_sphere.draw()
-    
+    pygame.display.update(rect)
+
     # Draw drag bar
     if drag_bar_color==Colors.yellow:
         # Big drag bar
-        pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height)) # Drag bar
+        rect = pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y, screen.get_width(), drag_bar_height)) # Drag bar
+        pygame.display.update(rect)
     else:
         # Visually less prominent drag bar when not hovering
-        pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y+drag_bar_height//2, screen.get_width(), drag_bar_height//2+1)) # Drag bar
+        rect = pygame.draw.rect(screen, drag_bar_color, (0, drag_bar_y+drag_bar_height//2, screen.get_width(), drag_bar_height//2+1)) # Drag bar
+        pygame.display.update(rect)
+
 
     tab_panel.draw() # Tab panel options
 
@@ -374,7 +380,8 @@ while True:
 
     # Draw everything here
     if redraw_screen:
-        pygame.display.update()
+        # pygame.display.update()
+        pass
 
     framerate.tick(30)
 

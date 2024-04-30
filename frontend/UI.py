@@ -35,9 +35,13 @@ class Button():
 
 # Creates buttons with different choices
 class ChoicePanel():
-    def __init__(self, screen, y, choices : [str]):
+    def __init__(self, screen, display, y, choices : [str]):
         self.screen = screen
+        self.display : pygame.display = display
+        self.x = 0
         self.y = y
+        self.width = screen.get_width()
+        self.height = 40
         self.choices = choices
         self.icons = [] # Empty list containing images for the different choices
         self.selected = 0 # Selected choice index
@@ -45,10 +49,12 @@ class ChoicePanel():
         self.color_unselected = Colors.unselected
         self.color_hover = Colors.hover
         self.color_selected = Colors.selected
-        self.height = 40
+        self.changed = True
 
     # Draw all options in panel
     def draw(self):
+        if not self.changed:
+            return
         border = 1
         button_width = self.screen.get_width()/len(self.choices)
         button_height = self.height
@@ -76,6 +82,7 @@ class ChoicePanel():
             else:
                 # Just text
                 text(self.screen, self.choices[i], x + button_width/2, y + button_height/2, Colors.black)
+        self.display.update((self.x, self.y, self.width, self.height))
 
     # Sets images of choice panel (automatically scales to size)
     def set_icons(self, images):
@@ -116,6 +123,20 @@ class ChoicePanel():
     # Gets the value of the selected option
     def get_selected(self):
         return self.choices[self.selected]
+    
+    def set_rectangle(self, rect):
+        if self.x != rect[0]:
+            self.changed = True
+            self.x = rect[0]
+        if self.y != rect[1]:
+            self.changed = True
+            self.y = rect[1]
+        if self.width != rect[2]:
+            self.changed = True
+            self.width = rect[2]
+        if self.height != rect[3]:
+            self.changed = True
+            self.height = rect[3]
 
 # Useful method to quickly draw centered text on screen
 def text(screen, string, x, y, color):
