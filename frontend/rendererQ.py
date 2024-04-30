@@ -84,7 +84,13 @@ sizeQ = 40 # Zoom level
 
 # Draws the circuit gates
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
-    for i in range(0,len(gateList)):
+    # Find indices of visible gates so we dont render anything out of view
+    start_index = -int(circuit_dx/UI.grid_size) - 1
+    if start_index<0:
+        start_index=0
+    end_index   = int((-circuit_dx+screen.get_width())/UI.grid_size) - 1
+    # print(end_index)
+    for i in range(start_index, min(len(gateList), end_index)): # We truncate our ending position so we dont go out of bounds
         gate_data = gateList[i]
         selected = i<=circuit.position-1
         value = None # Value to show on gate     
@@ -180,8 +186,6 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
         Mouse.holding = None
         Mouse.status = None
 
-
-
 # Game loop
 while True:
     Mouse.update(Mouse)
@@ -217,7 +221,7 @@ while True:
     pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y + drag_bar_height - circuit_navigation_panel.height))
     # Draw a line to show where user has stepped to TODO make it dotted
     pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width() - qubit_name_panel.width, Colors.qubit_line) # Draws horisontal lines for qubits
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
@@ -383,7 +387,7 @@ while True:
         # pygame.display.update()
         pass
 
-    framerate.tick(30)
+    framerate.tick(60)
 
 # --------------------------------------------------------
 # Draw methods
