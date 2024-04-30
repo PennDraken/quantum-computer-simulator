@@ -68,7 +68,10 @@ class Circuit_Navigation_Window:
 
     # Updates state
     def update(self, mouse):
-        self.width = self.screen.get_width()
+        width = self.screen.get_width()
+        if width!=self.width:
+            self.width = width
+            self.changed = True
         self.__check_hover__(mouse.x, mouse.y)
         if mouse.l_click:
             self.click(mouse.x, mouse.y)
