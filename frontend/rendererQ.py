@@ -82,7 +82,7 @@ buttons_options = input_box.Button(screen, Colors.black, Colors.selected, button
 
 sizeQ = 40 # Zoom level
 
-# Draws the circuit
+# Draws the circuit gates
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
     for i in range(0,len(gateList)):
         gate_data = gateList[i]
@@ -186,7 +186,7 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
 while True:
     Mouse.update(Mouse)
     # Clear screen
-    screen.fill((0,0,0))
+    # screen.fill((0,0,0))
     pygame_event = pygame.event.get() # This removes all events from stack
     redraw_screen = True
     if len(pygame_event) > 0: # Check if anything has happened since last frame
@@ -216,7 +216,8 @@ while True:
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
-    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, pygame.display.Info().current_w, Colors.qubit_line) # Draws horisontal lines for qubits
+    pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y + drag_bar_height - circuit_navigation_panel.height))
+    screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), circuit_x + circuit_dx, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     
