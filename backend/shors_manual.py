@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 # Vector containing all states corresponding to a qubit
 def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
@@ -9,6 +10,7 @@ def collapsed_vector(single_qubit_state, qubit_index, qubit_count)->np.array:
     return vector
 
 def get_qubit(state_vector, index):
+    assert 2**index<len(state_vector), f"Qubit index out of bounds {index}"
     m1 = collapsed_vector([0,1], index, int(np.log2(len(state_vector)))) # len 8 -> 3 qubits
     p = np.sum(np.abs(m1*state_vector)**2)
     return np.round(p, 8)
@@ -55,6 +57,42 @@ def expand_gate(gate, index, qubit_count):
                 i += 1
     return expanded_gate
 
+# Normalise a state_vector
+def normalize(state_vector : np.array):
+        scaler = np.sqrt(np.sum(np.abs(state_vector)**2))
+        new_vector = state_vector / scaler
+        return new_vector
+
+# Measuers a qubit
+def measure(state_vector, qubit_index):
+    p = get_qubit(state_vector, qubit_index)
+    if random.random() <= p:
+        state_vector = state_vector * collapsed_vector([0,1], qubit_index, int(np.log2(len(state_vector))))
+    else:
+        state_vector = state_vector * collapsed_vector([1,0], qubit_index, int(np.log2(len(state_vector))))
+    # Normalize
+    state_vector = normalize(state_vector)
+    return state_vector
+
+
+
+# Generates a Quantum Fourier Transform matrix
+def QFT(N : int)->np.array:
+    N = 2**N
+    W = np.power(np.e, (2 * np.pi*1j)/N)
+    constant = 1/np.sqrt(N)
+    Matrix = np.ones((N,N), dtype= complex)
+    for n in range(N):
+        for m in range(n, N):
+            value = np.power(W, n * m)
+            Matrix[n][m] = value
+            Matrix[m][n] = value
+    Matrix *= constant
+    return Matrix
+
+def QFT_inv(N : int):
+    return np.linalg.inv(QFT(N))
+
 def function_exponentiation(a,i,N,x):
     return (x*(a**2)**i)%N
 
@@ -86,95 +124,78 @@ def Ua(a, i, N):
     assert is_unitary(matrix), f"Gate is not unitary\n {matrix}"
     return matrix
 
-"""
-Ua(3,0,5)
-     0  0  0  0  0  0  1  0  ->  0  1  0  0  0  0  0  0 
-state:
-     0  1  2  3  4  5  6  7  
-0  [[1. 0. 0. 0. 0. 1. 0. 0.]    
-1   [0. 1. 0. 0. 0. 0. 1. 0.] 
-2   [0. 0. 1. 0. 0. 0. 0. 1.] 
-3   [0. 0. 0. 1. 0. 0. 0. 0.]
-4   [0. 0. 0. 0. 1. 0. 0. 0.]
-5   [0. 0. 0. 0. 0. 0. 0. 0.]
-6   [0. 0. 0. 0. 0. 0. 0. 0.]
-7   [0. 0. 0. 0. 0. 0. 0. 0.]]
-
-
-
-0  [[1. 0. 0. 0. 0. 0. 0. 0.]    
-1   [0. 1. 0. 0. 0. 0. 0. 0.] 
-2   [0. 0. 1. 0. 0. 0. 0. 0.] 
-3   [0. 0. 0. 1. 0. 0. 0. 0.]
-4   [0. 0. 0. 0. 1. 0. 0. 0.]
-5   [1. 0. 0. 0. 0. 0. 0. 0.]
-6   [0. 1. 0. 0. 0. 0. 0. 0.]
-7   [0. 0. 1. 0. 0. 0. 0. 0.]]
-
- """
-gate_Ua305 = np.array([
-    [1, 0, 0, 0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1]
-])
-vector = np.array([0,0,0,0,0,1,0,0])
-print(f"Ua(3,0,5)*6={gate_Ua305.dot(vector)}")
 
 # assert (np.allclose(gate_Ua305, Ua(3,0,5))), f"Not close \n{Ua(3, 0, 5)}"
 # assert (np.allclose(Ua(3,0,5).dot(vector), np.array([1,0,0,0,0,0,0,0]))), f"Not close \n{Ua(3,0,5).dot(vector)}"
 
 # Makes a gate controlled
 def controlled(matrix, index=0):
-  m, n = matrix.shape
-  new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
-  new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
-  if index!=0:
-      return controlled(new_matrix, index-1)
-  return new_matrix
+    m, n = matrix.shape
+    new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
+    new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
+    if index!=0:
+        return controlled(new_matrix, index-1)
+    return new_matrix
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 # Worked example for a=3 N=5
-a=3
-n=3
-N=5
+def shors_3_5():
+    a=3
+    n=3
+    N=5
 
-# Create state vector for all 3*n qubits
-hadamard_qubit = 1/np.sqrt(2)*np.array([1,1])
-# 2 qubits
-qubits_state = np.kron(hadamard_qubit, hadamard_qubit)
-# 3 qubits
-qubits_state = np.kron(qubits_state, hadamard_qubit)
-# 4 qubits
-qubits_state = np.kron(qubits_state, hadamard_qubit)
-# 5 qubits
-qubits_state = np.kron(qubits_state, hadamard_qubit)
-# 6 qubits
-qubits_state = np.kron(qubits_state, hadamard_qubit)
-# 3 final qubits set to 1
-qubits_state = np.kron(qubits_state, np.array([0,1]))
-qubits_state = np.kron(qubits_state, np.array([0,1]))
-qubits_state = np.kron(qubits_state, np.array([0,1]))
-print(len(qubits_state))
+    # Create state vector for all 3*n qubits
+    hadamard_qubit = 1/np.sqrt(2)*np.array([1,1])
+    # 2 qubits
+    qubits_state = np.kron(hadamard_qubit, hadamard_qubit)
+    # 3 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 4 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 5 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 6 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 3 final qubits set to 1
+    qubits_state = np.kron(qubits_state, np.array([0,1]))
+    qubits_state = np.kron(qubits_state, np.array([1,0]))
+    qubits_state = np.kron(qubits_state, np.array([1,0]))
+    print(qubits_state)
+    print(len(qubits_state))
 
-for i in range(0,6):
-    gate = expand_gate(controlled(Ua(3,i,5), index=i), (5-i), n*3)
-    qubits_state = gate.dot(qubits_state)
-    print(f"Probability number list for i={i} is : {get_number_list(qubits_state, 0, 6)}")
-    print(f"Probability number for lower list for i={i} is : {get_number_list(qubits_state, 6, 12)}")
+    print(f"Iteration init")
+    print(f"Probability number list is: {get_number_list(qubits_state, 0, 6)}")
+    print(f"Probability number for lower list is: {get_number_list(qubits_state, 6, 9)}")
     print("-------------------------------------------------------------------------------------")
 
+    for i in range(0,6):
+        gate = expand_gate(controlled(Ua(3,i,5), index=i), (5-i), n*3)
+        qubits_state = gate.dot(qubits_state)
+        print(f"Iteration {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+        print("-------------------------------------------------------------------------------------")
+
+    # Apply QFT^-1
+    gate = expand_gate(QFT_inv(6), 0, 9)
+    qubits_state = gate.dot(qubits_state)
+    print(f"QFT^-1 applied")
+    print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+    print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+    print("-------------------------------------------------------------------------------------")
+
+    # Measurement
+    for i in range(0,6):
+        qubits_state = measure(qubits_state, i)
+        print(f"Measurement of qubit {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+        print("-------------------------------------------------------------------------------------")
+
+    return qubits_state
 
 
-
-
-
-
-
+shors_3_5()
 
 
 
