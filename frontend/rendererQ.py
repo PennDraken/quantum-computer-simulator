@@ -71,16 +71,31 @@ circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
 buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 
+error_occurred = [False for _ in range(len(gateList))]  # Initialize flag
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
 menu_buttons = MenuGateButton.createGateButtons(gate_option_list, 40, 40)
-gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
+test_list = gateList
 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
 text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
 buttons_options = input_box.Button(screen, Colors.black, Colors.selected, buttons_text, text_box)
 
 sizeQ = 40 # Zoom level
+
+def popupmsg(msg):
+    popup = tk.Tk()
+    popup.wm_title("!")
+    width = 325
+    height = 150
+    x = int(screen.get_width())
+    y = int(screen.get_height())
+    popup.geometry(f"{width}x{height}+{x}+{y}")
+    label = ttk.Label(popup, text=msg, font=("Verdana", 16))
+    label.pack(side="top", fill="x", pady=30)
+    B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
+    B1.pack()
+    popup.mainloop()
 
 # Draws the circuit gates
 def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit):
@@ -100,9 +115,16 @@ def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit,
                 value = circuit.systems[i+1].get_qubit(int(gate_data[1][0])) # Load qubit data
         else:
             color = Colors.white
-        gate_data = handler.render_gate(gate_data[0], gate_data[1], value,(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color, selected)
+        try:
+            gate_data = handler.render_gate(gate_data[0], gate_data[1], ["calculation_placeholder"],
+                                            (circuit_x + circuit_dx, circuit_y + circuit_dy), i + 1, color, selected)
+        except ValueError:
+            error_occurred[i] = True  # Set flag if an error occurred
+            popupmsg("Use the correct syntax")
+        else:
+            error_occurred[i] = False
         gates_on_circuit.append(gate_data)
-
+        
 def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
     offset_x = circuit_x + circuit_dx
     offset_y = circuit_y + circuit_dy
@@ -212,9 +234,16 @@ while True:
                     screenHandler.offsetMod += zoom_factor
                     sizeQ += 2 * event.y
 
+    
+    # Draw example circuit
+    draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, test_list, gates_on_circuit)
+    if any(error_occurred):
+          test_list= gateList
+    else:
+        gateList = test_list
+
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
-
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
@@ -222,8 +251,6 @@ while True:
     # Draw a line to show where user has stepped to TODO make it dotted
     pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
-    # Draw example circuit
-    draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
 
     # Draw qubit names on left side
@@ -258,16 +285,17 @@ while True:
         text_box.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         text_box.update(tab_panel.y, tab_panel.height)
         buttons_options.draw()
-        gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
         test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
         match test:
             case "SUBMIT":
-                description_string_list = text_box.text.split('\n')
-                qubits = eval(description_string_list[0])
-                circuit.description = [qubits] + description_string_list[1:]
-                gateList = circuit.as_frontend_gate_list()
-                qubit_name_panel.qubits_list = qubits
-                pass
+                try:
+                    description_string_list = text_box.text.split('\n')
+                    qubits = eval(description_string_list[0])
+                    circuit.description = [qubits] + description_string_list[1:]
+                    qubit_name_panel.qubits_list = qubits
+                    test_list = circuit.as_frontend_gate_list()
+                except (IndexError, SyntaxError, NameError, ValueError):
+                    print("")
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
@@ -286,7 +314,7 @@ while True:
                         description_string_list = text_box.text.split('\n')
                         qubits = eval(description_string_list[0])
                         circuit.description = [qubits] + description_string_list[1:]
-                        gateList = circuit.as_frontend_gate_list()
+                        test_list = circuit.as_frontend_gate_list()
                         qubit_name_panel.qubits_list = qubits
                         pass
                 except Exception as e:
@@ -380,7 +408,7 @@ while True:
     drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
     
     if option=="Logic gates" and Mouse.status != "Moving gate":
-        MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
+        MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy,error_occurred)  # gate placement
 
     # Draw everything here
     if redraw_screen:
