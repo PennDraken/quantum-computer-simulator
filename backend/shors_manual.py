@@ -199,7 +199,77 @@ def shors_5(a):
     print(r)
     return r
 
-# shors_5(3)
+def shors_7_15():
+    a=7
+    n=4
+    N=15
+
+    # Create state vector for all 3*n qubits
+    hadamard_qubit = 1/np.sqrt(2)*np.array([1,1])
+    # 2 qubits
+    qubits_state = np.kron(hadamard_qubit, hadamard_qubit)
+    # 3 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 4 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 5 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 6 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 7 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+    # 8 qubits
+    qubits_state = np.kron(qubits_state, hadamard_qubit)
+
+    # 4 final qubits set to |1>
+    qubits_state = np.kron(qubits_state, np.array([0,1]))
+    qubits_state = np.kron(qubits_state, np.array([1,0]))
+    qubits_state = np.kron(qubits_state, np.array([1,0]))
+    qubits_state = np.kron(qubits_state, np.array([1,0]))
+
+    print(qubits_state)
+    print(len(qubits_state))
+
+    print(f"Iteration init")
+    print(f"Probability number list is: {get_number_list(qubits_state, 0, 6)}")
+    print(f"Probability number for lower list is: {get_number_list(qubits_state, 6, 9)}")
+    print("-------------------------------------------------------------------------------------")
+
+    for i in range(0,8):
+        gate = expand_gate(controlled(Ua(a,i,N), index=7-i), index=i, qubit_count=3*n) # TODO double check this
+        qubits_state = gate.dot(qubits_state)
+        print(f"Iteration {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 2*n)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 2*n, 3*n)}")
+        print("-------------------------------------------------------------------------------------")
+
+    # Apply QFT^-1
+    gate = expand_gate(QFT_inv(2*n), 0, 3*n)
+    qubits_state = gate.dot(qubits_state)
+    print(f"QFT^-1 applied")
+    print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 2*n)}")
+    print(f"Probability lower qubits are: {get_number_list(qubits_state, 2*n, 3*n)}")
+    print("-------------------------------------------------------------------------------------")
+
+    # Measurement
+    for i in range(0,2*n):
+        qubits_state = measure(qubits_state, i)
+        print(f"Measurement of qubit {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 2*n)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 2*n, 3*n)}")
+        print("-------------------------------------------------------------------------------------")
+
+    # Find period
+    val = get_qubit(qubits_state, 0)*2**0 + get_qubit(qubits_state, 1)*2**1 + get_qubit(qubits_state, 2)*2**2 + get_qubit(qubits_state, 3)*2**3 + get_qubit(qubits_state, 4)*2**4 + get_qubit(qubits_state, 5)*2**5 + get_qubit(qubits_state, 6)*2**6 + get_qubit(qubits_state, 7)*2**7
+    # phase = val / 2**(n-1) # b / c
+    phase = val / 2**(2*n) # b / c
+    # frac = fractions.Fraction(phase).limit_denominator(N-1) # frac = j / r
+    r = fractions.Fraction(phase).limit_denominator(N).denominator
+    if r==3:
+        pass
+    print(r)
+    return r
+
 
 # exit()
 def shors():
@@ -242,127 +312,30 @@ def least_frequent(List):
     return least_freq_num
 
 # shors()
-r_list = []
-for i in range(0,200):
-    r_list.append(shors_5(3))
-print(f"List: {r_list}\n")
-r_guess = most_frequent(r_list)
-print(f"Most frequent: {r_guess}")
-print(f"Amount: {r_list.count(r_guess)}")
-print(f"4 Amount: {r_list.count(4)}")
-print(f"LCM: {np.lcm.reduce(r_list)}")
-exit()
+def shor_counter():
+    r_list = []
+    for i in range(0,200):
+        r_list.append(shors_5(3))
+    print(f"List: {r_list}\n")
+    r_guess = most_frequent(r_list)
+    print(f"Most frequent: {r_guess}")
+    print(f"Amount: {r_list.count(r_guess)}")
+    print(f"4 Amount: {r_list.count(4)}")
+    print(f"LCM: {np.lcm.reduce(r_list)}")
 
+def shor_7_15():
+    r_list = []
+    for i in range(0,20):
+        r_list.append(shors_7_15())
+    print(f"List: {r_list}\n")
+    r_guess = most_frequent(r_list)
+    print(f"Most frequent: {r_guess}")
+    print(f"Amount: {r_list.count(r_guess)}")
+    print(f"4 Amount: {r_list.count(4)}")
+    print(f"LCM: {np.lcm.reduce(r_list)}")
 
-def gate_experimentation7_15():
-    # Apply our gates
-    a=7
-    N=15
-    gate_0 = Ua(a,0,15)
-    print(f"Gate i=0\n{gate_0}")
+shor_7_15()
 
-    gate_1 = Ua(a,1,15)
-    print(f"Gate i=1\n{gate_1}")
-
-    gate_2 = Ua(a,2,15)
-    print(f"Gate i=2\n{gate_2}")
-
-    gate_3 = Ua(a,3,15)
-    print(f"Gate i=3\n{gate_3}")
-
-    gate_4 = Ua(a,4,15)
-    print(f"Gate i=4\n{gate_4}")
-
-    gate_5 = Ua(a,5,15)
-    print(f"Gate i=5\n{gate_5}")
-
-    gate_6 = Ua(a,6,15)
-    print(f"Gate i=5\n{gate_6}")
-
-    gate_7 = Ua(a,7,15)
-    print(f"Gate i=5\n{gate_7}")
-
-    print("Statevectors---------------")
-    # statevector_lower = np.array([0, 0, 0, 0, 0, 0, 0, 1]) # x0,x1,x2
-    # statevector_lower = np.kron(np.kron(np.array([0,1]),np.array([1,0])), np.array([1,0]))
-    statevector_lower = np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) # 0b0111
-    print(f"Statevector lower input: {statevector_lower}")
-
-    statevector_index_0 = gate_0.dot(statevector_lower)
-    print(statevector_index_0)
-
-    statevector_index_1 = gate_1.dot(statevector_index_0)
-    print(statevector_index_1)
-
-    statevector_index_2 = gate_2.dot(statevector_index_1)
-    print(statevector_index_2)
-
-    statevector_index_3 = gate_3.dot(statevector_index_2)
-    print(statevector_index_3)
-
-    statevector_index_4 = gate_4.dot(statevector_index_3)
-    print(statevector_index_4)
-
-    statevector_index_5 = gate_5.dot(statevector_index_4)
-    print(statevector_index_5)
-
-    statevector_index_6 = gate_6.dot(statevector_index_5)
-    print(statevector_index_6)
-
-    statevector_index_7 = gate_7.dot(statevector_index_6)
-    print(statevector_index_7)
-
-# gate_experimentation7_15()
-# exit()
-
-
-def gate_experimentation():
-    # Apply our gates
-    gate_0 = Ua(3,0,5)
-    print(f"Gate i=0\n{gate_0}")
-    # Control qubit index = 5
-    # q0 q1 q2 q3 q4 q5 x0 x1 x2
-
-    gate_1 = Ua(3,1,5)
-    print(f"Gate i=1\n{gate_1}")
-
-    gate_2 = Ua(3,2,5)
-    print(f"Gate i=2\n{gate_2}")
-
-    gate_3 = Ua(3,3,5)
-    print(f"Gate i=3\n{gate_3}")
-
-    gate_4 = Ua(3,4,5)
-    print(f"Gate i=4\n{gate_4}")
-
-    gate_5 = Ua(3,5,5)
-    print(f"Gate i=5\n{gate_5}")
-
-    print("Statevectors---------------")
-    # statevector_lower = np.array([0, 0, 0, 0, 0, 0, 0, 1]) # x0,x1,x2   1 1 0 x2 
-    # statevector_lower = np.kron(np.kron(np.array([0,1]),np.array([1,0])), np.array([1,0]))
-    #                             0  1  2  3  4  5  6  7
-    statevector_lower = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    print(f"Statevector lower input: {statevector_lower}")
-
-    statevector_index_0 = gate_0.dot(statevector_lower)
-    print(statevector_index_0)
-
-    statevector_index_1 = gate_1.dot(statevector_index_0)
-    print(statevector_index_1)
-
-    statevector_index_2 = gate_2.dot(statevector_index_1)
-    print(statevector_index_2)
-
-    statevector_index_3 = gate_3.dot(statevector_index_2)
-    print(statevector_index_3)
-
-    statevector_index_4 = gate_4.dot(statevector_index_3)
-    print(statevector_index_4)
-
-    statevector_index_5 = gate_5.dot(statevector_index_4)
-    print(statevector_index_5)
-        
 # gate_experimentation()
 
 # 3^2^0 mod 5 = 1
