@@ -27,10 +27,8 @@ def is_unitary(matrix):
     # Check if the matrix is square
     if matrix.shape[0] != matrix.shape[1]:
         return False
-    
     # Compute the product of the matrix and its conjugate transpose
     product = np.dot(matrix, np.conj(matrix.T))
-    
     # Check if the product is close to the identity matrix
     return np.allclose(product, np.eye(matrix.shape[0]))
 
@@ -40,7 +38,7 @@ I = np.array([[1,0],[0,1]])
 def expand_gate(gate, index, qubit_count):
     # Check that gate fits at given index
     width = int(np.log2(len(gate)))
-    assert index+width-1 < qubit_count, "Error! Gate does not fit"
+    assert index+width-1 < qubit_count, "Error! Gate does not fit."
     if index == 0:
         expanded_gate = gate
         i = width  # start position
@@ -159,46 +157,49 @@ def shors_5(a):
     qubits_state = np.kron(qubits_state, np.array([0,1]))
     qubits_state = np.kron(qubits_state, np.array([1,0]))
     qubits_state = np.kron(qubits_state, np.array([1,0]))
-    # print(qubits_state)
-    # print(len(qubits_state))
+    print(qubits_state)
+    print(len(qubits_state))
 
-    # print(f"Iteration init")
-    # print(f"Probability number list is: {get_number_list(qubits_state, 0, 6)}")
-    # print(f"Probability number for lower list is: {get_number_list(qubits_state, 6, 9)}")
-    # print("-------------------------------------------------------------------------------------")
+    print(f"Iteration init")
+    print(f"Probability number list is: {get_number_list(qubits_state, 0, 6)}")
+    print(f"Probability number for lower list is: {get_number_list(qubits_state, 6, 9)}")
+    print("-------------------------------------------------------------------------------------")
 
     for i in range(0,6):
         gate = expand_gate(controlled(Ua(a,i,5), index=i), (5-i), n*3)
         qubits_state = gate.dot(qubits_state)
-        # print(f"Iteration {i}")
-        # print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
-        # print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
-        # print("-------------------------------------------------------------------------------------")
+        print(f"Iteration {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+        print("-------------------------------------------------------------------------------------")
 
     # Apply QFT^-1
     gate = expand_gate(QFT_inv(6), 0, 9)
     qubits_state = gate.dot(qubits_state)
-    # print(f"QFT^-1 applied")
-    # print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
-    # print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
-    # print("-------------------------------------------------------------------------------------")
+    print(f"QFT^-1 applied")
+    print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+    print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+    print("-------------------------------------------------------------------------------------")
 
     # Measurement
     for i in range(0,6):
         qubits_state = measure(qubits_state, i)
-        # print(f"Measurement of qubit {i}")
-        # print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
-        # print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
-        # print("-------------------------------------------------------------------------------------")
+        print(f"Measurement of qubit {i}")
+        print(f"Probability upper qubits are: {get_number_list(qubits_state, 0, 6)}")
+        print(f"Probability lower qubits are: {get_number_list(qubits_state, 6, 9)}")
+        print("-------------------------------------------------------------------------------------")
 
     # Find period
     val = get_qubit(qubits_state, 0)*2**0 + get_qubit(qubits_state, 1)*2**1 + get_qubit(qubits_state, 2)*2**2 + get_qubit(qubits_state, 3)*2**3 + get_qubit(qubits_state, 4)*2**4 + get_qubit(qubits_state, 5)*2**5
-    phase = val / 2**n
-    frac = fractions.Fraction(phase).limit_denominator(N)
-    r = frac.denominator
-    # print(r)
+    phase = val / 2**n # b / c
+    # frac = fractions.Fraction(phase).limit_denominator(N-1) # frac = j / r
+    r = fractions.Fraction(phase).limit_denominator(N-1).denominator
+    print(r)
     return r
 
+# shors_5(3)
+
+# exit()
 def shors():
     N = 5
     if N % 2 == 0:
@@ -228,20 +229,27 @@ def most_frequent(List):
             num = i
     return num
 
+def least_frequent(List):
+    min_counter = len(List) + 1  # Initialize minimum counter with a value greater than the list length
+    least_freq_num = None  # Initialize the least frequent number
+    for num in List:
+        curr_frequency = List.count(num)
+        if curr_frequency < min_counter:
+            min_counter = curr_frequency
+            least_freq_num = num
+    return least_freq_num
+
 # shors()
 r_list = []
-for i in range(0,100):
+for i in range(0,20):
     r_list.append(shors_5(3))
 print(f"List: {r_list}\n")
 r_guess = most_frequent(r_list)
 print(f"Most frequent: {r_guess}")
 print(f"Amount: {r_list.count(r_guess)}")
 print(f"4 Amount: {r_list.count(4)}")
+print(f"LCM: {np.lcm.reduce(r_list)}")
 exit()
-
-
-
-
 
 
 def gate_experimentation7_15():
