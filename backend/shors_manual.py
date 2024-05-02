@@ -191,9 +191,11 @@ def shors_5(a):
 
     # Find period
     val = get_qubit(qubits_state, 0)*2**0 + get_qubit(qubits_state, 1)*2**1 + get_qubit(qubits_state, 2)*2**2 + get_qubit(qubits_state, 3)*2**3 + get_qubit(qubits_state, 4)*2**4 + get_qubit(qubits_state, 5)*2**5
-    phase = val / 2**n # b / c
+    phase = val / 2**(n-1) # b / c
     # frac = fractions.Fraction(phase).limit_denominator(N-1) # frac = j / r
     r = fractions.Fraction(phase).limit_denominator(N-1).denominator
+    if r==3:
+        pass
     print(r)
     return r
 
@@ -241,7 +243,7 @@ def least_frequent(List):
 
 # shors()
 r_list = []
-for i in range(0,20):
+for i in range(0,200):
     r_list.append(shors_5(3))
 print(f"List: {r_list}\n")
 r_guess = most_frequent(r_list)
