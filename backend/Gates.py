@@ -1,5 +1,4 @@
 import numpy as np
-import ast
 
 # Stores the different gates TODO More gates
 # Identity
@@ -131,11 +130,11 @@ def controlled_swap(n)->np.array:
     return matrix
     
 def add_control_qubit(matrix):
-  m, n = matrix.shape
-  new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
-  new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
+    m, n = matrix.shape
+    new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
+    new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
     
-  return new_matrix
+    return new_matrix
 
 def amodN(a, N)->np.array:
     return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
@@ -204,8 +203,6 @@ def grover_op(num_qubits, states : list[int]):
     for column in states:
         matrix[:, column] = -matrix[:, column] # Negates the column
     return matrix
-
-
 
 def normalize(vector : np.array)->np.array:
         scaler = np.sqrt(np.sum(np.abs(vector)**2))

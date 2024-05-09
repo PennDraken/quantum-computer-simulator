@@ -16,7 +16,7 @@ else:
 # System of all registers of qubits
 class System():
     def __init__(self):
-        self.qubits=[] # Used to keep track of qubits
+        self.qubits={} # Used to keep track of qubits
         self.registers=[]
 
     def add_qubit(self, qubit, vector: np.array):
@@ -181,7 +181,7 @@ class System():
         else:
             measured_state=m1*register.vector
         # Normalise the measurement to fulfill property |a|^2+|b|^2+...==1
-        norm_vector = self.normalize(measured_state)
+        norm_vector = self.normalise(measured_state)
         # Seperate out the measured qubit and remaining qubits into different registers
         new_vector = np.zeros(2**(len(register.qubits) - 1), dtype=complex)
         for index in range(0, len(new_vector)):
@@ -190,7 +190,7 @@ class System():
             index_b = insert_bit(index, 1, len(register.qubits) - qubit_index - 1)
             # add the two elements that should be put into new indices
             new_vector[index] = norm_vector[index_a] + norm_vector[index_b]
-        new_vector = self.normalize(new_vector)
+        new_vector = self.normalise(new_vector)
         # Add the two new registers to system self
         measured_register = Register([qubit], np.array([1 if p == 0 else 0, p])) # Create vector [1,0] or [0,1] based on p (result of measurement)
         register.qubits.remove(qubit) # Our other register should no longer contain measured qubit
@@ -201,7 +201,7 @@ class System():
         return p # Returns probability of q_n=1 for qubit n
     
     # Normalises probabilities of vector and returns it
-    def normalize(self, vector : np.array)->Register:
+    def normalise(self, vector : np.array)->Register:
         scaler = np.sqrt(np.sum(np.abs(vector)**2))
         new_vector = vector/scaler
         return new_vector

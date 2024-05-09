@@ -11,7 +11,7 @@ else:
 
 # System of a single/ multiple qubits
 class Register():
-    def __init__(self, qubits,  vector: np.array):
+    def __init__(self, qubits: set,  vector: np.array):
         self.qubits = qubits
         self.vector = vector
         self.label = None # TODO init this to a value
