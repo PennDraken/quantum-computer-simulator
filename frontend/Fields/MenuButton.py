@@ -54,7 +54,7 @@ def checkLines( x : int , y : int, xl, xr):
     return withinX
 
 # Cheks if user has clicked gate. Start moving gate.
-def check_moving_gate(gateButtons : [[MenuGateObject]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int, error_occurred: [bool]):
+def check_moving_gate(gateButtons : [[MenuGateObject]], gateList : [(str, [int])], x : int, y : int, circuit_dx : int, circuit_dy : int):
     # Calculate how much the cicuit view has shifted
     offset_x = x + circuit_dx
     offset_y = y + circuit_dy
@@ -85,12 +85,9 @@ def check_moving_gate(gateButtons : [[MenuGateObject]], gateList : [(str, [int])
             if col < len(gateList):
                 # Insert into gatelist
                 gateList.insert(col - 1, gate_data)
-                error_occurred.insert(col - 1, False)
-
             else:
                 # Add to end of gatelist
                 gateList.append(gate_data) 
-                error_occurred.append(False)
             button.selected = False
             break
         if not button.selected:
