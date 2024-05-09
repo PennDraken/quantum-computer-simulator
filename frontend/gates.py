@@ -4,6 +4,7 @@ import Utilities.Colors as Colors
 import screenHandler
 import pygame
 import UI
+from time import time
 
 Loc = screenHandler.Loc
 screen = screenHandler.screen
@@ -38,7 +39,11 @@ class gateHandler:
     gateWidth = UI.gate_size
     gateHeight = UI.gate_size
     step = 0
-    
+    image_unmeasured  = pygame.image.load("frontend/images/gates/measure-unmeasured.png")
+    image_measured_1 = pygame.image.load("frontend/images/gates/measure-measured-1.png")
+    image_measured_0 = pygame.image.load("frontend/images/gates/measure-measured-0.png")
+    image_measured   = pygame.image.load("frontend/images/gates/measure-measured.png")
+
     def __init__(self):
         self.gateMap = {}
     
@@ -121,15 +126,15 @@ class gateHandler:
             y = qubits[0] * UI.grid_size + center_offset + offset_x_y_tuple[1]
             gate_rect = (x, y, UI.gate_size, UI.gate_size) # Note this rect does not scale icon
             if not selected:
-                image = pygame.image.load("frontend/images/gates/measure-unmeasured.png")
+                image = self.image_unmeasured
             else:
                 # Measured
                 if input_data==1:
-                    image = pygame.image.load("frontend/images/gates/measure-measured-1.png")
+                    image = self.image_measured_1
                 elif input_data==0:
-                    image = pygame.image.load("frontend/images/gates/measure-measured-0.png")
+                    image = self.image_measured_0
                 else:
-                    image = pygame.image.load("frontend/images/gates/measure-measured.png")
+                    image = self.image_measured
 
             image = pygame.transform.smoothscale(image, (UI.gate_size, UI.gate_size))
                 

@@ -11,6 +11,7 @@ parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
 sys.path.insert(0, parent_dir_path)
 
 # Custom modules
+import screenHandler
 import UI
 import Utilities.Colors as Colors
 import frontend.q_sphere as q_sphere
@@ -25,13 +26,13 @@ import gates
 from gates import Gate, gateHandler
 from Utilities.mouse import Mouse
 import Fields.TextInput as input_box
-import screenHandler
 import Fields.gate_date_visualizer as gate_data_visualizer
 from tkinter.filedialog import asksaveasfile, askopenfile
-
+from time import time
 screen = screenHandler.screen
 gate_handler : gateHandler = gateHandler()
 framerate = pygame.time.Clock()
+
 
 # positioning of circuit
 circuit_x = 75
@@ -54,10 +55,10 @@ q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), scr
 # circuit : Circuit = Circuit([["A","B","C","D","E","F","G"], "CU 4 5", "CUSTOM 2 3", "CUSTOM 0 1 2 3 4", "CUSTOM 2 3 5", "CUSTOM 1 3 5"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
-# circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
-circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
+# circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
@@ -225,7 +226,6 @@ while True:
     # Draw example circuit
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
     pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
-
     # Draw qubit names on left side
     qubit_name_panel.set_rectangle((0, circuit_navigation_panel.height, 90, drag_bar_y - circuit_navigation_panel.height))
     qubit_name_panel.set_offset_y(circuit_y + circuit_dy)
@@ -388,7 +388,7 @@ while True:
         pass
 
     framerate.tick(60)
-
+    # exit()
 # --------------------------------------------------------
 # Draw methods
     

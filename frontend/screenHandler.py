@@ -1,10 +1,10 @@
 import pygame
 import sys
 from enum import Enum
-import UI
 import Utilities.Colors as Colors
 
 pygame.init()
+import UI # Dont ask why this import is here, pygame needs to be initialised
 img = pygame.image.load("frontend/images/icons/program-logo-32.png")
 pygame.display.set_icon(img)
 

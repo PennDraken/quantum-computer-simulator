@@ -4,6 +4,8 @@ import Utilities.Colors as Colors
 
 grid_size = 90
 gate_size = 70
+gate_font     = pygame.font.Font(None, 24)
+big_gate_font = pygame.font.Font(None, 48)
 
 # A single button on screen
 class Button():
@@ -140,9 +142,11 @@ class ChoicePanel():
 
 # Useful method to quickly draw centered text on screen
 def text(screen, string, x, y, color):
-    font = pygame.font.Font(None, 24)
     text_color = pygame.Color(color)
-    text_surface = font.render(string, True, text_color)
+    if len(string)==1:
+        text_surface = big_gate_font.render(string, True, text_color)
+    else:
+        text_surface = gate_font.render(string, True, text_color)
     text_rect = text_surface.get_rect()
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
@@ -150,9 +154,9 @@ def text(screen, string, x, y, color):
 # Useful method to quickly draw centered text on screen (Rotated 90 degrees)
 def rotated_text(screen, string, x, y, color, bg_rect=False):
     # pygame.draw.circle(screen, Colors.white, (x, y), 40) # Uncomment this line to debug center of text
-    font = pygame.font.Font(None, 24)
+    #font = pygame.font.Font(None, 24)
     text_color = pygame.Color(color)
-    text_surface = font.render(string, True, text_color)
+    text_surface = gate_font.render(string, True, text_color)
     text_rect = text_surface.get_rect(center=(x, y))
     rect_width = text_surface.get_height() + 10
     rect_height = text_surface.get_width() + 10
