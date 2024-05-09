@@ -72,6 +72,7 @@ calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0
 circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
 tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag qubit","Drag gate","Select multiple"])
+tool_panel.set_icons([pygame.image.load("frontend/images/icons/move-gate-icon.png"), pygame.image.load("frontend/images/icons/move-qubit-icon.png"), pygame.image.load("frontend/images/icons/select-gates-icon.png")]) # Set icons for the different options
 
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
   
