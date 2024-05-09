@@ -156,3 +156,25 @@ class Circuit():
             gate = Gates.string_to_gate(gate_description) 
             self.cached_gates[gate_description] = gate
             return gate
+        
+    def verify_description_string_list(self, string_list):
+        valid_lines = [True for _ in range(len(string_list))] # Init to false
+        try:
+            qubits = eval(string_list[0])
+        except:
+            valid_lines[0] = False
+            return valid_lines
+        
+        try:
+            verification_circuit = Circuit([qubits] + string_list[1:])
+        except:
+            valid_lines[0] = False
+            return valid_lines
+        
+        for i in range(0,len(string_list)-1):
+            try:
+                verification_circuit.step_fwd()
+            except:
+                valid_lines[i+1] = False
+                break
+        return valid_lines

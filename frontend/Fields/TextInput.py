@@ -28,6 +28,15 @@ class input_box:
         self.text_editor.set_text_from_list(string_list)
         self.text = self.text_editor.get_text_as_string()
 
+    def set_text_from_string_list(self, string_list):
+        self.text_editor.set_text_from_list(string_list)
+        self.text = self.text_editor.get_text_as_string()
+
+    def get_text_as_string_list(self):
+        string_list = self.text_editor.get_text_as_list()
+        return string_list
+
+
 class Button():
     def __init__(self, screen, color_base, color_selected, buttons: [str], input_box_instance:input_box):
         self.screen = screen
@@ -67,11 +76,7 @@ class Button():
                 if mouse_pressed[0]:
                     self.selected[i] = True
                     self.color[i] = self.color_selected
-                    if self.text[i] == "UPDATE":
-                        self.input_box_instance.text = gates_cleaned
-                        self.input_box_instance.text_editor.set_text_from_list(self.input_box_instance.text)
-                    else:
-                        return self.text[i]
+                    return self.text[i]
                 else:
                     self.selected[i] = not self.selected[i]
                     self.color[i] = self.color_unselected

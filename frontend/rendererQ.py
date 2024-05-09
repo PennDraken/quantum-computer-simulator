@@ -33,7 +33,6 @@ screen = screenHandler.screen
 gate_handler : gateHandler = gateHandler()
 framerate = pygame.time.Clock()
 
-
 # positioning of circuit
 circuit_x = 75
 circuit_y = 75
@@ -55,10 +54,10 @@ q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), scr
 # circuit : Circuit = Circuit([["A","B","C","D","E","F","G"], "CU 4 5", "CUSTOM 2 3", "CUSTOM 0 1 2 3 4", "CUSTOM 2 3 5", "CUSTOM 1 3 5"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
-circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+# circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
-# circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
+circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
@@ -79,7 +78,7 @@ menu_buttons = MenuGateButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
 text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
-buttons_options = input_box.Button(screen, Colors.black, Colors.selected, buttons_text, text_box)
+buttons_options = input_box.Button(screen, Colors.gray, Colors.selected, buttons_text, text_box)
 
 sizeQ = 40 # Zoom level
 
@@ -258,16 +257,25 @@ while True:
         text_box.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         text_box.update(tab_panel.y, tab_panel.height)
         buttons_options.draw()
-        gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
+        # gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
         test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
         match test:
+            case "UPDATE":
+                circuit_string = [str(circuit.description[0])] + circuit.description[1:]
+                text_box.set_text_from_string_list(circuit_string)
             case "SUBMIT":
-                description_string_list = text_box.text.split('\n')
-                qubits = eval(description_string_list[0])
-                circuit.description = [qubits] + description_string_list[1:]
-                gateList = circuit.as_frontend_gate_list()
-                qubit_name_panel.qubits_list = qubits
-                pass
+                # Verify gates here
+                # Update our gates if no errors
+                description_string_list = text_box.get_text_as_string_list()
+                text_box.valid_lines = circuit.verify_description_string_list(description_string_list)
+                if False in text_box.valid_lines:
+                    print(f"Error at line {text_box.valid_lines.index(False)}")
+                else:
+                    qubits = eval(description_string_list[0])
+                    circuit.description = [qubits] + description_string_list[1:]
+                    gateList = circuit.as_frontend_gate_list()
+                    qubit_name_panel.qubits_list = qubits
+
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])
