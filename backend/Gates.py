@@ -52,6 +52,20 @@ def gen_I(qubit_count):
 
 # Generates a Quantum Fourier Transform matrix
 def QFT(N : int)->np.array:
+    N = 2**N
+    W = np.power(np.e, (2 * np.pi*1j)/N)
+    constant = 1/np.sqrt(N)
+    matrix = np.ones((N,N), dtype= complex)
+    for n in range(N):
+        for m in range(n, N):
+            value = np.power(W, n * m)
+            matrix[n][m] = value
+            matrix[m][n] = value
+    matrix *= constant
+    return matrix
+
+def QFT_dagger(N : int)->np.array:
+    N = 2**N
     W = np.power(np.e, (2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
     Matrix = np.ones((N,N), dtype= complex)
@@ -62,17 +76,18 @@ def QFT(N : int)->np.array:
             Matrix[m][n] = value
     Matrix *= constant
     return Matrix
+
 def DFT(N : int)-> np.array:
     W = np.power(np.e, (-2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
-    Matrix = np.ones((N,N), dtype= complex)
+    matrix = np.ones((N,N), dtype= complex)
     for n in range(N):
         for m in range(n, N):
             value = np.round(np.power(W, n * m), 5)
-            Matrix[n][m] = value
-            Matrix[m][n] = value
-    Matrix *= constant
-    return Matrix
+            matrix[n][m] = value
+            matrix[m][n] = value
+    matrix *= constant
+    return matrix
 
 # gets corresponding gate from a gate_str
 def string_to_gate(gate_str : str):
@@ -114,6 +129,15 @@ def controlled_mul_amodN(a, N)->np.array:
     gate = np.zeros((N, N), dtype=complex)
     return -1
 
+def controlled(matrix, index=1):
+    new_matrix_size = 2**(int(np.log2(len(matrix)))+index)
+    new_matrix = np.diag(np.ones(new_matrix_size))
+    # len(matrix) is the position where our matrix should be inserted
+    start_index = new_matrix_size - len(matrix)
+    end_index   = new_matrix_size
+    new_matrix[start_index:end_index, start_index:end_index] = matrix
+    return new_matrix
+
 def controlled_swap(n)->np.array:
     #qusim_class.swap(, )
     I = np.eye((2), dtype=complex)
@@ -134,12 +158,25 @@ def add_control_qubit(matrix):
   m, n = matrix.shape
   new_matrix = np.hstack((np.eye(m, n), np.zeros((m, n), dtype=complex)))
   new_matrix = np.vstack((new_matrix, np.hstack((np.zeros((m, n)), matrix), dtype=complex)))
-    
   return new_matrix
 
-def amodN(a, N)->np.array:
-    return controlled_mul_amodN(a, N)*controlled_swap(N)*controlled_mul_amodN(pow(a, -1, N), N)
+def function_exponentiation(a,power,N,x):
+    return (x*a**power)%N
 
+
+def amodN(a, power, N):
+    number_of_qubits = int(np.ceil(np.log2(N)))
+    number_of_states = 2**number_of_qubits
+    matrix = np.zeros((number_of_states,number_of_states))
+    highest_state = N
+    # Map matrix
+    for input_state in range(highest_state):
+        output_state = function_exponentiation(a,power,N,input_state)
+        matrix[output_state, input_state] = 1
+    # Add remaining states (ensures unitary)
+    for i in range(highest_state, number_of_states):
+        matrix[i,i]=1
+    return matrix
 
 def expand_gate(gate, index, qubit_count):
     # Check that gate fits at given index
