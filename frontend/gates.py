@@ -138,7 +138,7 @@ class gateHandler:
 
             image = pygame.transform.smoothscale(image, (UI.gate_size, UI.gate_size))
                 
-            pygame.draw.rect(screen, color, gate_rect)
+            pygame.draw.rect(screen, color, gate_rect, border_radius=UI.gate_size//8) # Draw rectangle here
             screen.blit(image, gate_rect)
             gate = Gate(gate_text, x, y, self.gateWidth, self.gateHeight)
         # Draw the actual gate
@@ -159,28 +159,35 @@ class gateHandler:
         # Draw dashed line to show outline of qubit
         lowest_qubit = min(qubits)
         highest_qubit = max(qubits)
-        top_y = lowest_qubit * UI.grid_size + offset_x_y_tuple[1] + center_offset
-        bottom_y = highest_qubit * UI.grid_size + offset_x_y_tuple[1] + UI.grid_size - center_offset
         left_x   = column * UI.grid_size + center_offset + offset_x_y_tuple[0]
         right_x  = column * UI.grid_size + center_offset + offset_x_y_tuple[0] + UI.gate_size
         line_width = 2
-        UI.draw_dashed_line(screen, color, (left_x, top_y), (left_x, bottom_y), line_width)
-        UI.draw_dashed_line(screen, color, (right_x - line_width, top_y), (right_x - line_width, bottom_y), line_width)
+        top_y    = (lowest_qubit +1)  * UI.grid_size + offset_x_y_tuple[1] + center_offset
+        bottom_y = (highest_qubit-1) * UI.grid_size + offset_x_y_tuple[1] + UI.grid_size - center_offset
+        if len(qubits)>1:
+            UI.draw_dashed_line(screen, color, (left_x, top_y), (left_x, bottom_y), line_width)
+            UI.draw_dashed_line(screen, color, (right_x - line_width, top_y), (right_x - line_width, bottom_y), line_width)
 
         # Draw vertical border lines for the qubits
         for qubit_index, qubit in enumerate(qubits):
             top_y    = qubits[qubit_index] * UI.grid_size + offset_x_y_tuple[1] # Note: The left and right lines are padded on the x-axis, but follow the grid size on the y axis
             bottom_y = qubits[qubit_index] * UI.grid_size + offset_x_y_tuple[1] + UI.grid_size
+            top_r = 0 # Corner radius
+            bot_r = 0            
             if qubits[qubit_index] == lowest_qubit:
+                # TOP
                 top_y += center_offset
+                top_r = UI.gate_size//4
             if qubits[qubit_index] == highest_qubit:
+                # BOTTOM
                 bottom_y -= center_offset
+                bot_r = UI.gate_size//4
 
             # Draw left and right vertical lines
             left_x   = column * UI.grid_size + center_offset + offset_x_y_tuple[0]
             right_x  = column * UI.grid_size + center_offset + offset_x_y_tuple[0] + UI.gate_size
             # Draw gate shape
-            pygame.draw.rect(screen, color, (left_x, top_y, UI.gate_size, bottom_y - top_y))
+            pygame.draw.rect(screen, color, (left_x, top_y, UI.gate_size, bottom_y - top_y), border_top_left_radius=top_r, border_top_right_radius=top_r, border_bottom_left_radius=bot_r, border_bottom_right_radius=bot_r)
         # Draw text rotated 90 degrees
         center_row = (highest_qubit - lowest_qubit)/2
         center_x = column * UI.grid_size + UI.grid_size/2 + offset_x_y_tuple[0]
