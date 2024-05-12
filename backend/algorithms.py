@@ -70,7 +70,7 @@ def grover(n_qubits, states : list[int], iterations=2):
         # Label
         circuit.append(f"label Iteration_{i}")
         # Grover operator
-        circuit.append(f"grover_op({n_qubits},{states}) {qubits_between(0, n_qubits - 1)}")
+        circuit.append(f"grover_op({n_qubits},{states}) {qubits_between(0, n_qubits)}")
     circuit.append(f"label Measurement section")
     for i in range(n_qubits):
         circuit.append(f"measure {i}")
@@ -91,8 +91,10 @@ def qubits_between(start, end):
     Example: qubits_between(2,5) returns "2 3 4"
     """
     if start > end:
-        return ""  # Return an empty string if start is greater than end
+        string = ' '.join(str(i) for i in range(start, end, -1))
     else:
-        return ' '.join(str(i) for i in range(start, end))
-    
-print(qubits_between(0,8))
+        string = ' '.join(str(i) for i in range(start, end))
+    print(string)
+    return string    
+
+print(qubits_between(5,1))

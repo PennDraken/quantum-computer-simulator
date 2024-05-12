@@ -18,6 +18,7 @@ class Circuit():
         self.systems = []  # Index corresponds to state in circuit
         self.history : bool = True
         self.show_output : bool = False
+        self.show_probability = True
         # First element is qubit list, rest are gate operations
         # self.description = [["A","B"],"H 0","CNOT 0 1"]
         self.description = description
@@ -92,6 +93,9 @@ class Circuit():
             print(f"Stepped forward {operation}")
             # self.systems[self.position].print_merged_register()
             self.systems[self.position].print_merged_register_QC()
+        if self.show_probability:
+            print(f"Stepped forward {operation}")
+            self.systems[self.position].print_probabilities()
 
     # Steps backwards in circuit
     # Removes state at current position

@@ -25,13 +25,23 @@ class Register():
     
     # note qubit_list contains the specific qubits
     def apply_gate(self, gate, qubit_list):
+        print("before swap--------------------")
+        for qubit in self.qubits:
+            print(f"{qubit} {self.get_probability(qubit)}")
         # sort state vector and qubits based on qubit list
         self.sort_register(qubit_list)
+        print("after swap----------------------")
+        for qubit in self.qubits:
+            print(f"{qubit} {self.get_probability(qubit)}")
         # expand gate
         first_qubit_index = self.qubits.index(qubit_list[0])
         gate = Gates.expand_gate(gate, first_qubit_index, len(self.qubits))
         # apply gate
         self.vector = gate.dot(self.vector)
+        # print results
+        print("after gate applied----------------------")
+        for qubit in self.qubits:
+            print(f"{qubit} {self.get_probability(qubit)}")
     
     # Merges a register with another register
     def merge(self, register):
@@ -41,6 +51,7 @@ class Register():
 
 
     def get_state_str(self)->str:
+        return ""
         qubit_copy = copy.deepcopy(self.qubits)
         reversed_qubit_list = qubit_copy[::-1]
         register_reversed = self.sort_register(reversed_qubit_list) # TODO sort by indices
@@ -56,6 +67,14 @@ class Register():
         self.state_str = output_str
         return output_str
     
+    def get_probability(self, qubit):
+        qubit_index = self.qubits.index(qubit)
+        qubit_count = len(self.qubits)
+        state_vector = self.vector
+        mask = 1 << (qubit_count - qubit_index - 1)
+        masked_states = state_vector[np.bitwise_and(np.arange(len(state_vector)), mask) != 0]
+        return np.sum(np.abs(masked_states) ** 2)    
+    
     # Sorts a register based on a qubit list to move qubit states to order given in qubits
     # Useful as final state may be shown in wrong order otherwise
     # Updates registers original state
@@ -68,18 +87,17 @@ class Register():
             if qubit not in sorted_qubits:
                 sorted_qubits.append(qubit) # TODO more efficient possible
         sorted_register = copy.deepcopy(register)
-        # find all bits that should be swapped
-        # bits_to_swap = find_swaps(unsorted_qubits, sorted_qubits)
-        qubits_to_swap = []
-        for i, qubit in enumerate(sorted_qubits):
-            if unsorted_qubits[i] != sorted_qubits[i]:
-                qubits_to_swap.append((unsorted_qubits[i], sorted_qubits[i]))
-        indices_to_swap = []
-        for pair in qubits_to_swap:
-            indices_to_swap.append((unsorted_qubits.index(pair[0]), unsorted_qubits.index(pair[1])))
         # swap state vector
-        for swap_pair in indices_to_swap:
-            sorted_register.vector = swap_vector(sorted_register.vector, swap_pair[0], swap_pair[1], len(sorted_qubits))
+        for i, source_qubit in enumerate(unsorted_qubits):
+            target_qubit = sorted_qubits[i]
+            if source_qubit!=target_qubit:
+                # swap these two qubits
+                source_i = unsorted_qubits.index(source_qubit) # same as i from for loop btw
+                target_i = unsorted_qubits.index(target_qubit)
+                sorted_register.vector = swap_vector(sorted_register.vector, source_i, target_i, len(sorted_qubits))
+                # swap in our reference list
+                unsorted_qubits[source_i] = target_qubit
+                unsorted_qubits[target_i] = source_qubit
         # Finished
         self.vector = sorted_register.vector
         self.qubits = sorted_qubits
@@ -122,16 +140,14 @@ def swap(register: Register, qubit_a, qubit_b):
     return register
 
 def swap_vector(state_vector, index_qubit_a, index_qubit_b, qubit_count):
-    state_vector_length = len(state_vector)
-    # Create an array representing the binary representation of each state index
-    binary_indices = np.arange(state_vector_length)[:, np.newaxis] >> np.arange(qubit_count - 1, -1, -1) & 1
-    # XOR the bits at index_qubit_a and index_qubit_b to determine which indices to swap
-    xor_result = binary_indices[:, index_qubit_a] ^ binary_indices[:, index_qubit_b]
-    # Find the indices where bits at index_qubit_a and index_qubit_b differ
-    swap_indices = np.nonzero(xor_result)[0]
-    # Perform the swaps
-    state_vector[swap_indices], state_vector[state_vector_length - swap_indices - 1] = (
-        state_vector[state_vector_length - swap_indices - 1], state_vector[swap_indices])
+    # Iterate through states vector and swap states
+    for state_index in range(1, len(state_vector) - 1):
+        # Calculate which element our current element should be replaced by
+        new_state_index = swap_bits(state_index, index_qubit_a, index_qubit_b, qubit_count)
+        # Check if index already has been swapped
+        if new_state_index > state_index:
+            # Perform swap
+            state_vector[state_index], state_vector[new_state_index] = state_vector[new_state_index], state_vector[state_index]
     return state_vector
 
 # Checks if two qubits are adjacent in a register. Not really used for anything right now.

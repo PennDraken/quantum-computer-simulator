@@ -50,9 +50,36 @@ def gen_I(qubit_count):
         gate = np.kron(gate,I)
     return gate
 
+
+# Reverses qubit order of a matrix (from LSB to MSB)
+# Used by QFT
+def reverse_qubit_order(matrix):
+    qubit_count = int(np.log2(len(matrix)))
+    result_matrix = matrix.copy()
+    # Swap rows
+    for row_i in range(len(matrix)):
+        new_row_i = reverse_bits(row_i, qubit_count)
+        result_matrix[new_row_i, :] = matrix[row_i, :]
+    # Swap columns
+    result_matrix2 = result_matrix.copy()
+    for col_i in range(len(matrix)):
+        new_col_i = reverse_bits(col_i, qubit_count)
+        result_matrix2[:, new_col_i] = result_matrix[:, col_i]        
+    return result_matrix2
+
+def reverse_bits(num, bit_count):
+    reversed_num = 0
+    for i in range(bit_count):
+        # Shift the reversed number to the left and add the least significant bit of num
+        reversed_num = (reversed_num << 1) | (num & 1)
+        # Right shift num to get the next bit
+        num >>= 1
+    return reversed_num
+
 # Generates a Quantum Fourier Transform matrix
-def QFT(N : int)->np.array:
-    N = 2**N
+# Note: Order of qubits
+def QFT(n : int)->np.array:
+    N = 2**n
     W = np.power(np.e, (2 * np.pi*1j)/N)
     constant = 1/np.sqrt(N)
     matrix = np.ones((N,N), dtype= complex)
@@ -62,20 +89,12 @@ def QFT(N : int)->np.array:
             matrix[n][m] = value
             matrix[m][n] = value
     matrix *= constant
+    # Reverse qubits
+    matrix = reverse_qubit_order(matrix)
     return matrix
 
-def QFT_dagger(N : int)->np.array:
-    N = 2**N
-    W = np.power(np.e, (2 * np.pi*1j)/N)
-    constant = 1/np.sqrt(N)
-    Matrix = np.ones((N,N), dtype= complex)
-    for n in range(N):
-        for m in range(n, N):
-            value = np.power(W, n * m)
-            Matrix[n][m] = value
-            Matrix[m][n] = value
-    Matrix *= constant
-    return Matrix
+def QFT_dagger(n : int)->np.array:
+    return np.conj(QFT(n)).T
 
 def DFT(N : int)-> np.array:
     W = np.power(np.e, (-2 * np.pi*1j)/N)
@@ -163,7 +182,6 @@ def add_control_qubit(matrix):
 def function_exponentiation(a,power,N,x):
     return (x*a**power)%N
 
-
 def amodN(a, power, N):
     number_of_qubits = int(np.ceil(np.log2(N)))
     number_of_states = 2**number_of_qubits
@@ -242,12 +260,10 @@ def grover_op(num_qubits, states : list[int]):
         matrix[:, column] = -matrix[:, column] # Negates the column
     return matrix
 
-
-
 def normalize(vector : np.array)->np.array:
-        scaler = np.sqrt(np.sum(np.abs(vector)**2))
-        new_vector = vector/scaler
-        return new_vector
+    scaler = np.sqrt(np.sum(np.abs(vector)**2))
+    new_vector = vector/scaler
+    return new_vector
 
 # -----------------------------------------------------------------------------
 # GATE MODIFIERS
@@ -298,13 +314,13 @@ def expand_gate(gate, index, qubit_count):
     return expanded_gate
 
 def combine_gates(i : int, n):
-     gate_i = np.array([])
-     state1 = True
-     for k in range(i):
-       if state1:
-         gate_i = expand_gate(conditional_phase_shift(i-k), i, n +1)
-         #print(gate_i)
-         state1 = False
-       else:
-         gate_i = np.matmul(gate_i, expand_gate(conditional_phase_shift(i-k), i, n +1))
-     return gate_i
+    gate_i = np.array([])
+    state1 = True
+    for k in range(i):
+        if state1:
+            gate_i = expand_gate(conditional_phase_shift(i-k), i, n +1)
+            #print(gate_i)
+            state1 = False
+        else:
+            gate_i = np.matmul(gate_i, expand_gate(conditional_phase_shift(i-k), i, n +1))
+        return gate_i

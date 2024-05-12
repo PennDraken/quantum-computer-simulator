@@ -1,7 +1,6 @@
 import numpy as np
 import copy
 
-
 if __name__ == "__main__":
     import Gates
     from Gates import expand_gate
@@ -110,14 +109,11 @@ class System():
             self.registers.remove(reg)
             merged_register = merged_register.merge(reg)
         return merged_register
-    
-
 
     def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: set):
         # merge registers
-        register = self.merge_registers_from_indices(qubit_index_list)
+        register: Register = self.merge_registers_from_indices(qubit_index_list)
         register.apply_gate(gate, self.indices_to_qubits(qubit_index_list))
-
 
     # Applies a gate to a qubit list (of integers)
     def apply_gate_qubit_list2(self, gate: np.array, qubit_index_list: set):
@@ -243,7 +239,7 @@ class System():
         for register in self.registers:
             print(f"Qubits:")
             for qubit in register.qubits:
-                print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+                print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
             print(f"State:\n {register.vector}\n")
         print("-----------------------------------------------------------------")        
 
@@ -252,7 +248,7 @@ class System():
         register = self.get_as_register()
         print(f"Qubits:")
         for qubit in register.qubits:
-            print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+            print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
         # Print the vector matrix
         print("\nState:")
         print(f"|{''.join(register.qubits)}>")
@@ -268,7 +264,7 @@ class System():
         register = self.get_as_register()
         print(f"Qubits:")
         for qubit in register.qubits:
-            print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+            print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
         # Print the vector matrix
         print("\nState:")
 
@@ -285,11 +281,17 @@ class System():
         print("-----------------------------------------------------------------")        
 
 
-    def get_probability(self, register, qubit)->float:
+    def get_probability_in_register(self, register, qubit)->float:
         qubit_index = register.qubits.index(qubit)
         m1 = Gates.collapsed_vector([0,1], qubit_index, len(register.qubits))
         p1 = np.sum(np.abs(m1*register.vector)**2)
         return float(p1)
+    
+    def print_probabilities(self):
+        for qubit in self.qubits:
+            reg = find_register(self, qubit)
+            print(f"Probability {qubit}: {reg.get_probability(qubit)}")
+            
     
 # Find a register where qubit is stored
 def find_register(system, qubit):
