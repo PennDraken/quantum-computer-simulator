@@ -50,6 +50,14 @@ def gen_I(qubit_count):
         gate = np.kron(gate,I)
     return gate
 
+def reverse_bits(num, bit_count):
+    reversed_num = 0
+    for i in range(bit_count):
+        # Shift the reversed number to the left and add the least significant bit of num
+        reversed_num = (reversed_num << 1) | (num & 1)
+        # Right shift num to get the next bit
+        num >>= 1
+    return reversed_num
 
 # Reverses qubit order of a matrix (from LSB to MSB)
 # Used by QFT
@@ -67,14 +75,6 @@ def reverse_qubit_order(matrix):
         result_matrix2[:, new_col_i] = result_matrix[:, col_i]        
     return result_matrix2
 
-def reverse_bits(num, bit_count):
-    reversed_num = 0
-    for i in range(bit_count):
-        # Shift the reversed number to the left and add the least significant bit of num
-        reversed_num = (reversed_num << 1) | (num & 1)
-        # Right shift num to get the next bit
-        num >>= 1
-    return reversed_num
 
 # Generates a Quantum Fourier Transform matrix
 # Note: Order of qubits
