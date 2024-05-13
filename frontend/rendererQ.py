@@ -295,8 +295,17 @@ def select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_b
                 
         Mouse.status = None
         Mouse.gates_to_move = []
+         
+    elif Mouse.status == "Moving multiple":
+        gates_to_render = []
+        i = 0
+        for gate in Mouse.gates_to_move:
+            rect = Gate.draw_gate(gate[1][0], Mouse.x + (i * UI.grid_size),  Mouse.y + (i * UI.grid_size), UI.gate_size, UI.gate_size, Colors.red)
+            pygame.display.update(rect)
+            i = i + 1
 
-
+      
+    
 
     
 
