@@ -21,7 +21,7 @@ import Fields.MenuButton as MenuGateButton
 import Fields.calculation_view_window as calculation_view_window
 import Fields.qubit_name_panel as qubit_name_panel
 from backend.circuit import Circuit
-from backend.Gates import string_to_gate
+from backend.Gates import string_to_gate 
 import backend.algorithms as algorithms # This is used to quickly set starting circuit state
 from frontend.Fields.circuit_navigation_panel import Circuit_Navigation_Window
 import gates
@@ -35,6 +35,7 @@ import numpy as np
 screen = screenHandler.screen
 gate_handler : gateHandler = gateHandler()
 framerate = pygame.time.Clock()
+
 
 # positioning of circuit
 circuit_x = 75
@@ -70,16 +71,17 @@ calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0
 
 circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
-tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag gate","Drag qubit","Select multiple"])
-tool_panel.icon_size = 0.75
-tool_panel.set_icons([pygame.image.load("frontend/images/icons/move-gate-icon.png"), pygame.image.load("frontend/images/icons/move-qubit-icon.png"), pygame.image.load("frontend/images/icons/select-gates-icon.png")]) # Set icons for the different options
+tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag qubit","Drag gate","Select multiple"])
 
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
+  
+
 
 gateList = circuit.as_frontend_gate_list()
 circuit_x = qubit_name_panel.width # Qubit label width
 circuit_y = 75
 buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
+
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
 gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
@@ -111,6 +113,9 @@ def draw_circuit(handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit,
             color = Colors.white
         gate_data = handler.render_gate(gate_data[0], gate_data[1], value,(circuit_x + circuit_dx,circuit_y + circuit_dy), i+1, color, selected)
         gates_on_circuit.append(gate_data)
+
+
+
 
 def drag_qubits_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
     offset_x = circuit_x + circuit_dx
@@ -146,6 +151,9 @@ def drag_qubits_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy,
     elif Mouse.status == "Holding qubit":
         Mouse.holding = None
         Mouse.status = None
+    
+  
+
 
 def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
     offset_x = circuit_x + circuit_dx
@@ -209,12 +217,18 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
 
 
 def select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
+    
     offset_x = circuit_x + circuit_dx
     offset_y = circuit_y + circuit_dy
+
 
     if Mouse.r_click:
         print(Mouse.point)
         Mouse.point = (Mouse.x, Mouse.y)
+
+           
+        
+
     
     #when selecting an area
     if Mouse.r_held and Mouse.status != "Moving multiple":
@@ -233,11 +247,10 @@ def select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_b
                                   
                 Mouse.gates_to_move.append((i, gate_data))
                 temp.append(i)
-                #gateList.pop(i)
-                #need to remove fromgatelist
+                
        Mouse.status = "Moving multiple"
-       for index in temp:
-         del gateList[index]    
+       for i in range (len(temp)):
+           gateList.pop(temp[0])
        print(len(Mouse.gates_to_move))
     
     
@@ -307,7 +320,6 @@ while True:
                 pass
             else:
                 zoom_factor = 5 * event.y
-                qubit_name_panel.changed = True # Manual change as scroll is not logged in the panel
                 # Check if zooming out is allowed
                 if UI.grid_size >= 50 or event.y > 0:
                     UI.grid_size += zoom_factor
@@ -322,16 +334,16 @@ while True:
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
-    rect = pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, tool_panel.y + tool_panel.height, screen.get_width() - qubit_name_panel.width, (drag_bar_y + drag_bar_height/2) - (tool_panel.y + tool_panel.height)))
+    rect = pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, tool_panel.height + tool_panel.y, screen.get_width() - qubit_name_panel.width, drag_bar_y + drag_bar_height - (tool_panel.y + tool_panel.height)))
+    
     # Draw a line to show where user has stepped to TODO make it dotted
+    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
-    pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, tool_panel.y + tool_panel.height), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()), width = 2)
     # Draw example circuit
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
-    # pygame.display.update((qubit_name_panel.width, tool_panel.y + tool_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
-    pygame.display.update(rect)
+    pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
     # Draw qubit names on left side
-    qubit_name_panel.set_rectangle((0, tool_panel.y + tool_panel.height, 90, drag_bar_y - (tool_panel.y + tool_panel.height)))
+    qubit_name_panel.set_rectangle((0, circuit_navigation_panel.height, 90, drag_bar_y - circuit_navigation_panel.height))
     qubit_name_panel.set_offset_y(circuit_y + circuit_dy)
     qubit_name_panel.draw()
     
@@ -340,6 +352,11 @@ while True:
     resize_tab_panel.set_rectangle((0, drag_bar_y + drag_bar_height, screen.get_width(), resize_tab_panel.height))
     tool_panel.set_rectangle((0, circuit_navigation_panel.y + circuit_navigation_panel.height, screen.get_width(), tool_panel.y))
 
+    
+
+    # Draw options panel
+    # Update positions
+    
     # Draws background of panel window (hides circuit)
     rect = pygame.draw.rect(screen, Colors.black, (0, resize_tab_panel.y + resize_tab_panel.height, screen.get_width(), screen.get_height() - resize_tab_panel.y - resize_tab_panel.height))
     # Draw selected screen
@@ -481,6 +498,7 @@ while True:
             q_sphere.pan(Mouse)
     elif not (Mouse.l_held or Mouse.l_click) and (Mouse.status=="Panning" or Mouse.status=="Resizing bottom panel" or Mouse.status=="Resizing bottom panel"):
         Mouse.status = None
+
     
     # Dragging gates logic
     if tool_panel.get_selected() == "Drag qubit":
@@ -501,10 +519,6 @@ while True:
         pass
 
     framerate.tick(60)
-    # exit()
-# --------------------------------------------------------
-# Draw methods
-    
 
 
 
