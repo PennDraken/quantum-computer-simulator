@@ -71,7 +71,7 @@ calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0
 
 circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
-tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag qubit","Drag gate","Select multiple"])
+tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag qubit","Drag gate","Select multiple","Add qubit"])
 
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
   
@@ -507,8 +507,10 @@ while True:
         drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
     if tool_panel.get_selected() == "Select multiple":
         select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
-        #if Mouse.status == "Moving multiple":
-        #    print("gates")
+    if tool_panel.get_selected() == "Add qubit":
+        circuit.description[0].append(str(len(circuit.description[0])))
+        tool_panel.selected = 0
+      
    
     if option=="Logic gates" and Mouse.status != "Moving gate":
         MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
@@ -519,7 +521,6 @@ while True:
         pass
 
     framerate.tick(60)
-
 
 
 # --------------------------------------------------------
