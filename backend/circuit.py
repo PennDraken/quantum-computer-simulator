@@ -9,6 +9,17 @@ if __name__ == "__main__":
 else:
     from . import Gates # Import in same directory as qusim_class
     from .system import System
+from time import time
+
+start_time = 0
+def start_timer():
+    global start_time
+    start_time = time()
+
+def end_timer(string):
+    print("--------------------------------------------------")
+    print(f"{string} {time() - start_time}")
+
 
 # ----------------------------------------------------------------------------------------------------
 # Stores a quantum circuit
@@ -18,7 +29,7 @@ class Circuit():
         self.systems = []  # Index corresponds to state in circuit
         self.history : bool = True
         self.show_output : bool = False
-        self.show_probability = True
+        self.show_probability = False
         # First element is qubit list, rest are gate operations
         # self.description = [["A","B"],"H 0","CNOT 0 1"]
         self.description = description
@@ -34,6 +45,7 @@ class Circuit():
     # Steps forward in circuit
     # Adds a new system to our systems
     def step_fwd(self):
+        start_timer()
         if self.position+1>=len(self.description):
             return # We're out out bounds
         self.position+=1
@@ -50,14 +62,19 @@ class Circuit():
             new_system : System = copy.deepcopy(self.systems[self.position-1])
             # Apply measure
             qubit = new_system.qubits[qubits_indices[0]]
+            end_timer("Interpreted operation")
             p = new_system.measure(qubit)
             if self.show_output:
                 print(f"Qubit {qubit} collapsed to {p}") # TODO should only print when print is turned on
         elif op_type=="label":
+            end_timer("Interpreted operation")
             new_system : System = copy.deepcopy(self.systems[self.position-1]) # Do nothing
         else:
+            end_timer("Interpreted operation")
             # It is gate
+            start_timer()
             gate = self.load_gate(op_type)
+            end_timer("Loaded gate")
             qubits_indices = []
             # Convert to useable data type
             for i in range(1, len(operation)):
@@ -66,11 +83,14 @@ class Circuit():
             new_system : System = copy.deepcopy(self.systems[self.position-1])
             # Apply gate
             if len(qubits_indices)==1: # TODO We should probably combine these apply gates into one function
+                start_timer()
                 new_system.apply_gate(gate, new_system.qubits[qubits_indices[0]])
+                end_timer("Applied gate")
             # Bit controlled gate
             elif len(gate)==2:
                 # this is an if controlled single qubit gate (controlled by a bit (measured register))
                 # find value of "qubit" (a bit in this case). If bit==1 we will apply gate
+                start_timer()
                 for register in new_system.registers:
                     if register.qubits==[new_system.qubits[qubits_indices[0]]]:
                         if np.array_equal(register.vector, np.array([0, 1])):
@@ -78,13 +98,18 @@ class Circuit():
                             # bit was 1 so we apply gate
                             new_system.apply_gate(gate, new_system.qubits[qubits_indices[1]])
                             break
-            # Multi qubit gate
+                end_timer("Applied bit controlled gate")
+            # Two qubit gate
             elif len(qubits_indices)==2:
                 # new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
+                start_timer()
                 new_system.apply_gate_multiple(gate, new_system.qubits[qubits_indices[0]], new_system.qubits[qubits_indices[1]])
+                end_timer("Two qubit gate applied")
             # Multi qubit gate that is more than 2
             elif len(qubits_indices)>2:
+                start_timer()
                 new_system.apply_gate_qubit_list(gate, qubits_indices)
+                end_timer("Multi qubit gate applied")
 
         # Add to our history
         self.systems.append(new_system)

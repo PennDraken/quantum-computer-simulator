@@ -25,23 +25,23 @@ class Register():
     
     # note qubit_list contains the specific qubits
     def apply_gate(self, gate, qubit_list):
-        print("before swap--------------------")
-        for qubit in self.qubits:
-            print(f"{qubit} {self.get_probability(qubit)}")
+        # print("before swap--------------------")
+        # for qubit in self.qubits:
+        #     print(f"{qubit} {self.get_probability(qubit)}")
         # sort state vector and qubits based on qubit list
         self.sort_register(qubit_list)
-        print("after swap----------------------")
-        for qubit in self.qubits:
-            print(f"{qubit} {self.get_probability(qubit)}")
+        # print("after swap----------------------")
+        # for qubit in self.qubits:
+        #     print(f"{qubit} {self.get_probability(qubit)}")
         # expand gate
         first_qubit_index = self.qubits.index(qubit_list[0])
         gate = Gates.expand_gate(gate, first_qubit_index, len(self.qubits))
         # apply gate
         self.vector = gate.dot(self.vector)
         # print results
-        print("after gate applied----------------------")
-        for qubit in self.qubits:
-            print(f"{qubit} {self.get_probability(qubit)}")
+        # print("after gate applied----------------------")
+        # for qubit in self.qubits:
+        #     print(f"{qubit} {self.get_probability(qubit)}")
     
     # Merges a register with another register
     def merge(self, register):

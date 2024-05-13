@@ -94,7 +94,5 @@ def qubits_between(start, end):
         string = ' '.join(str(i) for i in range(start, end, -1))
     else:
         string = ' '.join(str(i) for i in range(start, end))
-    print(string)
     return string    
 
-print(qubits_between(5,1))
