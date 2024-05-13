@@ -297,12 +297,28 @@ def select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_b
         Mouse.gates_to_move = []
          
     elif Mouse.status == "Moving multiple":
-        gates_to_render = []
+        
+        grid_x = floor((Mouse.x - offset_x) / UI.grid_size) * UI.grid_size + offset_x
+        grid_y = floor((Mouse.y - offset_y) / UI.grid_size) * UI.grid_size + offset_y
+        
         i = 0
         for gate in Mouse.gates_to_move:
-            rect = Gate.draw_gate(gate[1][0], Mouse.x + (i * UI.grid_size),  Mouse.y + (i * UI.grid_size), UI.gate_size, UI.gate_size, Colors.white)
+            rect = Gate.draw_gate(gate[1][0], Mouse.x + (i * UI.grid_size),  Mouse.y + (i * UI.grid_size), UI.gate_size, UI.gate_size, Colors.red)
             pygame.display.update(rect)
-            i = i + 1
+
+            qubits = gate[1][1]        
+
+            if qubits[0] != min(qubits):
+                print (qubits[0])
+                grid_y -= (max(qubits) - min(qubits)) * UI.grid_size 
+            delta_qubit_index = max(qubits) - min(qubits) 
+            highlight_height = (delta_qubit_index + 1) * UI.grid_size
+            gate_color = Colors.white
+            if Mouse.y < drag_bar_y:
+                rect = pygame.draw.rect(screen, Colors.white, (grid_x + (i * UI.grid_size) , grid_y + (i * UI.grid_size), UI.grid_size, highlight_height), width = 1)
+                pygame.display.update(rect) 
+                
+            i = i + 1  
 
       
     
