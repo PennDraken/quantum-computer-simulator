@@ -269,6 +269,10 @@ while True:
                 description_string_list = text_box.get_text_as_string_list()
                 text_box.valid_lines = circuit.verify_description_string_list(description_string_list)
                 if False in text_box.valid_lines:
+                    message = "Wrong Syntax, please enter the correct syntax"
+                    x = int(screen.get_width())
+                    y = int(screen.get_height())
+                    input_box.popupmsg(msg = message, x=x, y=y)
                     print(f"Error at line {text_box.valid_lines.index(False)}")
                 else:
                     qubits = eval(description_string_list[0])

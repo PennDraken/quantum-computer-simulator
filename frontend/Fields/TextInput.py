@@ -1,5 +1,8 @@
 from pygame_texteditor import TextEditor
 import pygame
+import tkinter as tk
+from tkinter import ttk
+
 
 class input_box:
     def __init__(self, screen, x, y, width, height, text):
@@ -81,13 +84,19 @@ class Button():
                     self.selected[i] = not self.selected[i]
                     self.color[i] = self.color_unselected
 
-""""    def button_function(self, button: str, gate_screen : [str], gate_text : [str]):
-        match button:
-            case "UPDATE":
-                self.input_box_instance.text = gate_screen
-            case "SUBMIT":"""""
 
 
+def popupmsg(msg, x, y):
+    popup = tk.Tk()
+    popup.wm_title("!")
+    width = 325
+    height = 150
+    popup.geometry(f"{width}x{height}+{x}+{y}")
+    label = ttk.Label(popup, text=msg, font=("Verdana", 16))
+    label.pack(side="top", fill="x", pady=30)
+    B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
+    B1.pack()
+    popup.mainloop()
 
 def text(screen, string, x, y, color):
     font = pygame.font.Font(None, 24)
