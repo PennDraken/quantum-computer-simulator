@@ -61,7 +61,7 @@ circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
 # circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
 
-calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
+calculation_window: calculation_view_window.Calculation_Viewer_Window = calculation_view_window.Calculation_Viewer_Window(screen, 0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - (tab_panel.y + tab_panel.height), circuit.systems)
 
 circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
@@ -237,7 +237,6 @@ while True:
 
     # Draw options panel
     # Update positions
-    
     # Draws background of panel window (hides circuit)
     rect = pygame.draw.rect(screen, Colors.black, (0, tab_panel.y + tab_panel.height, screen.get_width(), screen.get_height() - tab_panel.y - tab_panel.height))
     # Draw selected screen
@@ -258,7 +257,6 @@ while True:
         text_box.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         text_box.update(tab_panel.y, tab_panel.height)
         buttons_options.draw()
-        # gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
         test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
         match test:
             case "UPDATE":
@@ -276,7 +274,6 @@ while True:
                     circuit.description = [qubits] + description_string_list[1:]
                     gateList = circuit.as_frontend_gate_list()
                     qubit_name_panel.qubits_list = qubits
-
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])

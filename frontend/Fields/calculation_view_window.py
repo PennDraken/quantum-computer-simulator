@@ -23,7 +23,7 @@ class Calculation_Viewer_Window:
         for system in self.systems:
             for register in system.registers:
                 label = register.get_label()
-                state_str = register.get_state_str()
+                state_str = register.get_state_str(system.qubits)
                 lines = state_str.splitlines()  # Precompute here
                 self.str_registers.append((label, lines))  # Store lines instead of state_str
 
@@ -42,7 +42,7 @@ class Calculation_Viewer_Window:
                 if y >= self.y - UI.grid_size and y < self.screen.get_height() and x + UI.gate_size > 0 and x < self.screen.get_width() + UI.gate_size: # Out of bounds check
                     # TODO precalculate these somehow? (for performance)
                     label = register.get_label()
-                    state_str = register.get_state_str()
+                    state_str = register.get_state_str(system.qubits)
                     lines = state_str.splitlines()
                     
                     # Draw the label showing the qubits of the register

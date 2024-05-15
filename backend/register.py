@@ -50,11 +50,14 @@ class Register():
         return self
 
 
-    def get_state_str(self)->str:
-        return ""
+    def get_state_str(self, qubits)->str:
         qubit_copy = copy.deepcopy(self.qubits)
-        reversed_qubit_list = qubit_copy[::-1]
-        register_reversed = self.sort_register(reversed_qubit_list) # TODO sort by indices
+        sorted_qubit_list = []
+        for qubit in qubits:
+            if qubit in qubit_copy:
+                sorted_qubit_list.append(qubit)
+        register_reversed = copy.deepcopy(self)
+        register_reversed = register_reversed.sort_register(sorted_qubit_list) # TODO sort by indices
         output_str = ""
         for i in range(0, len(self.vector)):
             state_val = register_reversed.vector[i].astype(complex) # Load state value as complex
