@@ -36,6 +36,7 @@ screen = screenHandler.screen
 gate_handler : gateHandler = gateHandler()
 framerate = pygame.time.Clock()
 
+
 # positioning of circuit
 circuit_x = 75
 circuit_y = 75
@@ -61,8 +62,10 @@ q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), scr
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
 circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
+# circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
 
@@ -362,7 +365,6 @@ while True:
 
     # Draw options panel
     # Update positions
-    
     # Draws background of panel window (hides circuit)
     rect = pygame.draw.rect(screen, Colors.black, (0, resize_tab_panel.y + resize_tab_panel.height, screen.get_width(), screen.get_height() - resize_tab_panel.y - resize_tab_panel.height))
     # Draw selected screen
@@ -402,7 +404,6 @@ while True:
                     circuit.description = [qubits] + description_string_list[1:]
                     gateList = circuit.as_frontend_gate_list()
                     qubit_name_panel.qubits_list = qubits
-
             case "EXPORT":
                     file_path = asksaveasfile(initialfile='Untitled.txt',
                                       defaultextension=".txt", filetypes=[("Text Documents", "*.txt")])

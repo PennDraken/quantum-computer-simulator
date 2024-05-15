@@ -7,26 +7,22 @@ def shor_subroutine_circuit(guess : int, N : int):
     qubits = []
     for i in range(n*3):
         qubits.append("q" + str(i))
-    temp = []
-    temp.append(qubits)
+    description = []
+    description.append(qubits)
     for k in range(n*2):
-        temp.append("H " + str(k))
-    temp.append("X " + str(n*2))
-    tGate = ("amodN(" + str(guess) +","+str(N)+")")
-    for l in range(n*2):
-        tString = tGate
-        tString = tString + " " + str(l)
-        for m in range(n*2, n*3):
-           tString = tString + " " + str(m)
-        temp.append(tString)  
-    tQFT = "QFT(" + str(N) +")"
-    for f in range(n*2):
-        tQFT = tQFT + " " + str(f)
-    temp.append(tQFT)
+        description.append("H " + str(k))
+    description.append("X " + str(n*3-1))
+    for control_qubit in range(n*2):
+        qubits = f"{control_qubit} {qubits_between(2*n, 3*n)}"
+        text_amod = f"controlled(amodN({guess},{2**control_qubit},{N})) {qubits}"
+        description.append(text_amod)
+
+    tQFT = f"QFT_dagger({2*n}) {qubits_between(0,2*n)}"
+    description.append(tQFT)
     for g in range(n*2):
-        temp.append("measure " + str(g))
+        description.append("measure " + str(g))
     #print(temp[0:len(temp)])
-    return temp
+    return description
 
 # Grovers algorithm
 # https://i0.wp.com/quantumzeitgeist.com/wp-content/uploads/QZ-Grover-4.png?fit=2427%2C708&ssl=1
@@ -74,7 +70,7 @@ def grover(n_qubits, states : list[int], iterations=2):
         # Label
         circuit.append(f"label Iteration_{i}")
         # Grover operator
-        circuit.append(f"grover_op({n_qubits},{states}) {qubits_between(0, n_qubits - 1)}")
+        circuit.append(f"grover_op({n_qubits},{states}) {qubits_between(0, n_qubits)}")
     circuit.append(f"label Measurement section")
     for i in range(n_qubits):
         circuit.append(f"measure {i}")
@@ -92,9 +88,13 @@ def qubits_between(start, end):
     """
     Generates a string consisting of all numbers between start and end seperated by spaces
     Used to create algorithms where qubit sizes may vary
-    Example: qubits_between(2,5) returns "2 3 4 5"
+    Example: qubits_between(2,5) returns "2 3 4"
     """
     if start > end:
-        return ""  # Return an empty string if start is greater than end
+        string = ' '.join(str(i) for i in range(start, end, -1))
     else:
-        return ' '.join(str(i) for i in range(start, end + 1))
+        string = ' '.join(str(i) for i in range(start, end))
+    print(string)
+    return string    
+
+print(qubits_between(5,1))

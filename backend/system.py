@@ -1,7 +1,6 @@
 import numpy as np
 import copy
 
-
 if __name__ == "__main__":
     import Gates
     from Gates import expand_gate
@@ -87,9 +86,37 @@ class System():
             # set register_a to register to update state
             self.registers[self.registers.index(register_a)] = register
 
+    def indices_to_qubits(self, qubit_index_list):
+        qubits = []
+        for qubit_index in qubit_index_list:
+            qubits.append(self.qubits[qubit_index])
+        return qubits
+    
+    # Given a qubit_index_list, transforms all registers into a single register. Updates system and registers.
+    # Returns the register that was merged
+    def merge_registers_from_indices(self, qubit_index_list):
+        qubits = self.indices_to_qubits(qubit_index_list)
+        # find registers
+        registers_to_merge = []
+        for qubit in qubits:
+            reg = find_register(self, qubit)
+            if reg not in registers_to_merge:
+                registers_to_merge.append(reg)
+        # merge registers
+        merged_register = registers_to_merge.pop(0) # This is reference so we automatically update it when we start merging below
+        while registers_to_merge:
+            reg = registers_to_merge.pop(0)
+            self.registers.remove(reg)
+            merged_register = merged_register.merge(reg)
+        return merged_register
+
+    def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: set):
+        # merge registers
+        register: Register = self.merge_registers_from_indices(qubit_index_list)
+        register.apply_gate(gate, self.indices_to_qubits(qubit_index_list))
 
     # Applies a gate to a qubit list (of integers)
-    def apply_gate_qubit_list(self, gate: np.array, qubit_index_list: []):
+    def apply_gate_qubit_list2(self, gate: np.array, qubit_index_list: set):
         # Get all different register
         unmerged_registers = []
         sorted_qubit_index_list = []
@@ -212,7 +239,7 @@ class System():
         for register in self.registers:
             print(f"Qubits:")
             for qubit in register.qubits:
-                print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+                print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
             print(f"State:\n {register.vector}\n")
         print("-----------------------------------------------------------------")        
 
@@ -221,7 +248,7 @@ class System():
         register = self.get_as_register()
         print(f"Qubits:")
         for qubit in register.qubits:
-            print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+            print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
         # Print the vector matrix
         print("\nState:")
         print(f"|{''.join(register.qubits)}>")
@@ -237,7 +264,7 @@ class System():
         register = self.get_as_register()
         print(f"Qubits:")
         for qubit in register.qubits:
-            print(f"{qubit}: {self.get_probability(register, qubit)*100:.4}%")
+            print(f"{qubit}: {self.get_probability_in_register(register, qubit)*100:.4}%")
         # Print the vector matrix
         print("\nState:")
 
@@ -254,18 +281,23 @@ class System():
         print("-----------------------------------------------------------------")        
 
 
-    def get_probability(self, register, qubit)->float:
+    def get_probability_in_register(self, register, qubit)->float:
         qubit_index = register.qubits.index(qubit)
         m1 = Gates.collapsed_vector([0,1], qubit_index, len(register.qubits))
         p1 = np.sum(np.abs(m1*register.vector)**2)
         return float(p1)
     
+    def print_probabilities(self):
+        for qubit in self.qubits:
+            reg = find_register(self, qubit)
+            print(f"Probability {qubit}: {reg.get_probability(qubit)}")
+            
+    
 # Find a register where qubit is stored
 def find_register(system, qubit):
     for register in system.registers:
         if qubit in register.qubits:
-            return register
-    return "Qubit not found"
+            return register # TODO throw error when no register found
 
 # Useful for setting qubit state in a specific order
 def sort_list_by_key(input_list, key):
