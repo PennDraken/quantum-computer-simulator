@@ -14,7 +14,14 @@ class Mouse():
     holding = None # Set this to object were holding (used for moving gates)
     r_click = False # Only true at frame user presses r_click
     r_held = False  # Only true when button is held down
-
+    point = (0,0)
+     
+    # change to a gatemove class
+    
+    # For moving multiple gates
+    gates_to_move = []
+    # for selecting gates
+    selection_rect = None
 
     # Updates the mouse
     @staticmethod
