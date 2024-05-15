@@ -67,9 +67,9 @@ def check_moving_gate(gateButtons : [[MenuGateObject]], gateList : [(str, [int])
     for button in gateButtons:
         if button.selected and (Mouse.r_held or Mouse.r_click):
             # Show gate snapping position
-            pygame.draw.rect(screenHandler.screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
+            # pygame.draw.rect(screenHandler.screen, Colors.white, (grid_x, grid_y, UI.grid_size, UI.grid_size), width = 1)
             # Show gate moving
-            Gate.draw_gate(button.gate[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
+            # Gate.draw_gate(button.gate[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, Colors.white)
             break
         elif button.selected and not (Mouse.r_click or Mouse.r_held):
             # Drop gate on circuit view

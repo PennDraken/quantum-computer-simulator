@@ -187,11 +187,11 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
         gate_color = Colors.white
         if Mouse.y < drag_bar_y:
             rect = pygame.draw.rect(screen, Colors.white, (grid_x, grid_y, UI.grid_size, highlight_height), width = 1)
-            pygame.display.update(rect)
         else:
             gate_color = Colors.red # Delete highlight
         rect = Gate.draw_gate(gate_data[0], Mouse.x,  Mouse.y, UI.gate_size, UI.gate_size, gate_color)
         pygame.display.update(rect)
+        print("Drew Gate")
     elif Mouse.holding != None and Mouse.status == "Moving gate":
         # Ensure dropping only allowed on panel
         if Mouse.y < drag_bar_y:
@@ -217,18 +217,12 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
 
 
 def select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList):
-    
     offset_x = circuit_x + circuit_dx
     offset_y = circuit_y + circuit_dy
-
 
     if Mouse.r_click:
         print(Mouse.point)
         Mouse.point = (Mouse.x, Mouse.y)
-
-           
-        
-
     
     #when selecting an area
     if Mouse.r_held and Mouse.status != "Moving multiple":
@@ -355,20 +349,31 @@ while True:
 
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
-
+    print("New loop")
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
     rect = pygame.draw.rect(screen, Colors.black, (qubit_name_panel.width, tool_panel.height + tool_panel.y, screen.get_width() - qubit_name_panel.width, drag_bar_y + drag_bar_height - (tool_panel.y + tool_panel.height)))
-    
     # Draw a line to show where user has stepped to TODO make it dotted
     pygame.draw.line(screen, Colors.yellow, (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, 0), (circuit.position * UI.grid_size + UI.grid_size/2 + circuit_x + circuit_dx, screen.get_height()))
     screenHandler.draw_horizontal_qubit_lines(len(circuit.systems[0].qubits), qubit_name_panel.width, circuit_y + circuit_dy, screen.get_width(), Colors.qubit_line) # Draws horisontal lines for qubits
     # Draw example circuit
+    
     draw_circuit(gate_handler, circuit_x, circuit_y, circuit_dx, circuit_dy, circuit, gateList, gates_on_circuit)
+    # Dragging gates logic
+    if tool_panel.get_selected() == "Drag qubit":
+        drag_qubits_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
+    elif tool_panel.get_selected() == "Drag gate":
+        drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
+    elif tool_panel.get_selected() == "Select multiple":
+        select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
+    elif tool_panel.get_selected() == "Add qubit":
+        circuit.description[0].append(str(len(circuit.description[0])))
+        tool_panel.selected = 0
     pygame.display.update((qubit_name_panel.width, circuit_navigation_panel.height, screen.get_width() - qubit_name_panel.width, drag_bar_y - circuit_navigation_panel.height))
     # Draw qubit names on left side
     qubit_name_panel.set_rectangle((0, circuit_navigation_panel.height, 90, drag_bar_y - circuit_navigation_panel.height))
+    
     qubit_name_panel.set_offset_y(circuit_y + circuit_dy)
     qubit_name_panel.draw()
     
@@ -525,21 +530,6 @@ while True:
         Mouse.status = None
 
     
-    # Dragging gates logic
-    if tool_panel.get_selected() == "Drag qubit":
-        drag_qubits_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
-    if tool_panel.get_selected() == "Drag gate":
-        drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
-    if tool_panel.get_selected() == "Select multiple":
-        select_multiple(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, drag_bar_y, gateList)
-    if tool_panel.get_selected() == "Add qubit":
-        circuit.description[0].append(str(len(circuit.description[0])))
-        tool_panel.selected = 0
-      
-   
-    if option=="Logic gates" and Mouse.status != "Moving gate":
-        MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)  # gate placement
-
     # Draw everything here
     if redraw_screen:
         # pygame.display.update()
