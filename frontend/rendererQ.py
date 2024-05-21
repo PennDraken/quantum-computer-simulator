@@ -57,23 +57,25 @@ resize_tab_panel.set_icons([pygame.image.load("frontend/images/icons/gate-icon.p
 q_sphere = q_sphere.Q_Sphere(screen, 0, drag_bar_y + 40, screen.get_width(), screen.get_height() - drag_bar_height)
 
 # Calculation window (generate example circuit) Comment out to load different presets
-# circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]) # Quantum teleportation
+circuit : Circuit = Circuit([["A","B","C"],"Ry(np.pi/4) 0","H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 1 2", "Z 0 2"]) # Quantum teleportation
 # circuit : Circuit = Circuit([["A","B","C","D","E","F","G"], "CU 4 5", "CUSTOM 2 3", "CUSTOM 0 1 2 3 4", "CUSTOM 2 3 5", "CUSTOM 1 3 5"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C"],"H 1","CNOT 1 2","CNOT 0 1","H 0", "measure 0", "measure 1", "X 2 1", "Z 2 0"])
 # circuit : qusim_class.Circuit = qusim_class.Circuit([["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"],"CNOT 0 1","CNOT 1 2","CNOT 2 3","CNOT 3 4","CNOT 4 5","CNOT 5 6","CNOT 6 7","CNOT 7 8","CNOT 8 9","CNOT 9 10","CNOT 10 11","CNOT 11 12","CNOT 12 13","CNOT 13 14","CNOT 14 15"])
-circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
-circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+# circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+# circuit : Circuit = Circuit(algorithms.shor_subroutine_circuit(7,15))
+# circuit : Circuit = Circuit([["A","B","C"], "X 0 1", "Z 0 1"])
 # circuit : Circuit = Circuit(algorithms.grover(3,0b010))
 # circuit : Circuit = Circuit(algorithms.grover_2_qubits(0b01))
 # circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit(algorithms.grover(5, [0b11010], iterations=4))
 # circuit : Circuit = Circuit([["q0","q1","q2","q3","q4","q5"],"gen_I(3) 3 5 4","gen_I(3) 1 4 5","gen_I(3) 5 3 4"])
+#  circuit : Circuit = Circuit([["A","B","C"]]) # Quantum teleportation
 
 calculation_window = calculation_view_window.Calculation_Viewer_Window(screen, 0, resize_tab_panel.y + resize_tab_panel.height, screen.get_width(), screen.get_height() - (resize_tab_panel.y + resize_tab_panel.height), circuit.systems)
 
 circuit_navigation_panel : Circuit_Navigation_Window = Circuit_Navigation_Window(screen, pygame.display, 0, 0, circuit)
 
-tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag qubit","Drag gate","Select multiple","Add qubit"])
+tool_panel: UI.ChoicePanel = UI.ChoicePanel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, ["Drag gate","Drag qubit","Select multiple","Add qubit"])
 tool_panel.set_icons([pygame.image.load("frontend/images/icons/move-gate-icon.png"), pygame.image.load("frontend/images/icons/move-qubit-icon.png"), pygame.image.load("frontend/images/icons/select-gates-icon.png"), pygame.image.load("frontend/images/icons/select-gates-icon.png")]) # Set icons for the different options
 
 qubit_name_panel = qubit_name_panel.Qubit_Name_Panel(screen, pygame.display, circuit_navigation_panel.y + circuit_navigation_panel.height, circuit.systems[0].qubits, circuit_dy)
@@ -87,12 +89,12 @@ buttons_text = ["UPDATE", "SUBMIT", "IMPORT", "EXPORT"]
 
 
 # gate_option_str_list = ["H", "X", "Y", "Z", "I", "S", "T", "CNOT"]
-gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1])]
+gate_option_list = [("H", [0]), ("X", [0]), ("Y", [0]), ("Z", [0]), ("I", [0]), ("S", [0]), ("T", [0]), ("CNOT", [0, 1]), ("Ry(np.pi/4)", [0]), ("Toffoli", [0,1,2]), ("SWAP", [0, 1]), ("measure", [0])]
 menu_buttons = MenuGateButton.createGateButtons(gate_option_list, 40, 40)
 gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
 text_box = input_box.input_box(screen, 0, drag_bar_y + 60, screen.get_width(), 50, circuit_string) 
-buttons_options = input_box.Button(screen, Colors.black, Colors.selected, buttons_text, text_box)
+buttons_options = input_box.Button(screen, Colors.gray, Colors.selected, buttons_text, text_box)
 
 sizeQ = 40 # Zoom level
 
@@ -165,7 +167,7 @@ def drag_gates_on_circuit(screen, circuit_x, circuit_y, circuit_dx, circuit_dy, 
                 # gateList.remove(gate_data) # Remove gate from list so we can see where we're moving it
                 gateList.pop(i)
                 print("clicked gate")
-                window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
+                # window = gate_data_visualizer.Matrix_Window(string_to_gate(gate_data[0]))
                 break
        
     elif Mouse.r_held and Mouse.status == "Moving gate":
@@ -331,7 +333,6 @@ while True:
 
     # Update circuit behind the scenes
     circuit.set_circuit_from_frontend_gate_list(gateList)
-    print("New loop")
     # Gates placed on the circuit (used for collision detection. is reset every frame)
     gates_on_circuit = []
     # Draw circuit view
@@ -388,6 +389,9 @@ while True:
         gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
         test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
         match test:
+            case "UPDATE":
+                circuit_string = [str(circuit.description[0])] + circuit.description[1:]
+                text_box.set_text_from_string_list(circuit_string)
             case "SUBMIT":
                 # Verify gates here
                 # Update our gates if no errors
@@ -401,7 +405,7 @@ while True:
                     print(f"Error at line {text_box.valid_lines.index(False)}")
                 else:
                     qubits = eval(description_string_list[0])
-                    circuit.description = [qubits] + description_string_list[1:]
+                    circuit = Circuit([qubits] + description_string_list[1:])
                     gateList = circuit.as_frontend_gate_list()
                     qubit_name_panel.qubits_list = qubits
             case "EXPORT":
@@ -421,7 +425,7 @@ while True:
                         text_box.set_text_from_string(file_content)
                         description_string_list = text_box.text.split('\n')
                         qubits = eval(description_string_list[0])
-                        circuit.description = [qubits] + description_string_list[1:]
+                        circuit = Circuit([qubits] + description_string_list[1:])
                         gateList = circuit.as_frontend_gate_list()
                         qubit_name_panel.qubits_list = qubits
                         pass
@@ -515,6 +519,9 @@ while True:
         Mouse.status = None
 
     
+    if option=="Logic gates" and Mouse.status != "Moving gate":
+        MenuGateButton.check_moving_gate(menu_buttons, gateList, circuit_x, circuit_y, circuit_dx, circuit_dy)
+        pygame.display.update((qubit_name_panel.width, tool_panel.y + tool_panel.height, screen.get_width(), screen.get_height()))
     # Draw everything here
     if redraw_screen:
         # pygame.display.update()
