@@ -91,7 +91,7 @@ def popupmsg(msg, x, y):
     popup.wm_title("!")
     width = 325
     height = 150
-    popup.geometry(f"{width}x{height}+{x}+{y}")
+    popup.geometry(f"{width}x{height}+{int(x-width/2)}+{int(y-height/2)}")
     label = ttk.Label(popup, text=msg, font=("Verdana", 16))
     label.pack(side="top", fill="x", pady=30)
     B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
