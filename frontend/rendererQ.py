@@ -398,7 +398,7 @@ while True:
                 description_string_list = text_box.get_text_as_string_list()
                 text_box.valid_lines = circuit.verify_description_string_list(description_string_list)
                 if False in text_box.valid_lines:
-                    message = "Wrong Syntax, please enter the correct syntax"
+                    message = "Wrong Syntax,\nplease enter the correct syntax at line "+f"{text_box.valid_lines.index(False)}"
                     x = int(screen.get_width()/2)
                     y = int(screen.get_height()/2)
                     input_box.popupmsg(msg = message, x=x, y=y)
