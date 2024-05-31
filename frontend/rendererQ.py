@@ -386,8 +386,7 @@ while True:
         text_box.handle_event(pygame_event, pressed_keys, mouse_x, mouse_y, mouse_pressed)
         text_box.update(resize_tab_panel.y, resize_tab_panel.height)
         buttons_options.draw()
-        gates_cleaned = re.findall(r"\((.+?)\)", str(gateList))
-        test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed, gates_cleaned)
+        test = buttons_options.handle_event(mouse_x, mouse_y, mouse_pressed)
         match test:
             case "UPDATE":
                 circuit_string = [str(circuit.description[0])] + circuit.description[1:]
@@ -423,12 +422,20 @@ while True:
                     if file_path:
                         file_content = file_path.read()
                         text_box.set_text_from_string(file_content)
-                        description_string_list = text_box.text.split('\n')
-                        qubits = eval(description_string_list[0])
-                        circuit = Circuit([qubits] + description_string_list[1:])
-                        gateList = circuit.as_frontend_gate_list()
-                        qubit_name_panel.qubits_list = qubits
-                        pass
+                        description_string_list = text_box.get_text_as_string_list()
+                        text_box.valid_lines = circuit.verify_description_string_list(description_string_list)
+                        if False in text_box.valid_lines:
+                            message = "Wrong Syntax found the imported file,\nWrong syntax at line"+f"{text_box.valid_lines.index(False)}"
+                            x = int(screen.get_width()/2)
+                            y = int(screen.get_height()/2)
+                            input_box.popupmsg(msg = message, x=x, y=y)
+                            print(f"Error at line {text_box.valid_lines.index(False)}")
+                        else:
+                            qubits = eval(description_string_list[0])
+                            circuit = Circuit([qubits] + description_string_list[1:])
+                            gateList = circuit.as_frontend_gate_list()
+                            qubit_name_panel.qubits_list = qubits
+
                 except Exception as e:
                     print(f"An error occurred: {e}")
     elif option == "Q-sphere":
