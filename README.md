@@ -1,19 +1,19 @@
-# quantum-computer-simulator
+# KVANTIS
+*A quantum computer simulator*
 
-## What is this repo?
+![](https://github.com/PennDraken/quantum-computer-simulator/blob/main/screenshots/state-viewer.png)
 
-This repo is for a quantum simulator running on binary hardware. Made for research purposes.
+**Kvantis** is a program that allows the simulation of quantum circuits on binary hardware.
+It features a GUI allowing users to construct their own quantum circuits, and an in-house backend to then run these circuits.
 
 ## Structure
+The program is divided into two parts `frontend` and `backend`.
 
-/demos show some basic implementations of simple qubit operations. 
+## How to run
+From the parent folder of the folders `frontend`/ `backend`, run with `python frontend/renderQ.py`.
 
-## Features
-
-As of the 30th of January only a couple of demos have been implemented.
-
-## Planned features
-
-- GUI  
-- Debugging mode  
-- Support for at least 10 qubits  
+## Dependicies
+- Pygame
+- pygame-texteditor
+- Numpy
+- TKinter
