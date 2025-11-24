@@ -73,7 +73,7 @@ class Button():
             self.rect[i].height = height
 
 
-    def handle_event(self, mouse_x, mouse_y, mouse_pressed, gates_cleaned) -> str:
+    def handle_event(self, mouse_x, mouse_y, mouse_pressed) -> str:
         for i, rect in enumerate(self.rect):
             if rect.collidepoint(mouse_x, mouse_y):
                 if mouse_pressed[0]:
